@@ -21,6 +21,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'locale',
+        'status',
     ];
 
     /**
@@ -43,6 +46,19 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'role' => 'string',
+            'status' => 'string',
         ];
+    }
+
+    // Relationships
+    public function createdPosts()
+    {
+        return $this->hasMany(Post::class, 'created_by');
+    }
+
+    public function updatedPosts()
+    {
+        return $this->hasMany(Post::class, 'updated_by');
     }
 }

@@ -1,0 +1,68 @@
+- 基本設定
+    - 目標: 將舊有的原生的csie/寫法改為框架化，風格更現代、簡潔
+    - laravel + react + tailwindcss
+        - Inertia 互連
+    - logo: https://www.csie.ncue.edu.tw/csie/resources/images/ncue-csie-logo.png
+    - color
+        - #ffb401
+        - #151f54
+        - #fff809
+    - 語言zh-TW、en
+    - 網站內容(先不管首頁呈現)
+        - 導覽列
+            - 簡介 
+                - 系所簡介
+                - 教育目標
+                - 法規彙編
+                - 交通資訊
+                - 設備介紹
+                - 系所LOGO
+            - 系所成員
+                - 師資陣容
+                - 行政人員
+            - 學術研究
+                - 實驗室
+                - 研究計畫
+                - 研究論文
+            - 課程修業
+                - 學士班
+                - 碩士班
+                - 人工智慧應用服務碩士在職專班
+                - 雙聯學制
+            - 招生專區
+                - 學士班
+                - 碩士班
+                - 人工智慧應用服務在職碩士班
+                - 碩士先修生
+            - 公告
+                - 全部資訊
+                - 一般資訊
+                - 大學部招生
+                - 研究所招生
+                - 演講及活動資訊
+                - 獲獎資訊
+                - 獎助學金
+                - 徵人資訊
+            - 聯絡我們
+        - 後端
+            - 舊有資料庫
+                - $servername = "localhost";
+                - $username = "root";
+                - $password = "5;gyej/";
+                - $dbname = "newcsieweb";
+            - 新的資料庫
+                - $servername = "localhost";
+                - $username = "root";
+                - $password = "5;gyej/";
+                - $dbname = "csie_web";
+            - 資料表
+                - 目前這一部分的規劃需要有以下幾點
+                    - 關聯化設計(原本沒有)
+                    - 權限控管(原本沒有，分為admin、teacher、user)
+                    - 正規化(原本沒有)
+                    - 應該依照navbar的分類來重新設計
+                        - 檔案、資料列選擇性匯入(正規化)
+                    - 語言化考慮
+                    - 靜態網頁紀錄在database應當不需要
+                    - 檔案應該是連結紀錄，檔案本體不需要
+                        - 考慮到laravel檔案紀錄

@@ -62,6 +62,7 @@ return [
             ]) : [],
         ],
 
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
@@ -96,6 +97,7 @@ return [
             'search_path' => 'public',
             'sslmode' => 'prefer',
         ],
+
 
         'sqlsrv' => [
             'driver' => 'sqlsrv',
