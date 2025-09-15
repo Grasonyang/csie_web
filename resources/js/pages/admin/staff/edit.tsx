@@ -2,6 +2,7 @@
 import StaffController from '@/actions/App/Http/Controllers/Admin/StaffController';
 import StaffForm from '@/components/admin/staff-form';
 import AppLayout from '@/layouts/app-layout';
+import { Card, CardContent } from '@/components/ui/card';
 import { Head } from '@inertiajs/react';
 
 interface Staff {
@@ -20,7 +21,13 @@ export default function StaffEdit({ staff }: { staff: Staff }) {
     return (
         <AppLayout>
             <Head title="編輯職員" />
-            <StaffForm initialValues={staff} onSubmit={submit} />
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <Card>
+                    <CardContent>
+                        <StaffForm initialValues={staff} onSubmit={submit} />
+                    </CardContent>
+                </Card>
+            </div>
         </AppLayout>
     );
 }

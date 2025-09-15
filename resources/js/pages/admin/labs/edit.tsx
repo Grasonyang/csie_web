@@ -2,6 +2,7 @@
 import LabController from '@/actions/App/Http/Controllers/Admin/LabController';
 import LabForm from '@/components/admin/lab-form';
 import AppLayout from '@/layouts/app-layout';
+import { Card, CardContent } from '@/components/ui/card';
 import { Head } from '@inertiajs/react';
 
 interface Lab {
@@ -18,7 +19,13 @@ export default function LabEdit({ lab }: { lab: Lab }) {
     return (
         <AppLayout>
             <Head title="編輯實驗室" />
-            <LabForm initialValues={lab} onSubmit={submit} />
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <Card>
+                    <CardContent>
+                        <LabForm initialValues={lab} onSubmit={submit} />
+                    </CardContent>
+                </Card>
+            </div>
         </AppLayout>
     );
 }
