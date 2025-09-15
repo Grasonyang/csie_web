@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\TestController;
+use App\Http\Controllers\Admin\StaffController;
+use App\Http\Controllers\Admin\LabController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -39,6 +41,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{test}/edit', [TestController::class, 'edit'])->name('edit');
         Route::put('/{test}', [TestController::class, 'update'])->name('update');
         Route::delete('/{test}', [TestController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('admin')->name('admin.')->group(function () {
+        Route::resource('staff', StaffController::class);
+        Route::resource('labs', LabController::class);
     });
 
 });
