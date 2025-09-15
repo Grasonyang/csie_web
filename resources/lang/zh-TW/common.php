@@ -16,6 +16,7 @@ return [
         'contact' => '聯絡我們',
         'others' => '其他',
         'education' => '教育',
+        'labs' => '實驗室',
     ],
     'auth' => [
         'login' => '登入',

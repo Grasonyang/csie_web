@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\AttachmentDownloadController;
+use App\Http\Controllers\LabController;
 use App\Http\Controllers\BulletinController;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Redirect;
@@ -14,6 +15,9 @@ Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
+// Labs
+Route::get('/labs', [LabController::class, 'index'])->name('labs.index');
+Route::get('/labs/{lab:code}', [LabController::class, 'show'])->name('labs.show');
 
 Route::get('/people', [StaffController::class, 'index'])->name('people.index');
 Route::get('/people/{slug}', [StaffController::class, 'show'])->name('people.show');
