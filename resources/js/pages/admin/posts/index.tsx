@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage, useForm } from '@inertiajs/react';
 import { type SharedData } from '@/types';
 import { Calendar, Pin, User, Eye, Edit, Trash2 } from 'lucide-react';
 
@@ -51,6 +51,9 @@ interface PostsIndexProps {
 export default function PostsIndex({ posts, categories }: PostsIndexProps) {
     const { auth, locale } = usePage<SharedData>().props;
     const isZh = locale === 'zh-TW';
+
+    // 使用 Inertia 的 useForm 來處理刪除請求
+    const { delete: destroy } = useForm();
 
     // 添加安全檢查
     const postsData = posts?.data || [];
@@ -178,7 +181,18 @@ export default function PostsIndex({ posts, categories }: PostsIndexProps) {
                                                                 <Edit className="h-4 w-4" />
                                                             </Button>
                                                         </Link>
-                                                        <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-800">
+                                                        <Button
+                                                            // 點擊後先確認是否刪除
+                                                            onClick={() => {
+                                                                if (confirm('確定要刪除嗎？')) {
+                                                                    // 送出刪除請求
+                                                                    destroy(PostController.destroy(post.id).url);
+                                                                }
+                                                            }}
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="text-red-600 hover:text-red-800"
+                                                        >
                                                             <Trash2 className="h-4 w-4" />
                                                         </Button>
                                                     </div>

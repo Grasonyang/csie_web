@@ -129,10 +129,11 @@ class PostController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * 刪除指定的公告。
      */
     public function destroy(Post $post)
     {
+        // 執行刪除動作
         $post->delete();
 
         return redirect()->route('admin.posts.index')
