@@ -1,11 +1,11 @@
 // 新增職員頁面
 import StaffController from '@/actions/App/Http/Controllers/Admin/StaffController';
-import AppLayout from '@/layouts/app-layout';
-import { Form, Head, Link } from '@inertiajs/react';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import InputError from '@/components/input-error';
+import AppLayout from '@/layouts/app-layout';
+import { Form, Head, Link } from '@inertiajs/react';
 
 export default function StaffCreate() {
     return (
@@ -43,8 +43,11 @@ export default function StaffCreate() {
                             <InputError message={errors.photo} />
                         </div>
                         <Button disabled={processing}>儲存</Button>
-                        <Link href={StaffController.index().url} className="ml-2">
-                            取消
+                        <Link href={StaffController.index().url}>
+                            {/* 取消按鈕 */}
+                            <Button variant="outline" className="ml-2">
+                                取消
+                            </Button>
                         </Link>
                     </>
                 )}

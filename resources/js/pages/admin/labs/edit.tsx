@@ -1,11 +1,11 @@
 // 編輯實驗室頁面
 import LabController from '@/actions/App/Http/Controllers/Admin/LabController';
-import AppLayout from '@/layouts/app-layout';
-import { Form, Head, Link } from '@inertiajs/react';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import InputError from '@/components/input-error';
+import AppLayout from '@/layouts/app-layout';
+import { Form, Head, Link } from '@inertiajs/react';
 
 interface Lab {
     id: number;
@@ -38,8 +38,11 @@ export default function LabEdit({ lab }: { lab: Lab }) {
                             <InputError message={errors.cover_image} />
                         </div>
                         <Button disabled={processing}>更新</Button>
-                        <Link href={LabController.index().url} className="ml-2">
-                            取消
+                        <Link href={LabController.index().url}>
+                            {/* 取消按鈕 */}
+                            <Button variant="outline" className="ml-2">
+                                取消
+                            </Button>
                         </Link>
                     </>
                 )}
