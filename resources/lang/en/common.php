@@ -16,6 +16,7 @@ return [
         'contact' => 'Contact',
         'others' => 'Others',
         'education' => 'Education',
+        'labs' => 'Labs',
     ],
     'auth' => [
         'login' => 'Login',

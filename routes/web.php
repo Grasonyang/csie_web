@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\AttachmentDownloadController;
+use App\Http\Controllers\LabController;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
@@ -11,6 +12,10 @@ use App\Http\Controllers\TestController;
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
+
+// Labs
+Route::get('/labs', [LabController::class, 'index'])->name('labs.index');
+Route::get('/labs/{lab:code}', [LabController::class, 'show'])->name('labs.show');
 
 // Locale switcher: sets session locale and redirects back
 Route::get('/locale/{locale}', function (string $locale) {
