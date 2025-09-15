@@ -13,8 +13,9 @@ return [
     |
     */
 
-    'failed' => 'These credentials do not match our records.',
-    'password' => 'The provided password is incorrect.',
-    'throttle' => 'Too many login attempts. Please try again in :seconds seconds.',
+    'failed' => '登入資訊與記錄不符。',
+    'password' => '提供的密碼不正確。',
+    'throttle' => '登入嘗試次數過多，請於 :seconds 秒後再試。',
+    'verification_link_sent' => '新的驗證連結已發送至您註冊時提供的電子郵件地址。',
 
 ];

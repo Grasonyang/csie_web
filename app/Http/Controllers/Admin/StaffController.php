@@ -34,8 +34,8 @@ class StaffController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'email' => ['nullable', 'string'],
-            'phone' => ['nullable', 'string'],
+            'email' => ['nullable', 'string', 'email'],
+            'phone' => ['nullable', 'string', 'regex:/^\+?[0-9\s\-]+$/'],
             'photo' => ['nullable', 'file'],
             'name' => ['required', 'string'],
             'name_en' => ['nullable', 'string'],

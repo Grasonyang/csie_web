@@ -4,32 +4,94 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import {
+    LayoutGrid,
+    Users,
+    UserCheck,
+    Beaker,
+    BookOpen,
+    GraduationCap,
+    Megaphone,
+    FileText,
+    Mail,
+    Settings,
+    Folder,
+    HelpCircle
+} from 'lucide-react';
 import AppLogo from './app-logo';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-];
-
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
-
 export function AppSidebar() {
+    const page = usePage<any>();
+    const { locale } = page.props;
+    const isZh = locale?.toLowerCase() === 'zh-tw';
+
+    const localizedMainNavItems: NavItem[] = [
+        {
+            title: 'Dashboard',
+            href: dashboard(),
+            icon: LayoutGrid,
+        },
+        {
+            title: isZh ? '公告管理' : 'Posts',
+            href: '/admin/posts',
+            icon: Megaphone,
+        },
+        {
+            title: isZh ? '師資管理' : 'Faculty',
+            href: '/admin/staff',
+            icon: UserCheck,
+        },
+        {
+            title: isZh ? '實驗室管理' : 'Laboratories',
+            href: '/admin/labs',
+            icon: Beaker,
+        },
+        {
+            title: isZh ? '課程管理' : 'Courses',
+            href: '/admin/courses',
+            icon: BookOpen,
+        },
+        {
+            title: isZh ? '學程管理' : 'Programs',
+            href: '/admin/programs',
+            icon: GraduationCap,
+        },
+        {
+            title: isZh ? '使用者管理' : 'Users',
+            href: '/admin/users',
+            icon: Users,
+        },
+        {
+            title: isZh ? '聯絡訊息' : 'Messages',
+            href: '/admin/contact-messages',
+            icon: Mail,
+        },
+        {
+            title: isZh ? '附件管理' : 'Attachments',
+            href: '/admin/attachments',
+            icon: FileText,
+        },
+    ];
+
+    const localizedFooterNavItems: NavItem[] = [
+        {
+            title: isZh ? '系統設定' : 'Settings',
+            href: '/admin/settings',
+            icon: Settings,
+        },
+        {
+            title: isZh ? '說明文件' : 'Documentation',
+            href: 'https://laravel.com/docs',
+            icon: HelpCircle,
+        },
+        {
+            title: 'Repository',
+            href: 'https://github.com/Grasonyang/csie_web',
+            icon: Folder,
+        },
+    ];
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -45,11 +107,11 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={localizedMainNavItems} />
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
+                <NavFooter items={localizedFooterNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

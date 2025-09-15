@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Models\PostCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class PostController extends Controller
@@ -15,9 +16,9 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::with(['category', 'author'])
+        $posts = Post::with(['category', 'creator'])
             ->orderBy('pinned', 'desc')
-            ->orderBy('published_at', 'desc')
+            ->orderBy('publish_at', 'desc')
             ->paginate(20);
 
         return Inertia::render('admin/posts/index', [
@@ -42,22 +43,31 @@ class PostController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'required|array',
             'title.zh-TW' => 'required|string|max:255',
             'title.en' => 'nullable|string|max:255',
-            'content' => 'required|array',
             'content.zh-TW' => 'required|string',
             'content.en' => 'nullable|string',
             'category_id' => 'required|exists:post_categories,id',
             'status' => 'required|in:draft,published',
             'pinned' => 'boolean',
-            'published_at' => 'nullable|date',
+            'publish_at' => 'nullable|date',
         ]);
 
-        $validated['author_id'] = auth()->id();
-        $validated['slug'] = \Str::slug($validated['title']['zh-TW'] . '-' . time());
+        $postData = [
+            'category_id' => $validated['category_id'],
+            'status' => $validated['status'],
+            'pinned' => $request->boolean('pinned'),
+            'publish_at' => $validated['publish_at'] ?? null,
+            'title' => $validated['title']['zh-TW'] ?? '',
+            'title_en' => $validated['title']['en'] ?? '',
+            'content' => $validated['content']['zh-TW'] ?? '',
+            'content_en' => $validated['content']['en'] ?? '',
+            'created_by' => auth()->id(),
+            'updated_by' => auth()->id(),
+            'slug' => Str::slug($validated['title']['zh-TW'] . '-' . time()),
+        ];
 
-        Post::create($validated);
+        Post::create($postData);
 
         return redirect()->route('admin.posts.index')
             ->with('success', '公告建立成功');
@@ -69,7 +79,7 @@ class PostController extends Controller
     public function show(Post $post)
     {
         return Inertia::render('admin/posts/show', [
-            'post' => $post->load(['category', 'author', 'attachments']),
+            'post' => $post->load(['category', 'creator', 'attachments']),
         ]);
     }
 
@@ -90,19 +100,29 @@ class PostController extends Controller
     public function update(Request $request, Post $post)
     {
         $validated = $request->validate([
-            'title' => 'required|array',
             'title.zh-TW' => 'required|string|max:255',
             'title.en' => 'nullable|string|max:255',
-            'content' => 'required|array',
             'content.zh-TW' => 'required|string',
             'content.en' => 'nullable|string',
             'category_id' => 'required|exists:post_categories,id',
             'status' => 'required|in:draft,published',
             'pinned' => 'boolean',
-            'published_at' => 'nullable|date',
+            'publish_at' => 'nullable|date',
         ]);
 
-        $post->update($validated);
+        $postData = [
+            'category_id' => $validated['category_id'],
+            'status' => $validated['status'],
+            'pinned' => $validated['pinned'] ?? false,
+            'publish_at' => $validated['publish_at'],
+            'title' => $validated['title']['zh-TW'],
+            'title_en' => $validated['title']['en'],
+            'content' => $validated['content']['zh-TW'],
+            'content_en' => $validated['content']['en'],
+            'updated_by' => auth()->id(),
+        ];
+
+        $post->update($postData);
 
         return redirect()->route('admin.posts.index')
             ->with('success', '公告更新成功');

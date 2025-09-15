@@ -3,10 +3,13 @@ import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 
 export function NavMain({ items = [] }: { items: NavItem[] }) {
-    const page = usePage();
+    const page = usePage<any>();
+    const { locale } = page.props;
+    const isZh = locale?.toLowerCase() === 'zh-tw';
+
     return (
         <SidebarGroup className="px-2 py-0">
-            <SidebarGroupLabel>Platform</SidebarGroupLabel>
+            <SidebarGroupLabel>{isZh ? "系統功能" : "Platform"}</SidebarGroupLabel>
             <SidebarMenu>
                 {items.map((item) => (
                     <SidebarMenuItem key={item.title}>

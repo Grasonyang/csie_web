@@ -1,7 +1,7 @@
 // Components
 import EmailVerificationNotificationController from '@/actions/App/Http/Controllers/Auth/EmailVerificationNotificationController';
 import { logout } from '@/routes';
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, usePage } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 
 import TextLink from '@/components/text-link';
@@ -9,13 +9,20 @@ import { Button } from '@/components/ui/button';
 import AuthLayout from '@/layouts/auth-layout';
 
 export default function VerifyEmail({ status }: { status?: string }) {
-    return (
-        <AuthLayout title="Verify email" description="Please verify your email address by clicking on the link we just emailed to you.">
-            <Head title="Email verification" />
+    const page = usePage<any>();
+    const { locale } = page.props;
+    const isZh = locale?.toLowerCase() === 'zh-tw';
 
-            {status === 'verification-link-sent' && (
+    return (
+        <AuthLayout
+            title={isZh ? "驗證電子郵件" : "Verify Email"}
+            description={isZh ? "請透過點擊我們剛才發送給您的電子郵件中的連結來驗證您的電子郵件地址。" : "Please verify your email address by clicking on the link we just emailed to you."}
+        >
+            <Head title={isZh ? "電子郵件驗證" : "Email Verification"} />
+
+            {status && (
                 <div className="mb-4 text-center text-sm font-medium text-green-600">
-                    A new verification link has been sent to the email address you provided during registration.
+                    {status}
                 </div>
             )}
 
@@ -24,11 +31,11 @@ export default function VerifyEmail({ status }: { status?: string }) {
                     <>
                         <Button disabled={processing} variant="secondary">
                             {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                            Resend verification email
+                            {isZh ? "重新發送驗證郵件" : "Resend Verification Email"}
                         </Button>
 
                         <TextLink href={logout()} className="mx-auto block text-sm">
-                            Log out
+                            {isZh ? "登出" : "Log out"}
                         </TextLink>
                     </>
                 )}

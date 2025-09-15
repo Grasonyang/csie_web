@@ -1,6 +1,6 @@
 import RegisteredUserController from '@/actions/App/Http/Controllers/Auth/RegisteredUserController';
 import { login } from '@/routes';
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, usePage } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 
 import InputError from '@/components/input-error';
@@ -11,9 +11,20 @@ import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 
 export default function Register() {
+    const page = usePage<any>();
+    const { locale, i18n } = page.props;
+    const isZh = locale?.toLowerCase() === 'zh-tw';
+
+    const t = (key: string, fallback?: string) => {
+        return key.split('.').reduce((acc: any, k: string) => (acc && acc[k] !== undefined ? acc[k] : undefined), i18n?.common) ?? fallback ?? key;
+    };
+
     return (
-        <AuthLayout title="Create an account" description="Enter your details below to create your account">
-            <Head title="Register" />
+        <AuthLayout
+            title={isZh ? "註冊新帳號" : "Register"}
+            description={isZh ? "請填寫以下資訊來建立您的帳號" : "Fill in the information below to create your account"}
+        >
+            <Head title={isZh ? "註冊" : "Register"} />
             <Form
                 {...RegisteredUserController.store.form()}
                 resetOnSuccess={['password', 'password_confirmation']}
@@ -22,9 +33,11 @@ export default function Register() {
             >
                 {({ processing, errors }) => (
                     <>
-                        <div className="grid gap-6">
+                        <div className="grid gap-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="name">Name</Label>
+                                <Label htmlFor="name" className="text-sm font-medium text-gray-700">
+                                    {isZh ? "姓名" : "Name"}
+                                </Label>
                                 <Input
                                     id="name"
                                     type="text"
@@ -33,13 +46,16 @@ export default function Register() {
                                     tabIndex={1}
                                     autoComplete="name"
                                     name="name"
-                                    placeholder="Full name"
+                                    placeholder={isZh ? "請輸入您的姓名" : "Enter your name"}
+                                    className="bg-white text-gray-900 border-gray-300 placeholder:text-gray-500 focus:border-[#151f54] focus:ring-[#151f54] focus:ring-1"
                                 />
                                 <InputError message={errors.name} className="mt-2" />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                                    {isZh ? "電子郵件" : "Email"}
+                                </Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -47,13 +63,16 @@ export default function Register() {
                                     tabIndex={2}
                                     autoComplete="email"
                                     name="email"
-                                    placeholder="email@example.com"
+                                    placeholder={isZh ? "請輸入電子郵件" : "Enter your email"}
+                                    className="bg-white text-gray-900 border-gray-300 placeholder:text-gray-500 focus:border-[#151f54] focus:ring-[#151f54] focus:ring-1"
                                 />
                                 <InputError message={errors.email} />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password">Password</Label>
+                                <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                                    {isZh ? "密碼" : "Password"}
+                                </Label>
                                 <Input
                                     id="password"
                                     type="password"
@@ -61,13 +80,16 @@ export default function Register() {
                                     tabIndex={3}
                                     autoComplete="new-password"
                                     name="password"
-                                    placeholder="Password"
+                                    placeholder={isZh ? "請輸入密碼" : "Enter your password"}
+                                    className="bg-white text-gray-900 border-gray-300 placeholder:text-gray-500 focus:border-[#151f54] focus:ring-[#151f54] focus:ring-1"
                                 />
                                 <InputError message={errors.password} />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password_confirmation">Confirm password</Label>
+                                <Label htmlFor="password_confirmation" className="text-sm font-medium text-gray-700">
+                                    {isZh ? "確認密碼" : "Confirm Password"}
+                                </Label>
                                 <Input
                                     id="password_confirmation"
                                     type="password"
@@ -75,21 +97,31 @@ export default function Register() {
                                     tabIndex={4}
                                     autoComplete="new-password"
                                     name="password_confirmation"
-                                    placeholder="Confirm password"
+                                    placeholder={isZh ? "請再次輸入密碼" : "Confirm your password"}
+                                    className="bg-white text-gray-900 border-gray-300 placeholder:text-gray-500 focus:border-[#151f54] focus:ring-[#151f54] focus:ring-1"
                                 />
                                 <InputError message={errors.password_confirmation} />
                             </div>
 
-                            <Button type="submit" className="mt-2 w-full" tabIndex={5} data-test="register-user-button">
-                                {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                                Create account
+                            <Button
+                                type="submit"
+                                className="mt-4 w-full bg-[#151f54] hover:bg-[#1e2968] text-white"
+                                tabIndex={5}
+                                data-test="register-user-button"
+                            >
+                                {processing && <LoaderCircle className="h-4 w-4 animate-spin mr-2" />}
+                                {isZh ? "建立帳號" : "Create Account"}
                             </Button>
                         </div>
 
-                        <div className="text-center text-sm text-muted-foreground">
-                            Already have an account?{' '}
-                            <TextLink href={login()} tabIndex={6}>
-                                Log in
+                        <div className="text-center text-sm text-gray-600">
+                            {isZh ? "已經有帳號了？" : "Already have an account?"}{' '}
+                            <TextLink
+                                href={login()}
+                                tabIndex={6}
+                                className="text-[#151f54] hover:text-[#ffb401] font-medium"
+                            >
+                                {isZh ? "立即登入" : "Sign in"}
                             </TextLink>
                         </div>
                     </>

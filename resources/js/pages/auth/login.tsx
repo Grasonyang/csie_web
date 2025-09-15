@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 import { register } from '@/routes';
 import { request } from '@/routes/password';
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, usePage } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 
 interface LoginProps {
@@ -17,16 +17,35 @@ interface LoginProps {
 }
 
 export default function Login({ status, canResetPassword }: LoginProps) {
+    const page = usePage<any>();
+    const { locale, i18n } = page.props;
+    const isZh = locale?.toLowerCase() === 'zh-tw';
+
+    const t = (key: string, fallback?: string) => {
+        return key.split('.').reduce((acc: any, k: string) => (acc && acc[k] !== undefined ? acc[k] : undefined), i18n?.common) ?? fallback ?? key;
+    };
+
     return (
-        <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
-            <Head title="Log in" />
+        <AuthLayout
+            title={isZh ? "登入系統" : "Login"}
+            description={isZh ? "請輸入您的帳號密碼以登入系統" : "Enter your credentials to access the system"}
+        >
+            <Head title={isZh ? "登入" : "Login"} />
+
+            {status && (
+                <div className="mb-4 rounded-md bg-green-50 border border-green-200 p-3 text-center text-sm font-medium text-green-700">
+                    {status}
+                </div>
+            )}
 
             <Form {...AuthenticatedSessionController.store.form()} resetOnSuccess={['password']} className="flex flex-col gap-6">
                 {({ processing, errors }) => (
                     <>
-                        <div className="grid gap-6">
+                        <div className="grid gap-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                                    {isZh ? "電子郵件" : "Email"}
+                                </Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -35,17 +54,24 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     autoFocus
                                     tabIndex={1}
                                     autoComplete="email"
-                                    placeholder="email@example.com"
+                                    placeholder={isZh ? "請輸入電子郵件" : "Enter your email"}
+                                    className="bg-white text-gray-900 border-gray-300 placeholder:text-gray-500 focus:border-[#151f54] focus:ring-[#151f54] focus:ring-1"
                                 />
                                 <InputError message={errors.email} />
                             </div>
 
                             <div className="grid gap-2">
-                                <div className="flex items-center">
-                                    <Label htmlFor="password">Password</Label>
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                                        {isZh ? "密碼" : "Password"}
+                                    </Label>
                                     {canResetPassword && (
-                                        <TextLink href={request()} className="ml-auto text-sm" tabIndex={5}>
-                                            Forgot password?
+                                        <TextLink
+                                            href={request()}
+                                            className="text-sm text-[#151f54] hover:text-[#ffb401]"
+                                            tabIndex={5}
+                                        >
+                                            {isZh ? "忘記密碼？" : "Forgot password?"}
                                         </TextLink>
                                     )}
                                 </div>
@@ -56,33 +82,49 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     required
                                     tabIndex={2}
                                     autoComplete="current-password"
-                                    placeholder="Password"
+                                    placeholder={isZh ? "請輸入密碼" : "Enter your password"}
+                                    className="bg-white text-gray-900 border-gray-300 placeholder:text-gray-500 focus:border-[#151f54] focus:ring-[#151f54] focus:ring-1"
                                 />
                                 <InputError message={errors.password} />
                             </div>
 
                             <div className="flex items-center space-x-3">
-                                <Checkbox id="remember" name="remember" tabIndex={3} />
-                                <Label htmlFor="remember">Remember me</Label>
+                                <Checkbox
+                                    id="remember"
+                                    name="remember"
+                                    tabIndex={3}
+                                    className="data-[state=checked]:bg-[#151f54] data-[state=checked]:border-[#151f54]"
+                                />
+                                <Label htmlFor="remember" className="text-sm text-gray-700">
+                                    {isZh ? "記住我" : "Remember me"}
+                                </Label>
                             </div>
 
-                            <Button type="submit" className="mt-4 w-full" tabIndex={4} disabled={processing} data-test="login-button">
-                                {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                                Log in
+                            <Button
+                                type="submit"
+                                className="mt-4 w-full bg-[#151f54] hover:bg-[#1e2968] text-white"
+                                tabIndex={4}
+                                disabled={processing}
+                                data-test="login-button"
+                            >
+                                {processing && <LoaderCircle className="h-4 w-4 animate-spin mr-2" />}
+                                {isZh ? "登入" : "Login"}
                             </Button>
                         </div>
 
-                        <div className="text-center text-sm text-muted-foreground">
-                            Don't have an account?{' '}
-                            <TextLink href={register()} tabIndex={5}>
-                                Sign up
+                        <div className="text-center text-sm text-gray-600">
+                            {isZh ? "還沒有帳號？" : "Don't have an account?"}{' '}
+                            <TextLink
+                                href={register()}
+                                tabIndex={6}
+                                className="text-[#151f54] hover:text-[#ffb401] font-medium"
+                            >
+                                {isZh ? "註冊新帳號" : "Sign up"}
                             </TextLink>
                         </div>
                     </>
                 )}
             </Form>
-
-            {status && <div className="mb-4 text-center text-sm font-medium text-green-600">{status}</div>}
         </AuthLayout>
     );
 }
