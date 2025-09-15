@@ -21,6 +21,10 @@ return [
         'login' => '登入',
         'dashboard' => '主控台',
     ],
+    'people' => [
+        'faculty' => '師資',
+        'staff' => '行政',
+    ],
     'search' => '搜尋',
     'bulletin' => [
         'title' => '公告',

@@ -8,13 +8,19 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\TestController;
+use App\Http\Controllers\StaffController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
+
+Route::get('/people', [StaffController::class, 'index'])->name('people.index');
+Route::get('/people/{slug}', [StaffController::class, 'show'])->name('people.show');
+
 Route::get('/bulletins', [BulletinController::class, 'index'])->name('bulletins.index');
 Route::get('/bulletins/{slug}', [BulletinController::class, 'show'])->name('bulletins.show');
+
 
 // Locale switcher: sets session locale and redirects back
 Route::get('/locale/{locale}', function (string $locale) {
