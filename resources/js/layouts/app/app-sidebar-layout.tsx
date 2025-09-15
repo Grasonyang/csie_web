@@ -3,6 +3,7 @@ import { AppShell } from '@/components/app-shell';
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppSidebarHeader } from '@/components/app-sidebar-header';
 import { type BreadcrumbItem } from '@/types';
+import AdminFooter from '@/components/admin-footer';
 import { type PropsWithChildren } from 'react';
 
 export default function AppSidebarLayout({ children, breadcrumbs = [] }: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[] }>) {
@@ -12,6 +13,7 @@ export default function AppSidebarLayout({ children, breadcrumbs = [] }: PropsWi
             <AppContent variant="sidebar" className="overflow-x-hidden">
                 <AppSidebarHeader breadcrumbs={breadcrumbs} />
                 {children}
+                <AdminFooter />
             </AppContent>
         </AppShell>
     );

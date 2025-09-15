@@ -27,6 +27,9 @@ export interface SharedData {
     quote: { message: string; author: string };
     auth: Auth;
     sidebarOpen: boolean;
+    locale?: string;
+    locales?: string[];
+    i18n?: Record<string, any>;
     [key: string]: unknown;
 }
 

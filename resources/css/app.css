@@ -11,6 +11,11 @@
     --font-sans:
         'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
+    /* Use a serif family as the main (body) font via `font-serif` */
+    --font-serif:
+        'Noto Serif TC', ui-serif, Georgia, Cambria, 'Times New Roman', Times,
+        'Noto Serif CJK TC', 'PMingLiU', 'MingLiU', 'Songti TC', 'STSong', serif;
+
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
     --radius-sm: calc(var(--radius) - 4px);

@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\ContactMessageController;
 use App\Http\Controllers\Api\ProgramController;
 use App\Http\Controllers\Api\CourseController;
 
+
 Route::prefix('v1')->group(function () {
     Route::apiResource('post-categories', PostCategoryController::class);
     Route::apiResource('posts', PostController::class);
