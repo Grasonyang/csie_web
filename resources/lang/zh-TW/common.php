@@ -22,6 +22,11 @@ return [
         'dashboard' => '主控台',
     ],
     'search' => '搜尋',
+    'bulletin' => [
+        'title' => '公告',
+        'all' => '全部',
+        'back' => '返回公告列表',
+    ],
     'language' => [
         'en' => 'EN',
         'zh_tw' => '繁中',
