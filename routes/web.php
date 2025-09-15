@@ -4,10 +4,12 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\AttachmentDownloadController;
 use App\Http\Controllers\LabController;
+use App\Http\Controllers\BulletinController;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\TestController;
+use App\Http\Controllers\StaffController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -16,6 +18,13 @@ Route::get('/', function () {
 // Labs
 Route::get('/labs', [LabController::class, 'index'])->name('labs.index');
 Route::get('/labs/{lab:code}', [LabController::class, 'show'])->name('labs.show');
+
+Route::get('/people', [StaffController::class, 'index'])->name('people.index');
+Route::get('/people/{slug}', [StaffController::class, 'show'])->name('people.show');
+
+Route::get('/bulletins', [BulletinController::class, 'index'])->name('bulletins.index');
+Route::get('/bulletins/{slug}', [BulletinController::class, 'show'])->name('bulletins.show');
+
 
 // Locale switcher: sets session locale and redirects back
 Route::get('/locale/{locale}', function (string $locale) {

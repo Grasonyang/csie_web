@@ -22,7 +22,16 @@ return [
         'login' => '登入',
         'dashboard' => '主控台',
     ],
+    'people' => [
+        'faculty' => '師資',
+        'staff' => '行政',
+    ],
     'search' => '搜尋',
+    'bulletin' => [
+        'title' => '公告',
+        'all' => '全部',
+        'back' => '返回公告列表',
+    ],
     'language' => [
         'en' => 'EN',
         'zh_tw' => '繁中',
