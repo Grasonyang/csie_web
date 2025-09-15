@@ -21,6 +21,10 @@ return [
         'login' => 'Login',
         'dashboard' => 'Dashboard',
     ],
+    'people' => [
+        'faculty' => 'Faculty',
+        'staff' => 'Staff',
+    ],
     'search' => 'Search',
     'language' => [
         'en' => 'EN',
