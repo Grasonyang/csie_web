@@ -26,6 +26,11 @@ return [
         'staff' => 'Staff',
     ],
     'search' => 'Search',
+    'bulletin' => [
+        'title' => 'Bulletins',
+        'all' => 'All',
+        'back' => 'Back to bulletins',
+    ],
     'language' => [
         'en' => 'EN',
         'zh_tw' => '繁中',
