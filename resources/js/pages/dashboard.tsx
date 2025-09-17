@@ -111,14 +111,6 @@ export default function Dashboard() {
                             {isZh ? "歡迎回來！這是您的系統概覽。" : "Welcome back! Here's your system overview."}
                         </p>
                     </div>
-                    <div className="mb-8">
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                            {isZh ? "系統管理後台" : "System Dashboard"}
-                        </h1>
-                        <p className="text-gray-600">
-                            {isZh ? "歡迎回來！這是您的系統概覽。" : "Welcome back! Here's your system overview."}
-                        </p>
-                    </div>
 
                     {/* 統計卡片 */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
