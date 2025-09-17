@@ -39,16 +39,22 @@ interface Post {
     updated_at: string;
 }
 
+interface PaginationMeta {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+}
+
 interface PostsIndexProps {
     posts: {
         data: Post[];
         links: any[];
-        meta: {
-            current_page: number;
-            last_page: number;
-            per_page: number;
-            total: number;
-        };
+        meta?: PaginationMeta;
+        current_page?: number;
+        last_page?: number;
+        per_page?: number;
+        total?: number;
     };
     categories: PostCategory[];
     filters?: {
@@ -69,6 +75,13 @@ type FilterState = {
     per_page: string;
 };
 
+const DEFAULT_PAGINATION_META: PaginationMeta = {
+    current_page: 1,
+    last_page: 1,
+    per_page: 20,
+    total: 0,
+};
+
 export default function PostsIndex({ posts, categories, filters = {}, perPageOptions = [] }: PostsIndexProps) {
     const { auth, locale } = usePage<SharedData>().props;
     const isZh = locale === 'zh-TW';
@@ -78,11 +91,20 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
 
     // 添加安全檢查
     const postsData = posts?.data || [];
-    const paginationMeta = posts?.meta || { last_page: 1, current_page: 1, per_page: 20, total: 0 };
+    // Laravel 預設分頁回應會將 current_page 等欄位平鋪在最外層，當 meta 缺席時需改用外層欄位作為備援
+    const paginationMeta: PaginationMeta = {
+        current_page:
+            posts?.meta?.current_page ?? posts?.current_page ?? DEFAULT_PAGINATION_META.current_page,
+        last_page: posts?.meta?.last_page ?? posts?.last_page ?? DEFAULT_PAGINATION_META.last_page,
+        per_page: posts?.meta?.per_page ?? posts?.per_page ?? DEFAULT_PAGINATION_META.per_page,
+        total: posts?.meta?.total ?? posts?.total ?? DEFAULT_PAGINATION_META.total,
+    };
     const paginationLinks = posts?.links || [];
     const resolvedPerPageOptions = perPageOptions.length > 0 ? perPageOptions : [10, 20, 50];
 
-    const initialPerPage = String(filters.per_page ?? paginationMeta.per_page ?? 20);
+    const initialPerPage = String(
+        filters.per_page ?? paginationMeta.per_page ?? DEFAULT_PAGINATION_META.per_page
+    );
     const [filterState, setFilterState] = useState<FilterState>({
         search: filters.search ?? '',
         category: filters.category ? String(filters.category) : '',
@@ -97,9 +119,18 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
             category: filters.category ? String(filters.category) : '',
             status: filters.status ?? '',
             pinned: filters.pinned ?? '',
-            per_page: String(filters.per_page ?? paginationMeta.per_page ?? 20),
+            per_page: String(
+                filters.per_page ?? paginationMeta.per_page ?? DEFAULT_PAGINATION_META.per_page
+            ),
         });
-    }, [filters.search, filters.category, filters.status, filters.pinned, filters.per_page, paginationMeta.per_page]);
+    }, [
+        filters.search,
+        filters.category,
+        filters.status,
+        filters.pinned,
+        filters.per_page,
+        paginationMeta.per_page,
+    ]);
 
     const handleFilterChange = (key: keyof FilterState, value: string) => {
         setFilterState((prev) => ({
@@ -127,7 +158,7 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
             category: '',
             status: '',
             pinned: '',
-            per_page: String(paginationMeta.per_page ?? 20),
+            per_page: String(paginationMeta.per_page ?? DEFAULT_PAGINATION_META.per_page),
         };
         setFilterState(resetState);
         router.get(PostController.index().url, { per_page: resetState.per_page }, {
@@ -146,9 +177,15 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
         return Number.isFinite(parsed) ? parsed : fallback;
     };
 
-    const currentPage = parseNumber(paginationMeta.current_page, 1);
-    const lastPage = parseNumber(paginationMeta.last_page, 1);
-    const perPageCount = parseNumber(paginationMeta.per_page, parseNumber(filterState.per_page, 20));
+    const currentPage = parseNumber(
+        paginationMeta.current_page,
+        DEFAULT_PAGINATION_META.current_page
+    );
+    const lastPage = parseNumber(paginationMeta.last_page, DEFAULT_PAGINATION_META.last_page);
+    const perPageCount = parseNumber(
+        paginationMeta.per_page,
+        parseNumber(filterState.per_page, DEFAULT_PAGINATION_META.per_page)
+    );
 
     const paginationRangeStart = postsData.length === 0 ? 0 : (currentPage - 1) * perPageCount + 1;
     const paginationRangeEnd = postsData.length === 0 ? 0 : paginationRangeStart + postsData.length - 1;
