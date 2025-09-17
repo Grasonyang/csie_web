@@ -21,32 +21,65 @@ interface PostCategory {
     slug: string;
 }
 
-interface CreatePostProps {
+interface AdminPost {
+    id: number;
+    category_id: number;
+    status: 'draft' | 'published' | 'archived';
+    publish_at: string | null;
+    pinned: boolean;
+    title: string;
+    title_en: string;
+    content: string;
+    content_en: string;
+    source_type?: 'manual' | 'link';
+    source_url?: string | null;
+    fetched_html?: string | null;
+}
+
+interface EditPostProps {
+    post: AdminPost;
     categories: PostCategory[];
 }
 
-export default function CreatePost({ categories }: CreatePostProps) {
+const formatPublishAt = (value: string | null): string => {
+    if (!value) {
+        return '';
+    }
+
+    const parsed = new Date(value);
+
+    if (Number.isNaN(parsed.getTime())) {
+        return value.slice(0, 16);
+    }
+
+    const offset = parsed.getTimezoneOffset() * 60000;
+    return new Date(parsed.getTime() - offset).toISOString().slice(0, 16);
+};
+
+export default function EditPost({ post, categories }: EditPostProps) {
     const { locale } = usePage<SharedData>().props;
     const isZh = locale === 'zh-TW';
 
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, put, processing, errors } = useForm({
         title: {
-            'zh-TW': '',
-            en: '',
+            'zh-TW': post.title ?? '',
+            en: post.title_en ?? '',
         },
         content: {
-            'zh-TW': '',
-            en: '',
+            'zh-TW': post.content ?? '',
+            en: post.content_en ?? '',
         },
-        category_id: '',
-        status: 'draft',
-        pinned: false,
-        publish_at: '',
-        source_type: 'manual',
-        source_url: '',
+        category_id: String(post.category_id ?? ''),
+        status: post.status ?? 'draft',
+        pinned: !!post.pinned,
+        publish_at: formatPublishAt(post.publish_at),
+        source_type: post.source_type ?? 'manual',
+        source_url: post.source_url ?? '',
     });
 
-    const [previewHtml, setPreviewHtml] = useState<string>('');
+    const [previewHtml, setPreviewHtml] = useState<string>(
+        post.source_type === 'link' ? post.fetched_html ?? '' : ''
+    );
     const [previewError, setPreviewError] = useState<string | null>(null);
     const [previewLoading, setPreviewLoading] = useState<boolean>(false);
 
@@ -68,6 +101,8 @@ export default function CreatePost({ categories }: CreatePostProps) {
 
         if (value === 'manual') {
             setData('source_url', '');
+            setPreviewHtml('');
+            setPreviewError(null);
         } else {
             setData('content.zh-TW', '');
             setData('content.en', '');
@@ -136,7 +171,7 @@ export default function CreatePost({ categories }: CreatePostProps) {
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(PostController.store().url, {
+        put(PostController.update(post.id).url, {
             onError: (formErrors) => {
                 console.error('Form errors:', formErrors);
             },
@@ -145,7 +180,7 @@ export default function CreatePost({ categories }: CreatePostProps) {
 
     return (
         <AppLayout>
-            <Head title={isZh ? '建立公告' : 'Create Post'} />
+            <Head title={isZh ? '編輯公告' : 'Edit Post'} />
 
             <div className="min-h-screen bg-gray-50">
                 <div className="mx-auto max-w-4xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
@@ -156,8 +191,8 @@ export default function CreatePost({ categories }: CreatePostProps) {
                             </Button>
                         </Link>
                         <div>
-                            <h1 className="text-3xl font-bold tracking-tight text-gray-900">{isZh ? '建立公告' : 'Create Post'}</h1>
-                            <p className="mt-2 text-gray-600">{isZh ? '建立新的公告或新聞' : 'Create a new announcement or news post'}</p>
+                            <h1 className="text-3xl font-bold tracking-tight text-gray-900">{isZh ? '編輯公告' : 'Edit Post'}</h1>
+                            <p className="mt-2 text-gray-600">{isZh ? '調整公告內容與顯示設定' : 'Update the announcement details.'}</p>
                         </div>
                     </div>
 
@@ -228,6 +263,7 @@ export default function CreatePost({ categories }: CreatePostProps) {
                                             >
                                                 <option value="draft">{isZh ? '草稿' : 'Draft'}</option>
                                                 <option value="published">{isZh ? '已發布' : 'Published'}</option>
+                                                <option value="archived">{isZh ? '已封存' : 'Archived'}</option>
                                             </Select>
                                         </div>
 
@@ -380,7 +416,7 @@ export default function CreatePost({ categories }: CreatePostProps) {
                                     disabled={processing}
                                     className="bg-blue-600 text-white transition-colors duration-200 shadow-sm hover:bg-blue-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
                                 >
-                                    {processing ? (isZh ? '建立中...' : 'Creating...') : isZh ? '建立公告' : 'Create Post'}
+                                    {processing ? (isZh ? '更新中...' : 'Updating...') : isZh ? '更新公告' : 'Update Post'}
                                 </Button>
                             </div>
                         </div>
