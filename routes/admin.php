@@ -51,8 +51,6 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
 
     // 公告管理
     Route::resource('post-categories', AdminPostCategoryController::class);
-    Route::post('posts/fetch-preview', [AdminPostController::class, 'fetchPreview'])
-        ->name('posts.fetch-preview');
     Route::resource('posts', AdminPostController::class);
 
     // 聯絡我們管理

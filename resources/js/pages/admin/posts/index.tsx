@@ -1,11 +1,16 @@
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import PostController from '@/actions/App/Http/Controllers/Admin/PostController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
+import { cn } from '@/lib/utils';
 import { type SharedData } from '@/types';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { Calendar, Edit, Eye, Pin, Trash2, User } from 'lucide-react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Calendar, ChevronLeft, ChevronRight, Edit, Eye, Pin, Trash2, User } from 'lucide-react';
 
 interface PostCategory {
     id: number;
@@ -46,9 +51,25 @@ interface PostsIndexProps {
         };
     };
     categories: PostCategory[];
+    filters?: {
+        search?: string;
+        category?: string | number;
+        status?: string;
+        pinned?: string;
+        per_page?: number;
+    };
+    perPageOptions?: number[];
 }
 
-export default function PostsIndex({ posts, categories }: PostsIndexProps) {
+type FilterState = {
+    search: string;
+    category: string;
+    status: string;
+    pinned: string;
+    per_page: string;
+};
+
+export default function PostsIndex({ posts, categories, filters = {}, perPageOptions = [] }: PostsIndexProps) {
     const { auth, locale } = usePage<SharedData>().props;
     const isZh = locale === 'zh-TW';
 
@@ -59,6 +80,119 @@ export default function PostsIndex({ posts, categories }: PostsIndexProps) {
     const postsData = posts?.data || [];
     const paginationMeta = posts?.meta || { last_page: 1, current_page: 1, per_page: 20, total: 0 };
     const paginationLinks = posts?.links || [];
+    const resolvedPerPageOptions = perPageOptions.length > 0 ? perPageOptions : [10, 20, 50];
+
+    const initialPerPage = String(filters.per_page ?? paginationMeta.per_page ?? 20);
+    const [filterState, setFilterState] = useState<FilterState>({
+        search: filters.search ?? '',
+        category: filters.category ? String(filters.category) : '',
+        status: filters.status ?? '',
+        pinned: filters.pinned ?? '',
+        per_page: initialPerPage,
+    });
+
+    useEffect(() => {
+        setFilterState({
+            search: filters.search ?? '',
+            category: filters.category ? String(filters.category) : '',
+            status: filters.status ?? '',
+            pinned: filters.pinned ?? '',
+            per_page: String(filters.per_page ?? paginationMeta.per_page ?? 20),
+        });
+    }, [filters.search, filters.category, filters.status, filters.pinned, filters.per_page, paginationMeta.per_page]);
+
+    const handleFilterChange = (key: keyof FilterState, value: string) => {
+        setFilterState((prev) => ({
+            ...prev,
+            [key]: value,
+        }));
+    };
+
+    const applyFilters = (event?: FormEvent) => {
+        event?.preventDefault();
+        const query = Object.fromEntries(
+            Object.entries(filterState).filter(([_, value]) => value !== '')
+        );
+
+        router.get(PostController.index().url, query, {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        });
+    };
+
+    const resetFilters = () => {
+        const resetState: FilterState = {
+            search: '',
+            category: '',
+            status: '',
+            pinned: '',
+            per_page: String(paginationMeta.per_page ?? 20),
+        };
+        setFilterState(resetState);
+        router.get(PostController.index().url, { per_page: resetState.per_page }, {
+            preserveScroll: true,
+            replace: true,
+        });
+    };
+
+    const hasActiveFilters = useMemo(() => {
+        const { search, category, status, pinned } = filterState;
+        return [search, category, status, pinned].some((value) => value !== '');
+    }, [filterState]);
+
+    const parseNumber = (value: unknown, fallback: number) => {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? parsed : fallback;
+    };
+
+    const currentPage = parseNumber(paginationMeta.current_page, 1);
+    const lastPage = parseNumber(paginationMeta.last_page, 1);
+    const perPageCount = parseNumber(paginationMeta.per_page, parseNumber(filterState.per_page, 20));
+
+    const paginationRangeStart = postsData.length === 0 ? 0 : (currentPage - 1) * perPageCount + 1;
+    const paginationRangeEnd = postsData.length === 0 ? 0 : paginationRangeStart + postsData.length - 1;
+
+    const buildFilterQuery = (overrides: Record<string, string | number> = {}) => {
+        const query: Record<string, string | number> = {};
+
+        for (const [key, value] of Object.entries(filterState)) {
+            if (value !== '') {
+                query[key] = value;
+            }
+        }
+
+        for (const [key, value] of Object.entries(overrides)) {
+            if (value !== '' && value !== undefined && value !== null) {
+                query[key] = value;
+            }
+        }
+
+        return query;
+    };
+
+    const isPrevDisabled = currentPage <= 1;
+    const isNextDisabled = currentPage >= lastPage;
+
+    const goToPage = (page: number) => {
+        if (page < 1 || page > lastPage || page === currentPage) {
+            return;
+        }
+
+        router.get(PostController.index().url, buildFilterQuery({ page }), {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        });
+    };
+
+    const paginationButtonClass = (disabled: boolean) =>
+        cn(
+            'h-8 w-8 border transition-colors',
+            disabled
+                ? 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400 hover:bg-gray-100'
+                : 'border-gray-300 text-gray-600 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700'
+        );
 
     const getStatusBadge = (status: string) => {
         const variants = {
@@ -122,6 +256,159 @@ export default function PostsIndex({ posts, categories }: PostsIndexProps) {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-6">
+                            <form onSubmit={applyFilters} className="mb-6 grid gap-4 md:grid-cols-6">
+                                <div className="md:col-span-2">
+                                    <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="post-search">
+                                        {isZh ? '搜尋公告' : 'Search posts'}
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <Input
+                                            id="post-search"
+                                            type="search"
+                                            placeholder={isZh ? '輸入標題或內容關鍵字' : 'Type a keyword'}
+                                            value={filterState.search}
+                                            onChange={(event) => handleFilterChange('search', event.target.value)}
+                                            className="flex-1"
+                                        />
+                                        <Button type="submit" variant="secondary" className="shrink-0">
+                                            {isZh ? '搜尋' : 'Search'}
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="post-category">
+                                        {isZh ? '分類' : 'Category'}
+                                    </label>
+                                    <Select
+                                        id="post-category"
+                                        value={filterState.category}
+                                        onChange={(event) => handleFilterChange('category', event.target.value)}
+                                    >
+                                        <option value="">{isZh ? '全部分類' : 'All categories'}</option>
+                                        {categories.map((category) => (
+                                            <option key={category.id} value={category.id.toString()}>
+                                                {isZh ? category.name : category.name_en}
+                                            </option>
+                                        ))}
+                                    </Select>
+                                </div>
+
+                                <div>
+                                    <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="post-status">
+                                        {isZh ? '狀態' : 'Status'}
+                                    </label>
+                                    <Select
+                                        id="post-status"
+                                        value={filterState.status}
+                                        onChange={(event) => handleFilterChange('status', event.target.value)}
+                                    >
+                                        <option value="">{isZh ? '全部狀態' : 'All statuses'}</option>
+                                        <option value="draft">{isZh ? '草稿' : 'Draft'}</option>
+                                        <option value="published">{isZh ? '已發布' : 'Published'}</option>
+                                        <option value="archived">{isZh ? '已封存' : 'Archived'}</option>
+                                    </Select>
+                                </div>
+
+                                <div>
+                                    <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="post-pinned">
+                                        {isZh ? '置頂' : 'Pinned'}
+                                    </label>
+                                    <Select
+                                        id="post-pinned"
+                                        value={filterState.pinned}
+                                        onChange={(event) => handleFilterChange('pinned', event.target.value)}
+                                    >
+                                        <option value="">{isZh ? '全部' : 'All'}</option>
+                                        <option value="1">{isZh ? '已置頂' : 'Pinned only'}</option>
+                                        <option value="0">{isZh ? '未置頂' : 'Not pinned'}</option>
+                                    </Select>
+                                </div>
+
+                                <div>
+                                    <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="post-per-page">
+                                        {isZh ? '每頁筆數' : 'Per page'}
+                                    </label>
+                                    <Select
+                                        id="post-per-page"
+                                        value={filterState.per_page}
+                                        onChange={(event) => {
+                                            const value = event.target.value;
+                                            handleFilterChange('per_page', value);
+                                            router.get(PostController.index().url, buildFilterQuery({ per_page: value }), {
+                                                preserveState: true,
+                                                preserveScroll: true,
+                                                replace: true,
+                                            });
+                                        }}
+                                    >
+                                        {resolvedPerPageOptions.map((option) => (
+                                            <option key={option} value={option.toString()}>
+                                                {option}
+                                            </option>
+                                        ))}
+                                    </Select>
+                                </div>
+
+                                <div className="flex items-end gap-2 md:col-span-6 md:justify-end">
+                                    {hasActiveFilters && (
+                                        <Button type="button" variant="ghost" onClick={resetFilters}>
+                                            {isZh ? '清除篩選' : 'Reset filters'}
+                                        </Button>
+                                    )}
+                                    <Button type="submit" className="bg-blue-600 text-white hover:bg-blue-700">
+                                        {isZh ? '套用篩選' : 'Apply filters'}
+                                    </Button>
+                                </div>
+                            </form>
+
+                            <div className="mb-4 flex flex-col gap-2 text-sm text-gray-500 md:flex-row md:items-center md:justify-between">
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="icon"
+                                        aria-disabled={isPrevDisabled}
+                                        onClick={() => {
+                                            if (!isPrevDisabled) {
+                                                goToPage(currentPage - 1);
+                                            }
+                                        }}
+                                        aria-label={isZh ? '上一頁' : 'Previous page'}
+                                        className={paginationButtonClass(isPrevDisabled)}
+                                    >
+                                        <ChevronLeft className="h-4 w-4" />
+                                    </Button>
+                                    <span>
+                                        {postsData.length === 0
+                                            ? isZh ? '目前查無符合條件的公告' : 'No posts match the current filters'
+                                            : isZh
+                                                ? `顯示第 ${paginationRangeStart} - ${paginationRangeEnd} 筆，共 ${paginationMeta.total} 筆`
+                                                : `Showing ${paginationRangeStart}-${paginationRangeEnd} of ${paginationMeta.total}`}
+                                    </span>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="icon"
+                                        aria-disabled={isNextDisabled}
+                                        onClick={() => {
+                                            if (!isNextDisabled) {
+                                                goToPage(currentPage + 1);
+                                            }
+                                        }}
+                                        aria-label={isZh ? '下一頁' : 'Next page'}
+                                        className={paginationButtonClass(isNextDisabled)}
+                                    >
+                                        <ChevronRight className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                                {hasActiveFilters && postsData.length > 0 && (
+                                    <span className="inline-flex items-center gap-1 text-xs uppercase tracking-wide text-blue-600">
+                                        {isZh ? '篩選中' : 'Filters active'}
+                                    </span>
+                                )}
+                            </div>
+
                             {postsData.length === 0 ? (
                                 <div className="py-12 text-center">
                                     <Calendar className="mx-auto h-12 w-12 text-gray-400" />
@@ -140,7 +427,16 @@ export default function PostsIndex({ posts, categories }: PostsIndexProps) {
                                             <div className="flex items-start justify-between">
                                                 <div className="min-w-0 flex-1">
                                                     <div className="mb-2 flex items-center gap-2">
-                                                        {post.pinned && <Pin className="h-4 w-4 flex-shrink-0 text-amber-500" />}
+                                                        {post.pinned && (
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <span className="inline-flex">
+                                                                        <Pin className="h-4 w-4 flex-shrink-0 text-amber-500" />
+                                                                    </span>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>{isZh ? '已置頂公告' : 'Pinned post'}</TooltipContent>
+                                                            </Tooltip>
+                                                        )}
                                                         <h3 className="truncate text-lg font-semibold text-gray-900">
                                                             {isZh ? post.title : post.title_en}
                                                         </h3>
@@ -150,7 +446,10 @@ export default function PostsIndex({ posts, categories }: PostsIndexProps) {
                                                     <div className="mb-3 flex items-center gap-4 text-sm text-gray-500">
                                                         <div className="flex items-center gap-1">
                                                             <Calendar className="h-4 w-4" />
-                                                            <Badge variant="outline" className="text-xs">
+                                                            <Badge
+                                                                variant="outline"
+                                                                className="border-blue-300 bg-blue-100 text-xs font-semibold text-blue-800"
+                                                            >
                                                                 {isZh ? post.category.name : post.category.name_en}
                                                             </Badge>
                                                         </div>
@@ -173,30 +472,51 @@ export default function PostsIndex({ posts, categories }: PostsIndexProps) {
                                                 </div>
 
                                                 <div className="ml-4 flex items-center gap-2">
-                                                    <Link href={PostController.show(post.id).url}>
-                                                        <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800">
-                                                            <Eye className="h-4 w-4" />
-                                                        </Button>
-                                                    </Link>
-                                                    <Link href={PostController.edit(post.id).url}>
-                                                        <Button variant="ghost" size="sm" className="text-green-600 hover:text-green-800">
-                                                            <Edit className="h-4 w-4" />
-                                                        </Button>
-                                                    </Link>
-                                                    <Button
-                                                        // 點擊後先確認是否刪除
-                                                        onClick={() => {
-                                                            if (confirm('確定要刪除嗎？')) {
-                                                                // 送出刪除請求
-                                                                destroy(PostController.destroy(post.id).url);
-                                                            }
-                                                        }}
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="text-red-600 hover:text-red-800"
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Link href={PostController.show(post.id).url}>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="text-blue-600 hover:text-blue-800"
+                                                                >
+                                                                    <Eye className="h-4 w-4" />
+                                                                </Button>
+                                                            </Link>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>{isZh ? '檢視公告' : 'View post'}</TooltipContent>
+                                                    </Tooltip>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Link href={PostController.edit(post.id).url}>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="text-green-600 hover:text-green-800"
+                                                                >
+                                                                    <Edit className="h-4 w-4" />
+                                                                </Button>
+                                                            </Link>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>{isZh ? '編輯公告' : 'Edit post'}</TooltipContent>
+                                                    </Tooltip>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button
+                                                                onClick={() => {
+                                                                    if (confirm(isZh ? '確定要刪除嗎？' : 'Are you sure you want to delete this post?')) {
+                                                                        destroy(PostController.destroy(post.id).url);
+                                                                    }
+                                                                }}
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="text-red-600 hover:text-red-800"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>{isZh ? '刪除公告' : 'Delete post'}</TooltipContent>
+                                                    </Tooltip>
                                                 </div>
                                             </div>
                                         </div>
@@ -209,25 +529,37 @@ export default function PostsIndex({ posts, categories }: PostsIndexProps) {
                     {/* Pagination */}
                     {paginationMeta.last_page > 1 && (
                         <div className="flex items-center justify-center space-x-2 py-4">
-                            {paginationLinks.map((link, index) => (
-                                <div key={index}>
-                                    {link.url ? (
-                                        <Link href={link.url}>
-                                            <Button
-                                                variant={link.active ? 'default' : 'outline'}
-                                                size="sm"
-                                                className={link.active ? 'bg-blue-600 hover:bg-blue-700' : ''}
-                                            >
-                                                {sanitizeLabel(link.label)}
-                                            </Button>
-                                        </Link>
-                                    ) : (
-                                        <Button variant="outline" size="sm" disabled>
-                                            {sanitizeLabel(link.label)}
-                                        </Button>
-                                    )}
-                                </div>
-                            ))}
+                            {paginationLinks.map((link, index) => {
+                                const sanitizedLabel = sanitizeLabel(link.label);
+
+                                if (!link.url) {
+                                    return (
+                                        <span
+                                            key={index}
+                                            className="inline-flex items-center justify-center rounded-md px-3 py-1 text-sm font-medium border border-input text-gray-400"
+                                        >
+                                            {sanitizedLabel}
+                                        </span>
+                                    );
+                                }
+
+                                return (
+                                    <button
+                                        key={index}
+                                        type="button"
+                                        onClick={() => {
+                                            router.visit(link.url, {
+                                                preserveState: true,
+                                                preserveScroll: true,
+                                                replace: true,
+                                            });
+                                        }}
+                                        className={`inline-flex items-center justify-center rounded-md px-3 py-1 text-sm font-medium transition-colors ${link.active ? 'bg-blue-600 text-white hover:bg-blue-700' : 'border border-input bg-background hover:bg-accent'}`}
+                                    >
+                                        {sanitizedLabel}
+                                    </button>
+                                );
+                            })}
                         </div>
                     )}
                 </div>

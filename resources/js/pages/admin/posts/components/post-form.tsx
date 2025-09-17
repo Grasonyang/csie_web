@@ -8,11 +8,10 @@ import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import type { SharedData } from '@/types';
 import { Link, useForm, usePage } from '@inertiajs/react';
-import type { InertiaFormProps } from '@inertiajs/react/types/useForm';
 import DOMPurify from 'dompurify';
 import { Calendar, Loader2 } from 'lucide-react';
 import type { FormEventHandler } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 
 export interface PostCategory {
     id: number;
@@ -26,6 +25,7 @@ export interface PostFormValues {
         'zh-TW': string;
         en: string;
     };
+
     content: {
         'zh-TW': string;
         en: string;
@@ -51,7 +51,7 @@ interface PostFormProps {
     initialValues: PostFormValues;
     statusOptions: StatusOption[];
     initialPreviewHtml?: string;
-    onSubmit: (form: InertiaFormProps<PostFormValues>) => void;
+    onSubmit: (form: any) => void;
 }
 
 const emptyContent = {
@@ -102,11 +102,28 @@ export default function PostForm({
         source_url: initialValues.source_url,
     });
 
-    const { data, setData, errors, processing } = form;
+    const { data, setData, errors, processing, setError, clearErrors } = form;
+
+    const [autoSyncTitleEn, setAutoSyncTitleEn] = useState(
+        () => initialValues.title.en.trim() === '' || initialValues.title.en === initialValues.title['zh-TW']
+    );
+    const [autoSyncContentEn, setAutoSyncContentEn] = useState(
+        () =>
+            initialValues.source_type === 'manual' &&
+            (initialValues.content.en.trim() === '' || initialValues.content.en === initialValues.content['zh-TW'])
+    );
 
     const [previewHtml, setPreviewHtml] = useState<string>(initialPreviewHtml);
     const [previewError, setPreviewError] = useState<string | null>(null);
     const [previewLoading, setPreviewLoading] = useState<boolean>(false);
+    const [previewEmbeddable, setPreviewEmbeddable] = useState<boolean>(true);
+    const [previewSource, setPreviewSource] = useState<string>('');
+    const publishRef = useRef<HTMLInputElement | null>(null);
+    const [publishEl, setPublishEl] = useState<HTMLInputElement | null>(null);
+    const publishCallbackRef = useCallback((el: HTMLInputElement | null) => {
+        publishRef.current = el;
+        setPublishEl(el);
+    }, []);
 
     useEffect(() => {
         if (data.source_type === 'manual') {
@@ -121,9 +138,55 @@ export default function PostForm({
         }
     }, [data.source_url]);
 
-    const submit: FormEventHandler = (event) => {
-        event.preventDefault();
-        onSubmit(form);
+    const handleTitleZhChange = (value: string) => {
+        const shouldSync = autoSyncTitleEn || data.title.en.trim() === '';
+        setData('title', {
+            'zh-TW': value,
+            en: shouldSync ? value : data.title.en,
+        });
+        if (autoSyncTitleEn !== shouldSync) {
+            setAutoSyncTitleEn(shouldSync);
+        }
+        if (errors['title.zh-TW']) {
+            clearErrors('title.zh-TW');
+        }
+    };
+
+    const handleTitleEnChange = (value: string) => {
+        setData('title', {
+            ...data.title,
+            en: value,
+        });
+        const shouldSync = value.trim() === '' || value === data.title['zh-TW'];
+        setAutoSyncTitleEn(shouldSync);
+    };
+
+    const handleContentZhChange = (value: string) => {
+        if (data.source_type !== 'manual') {
+            setData('content', {
+                ...data.content,
+                'zh-TW': value,
+            });
+            return;
+        }
+
+        const shouldSync = autoSyncContentEn || data.content.en.trim() === '';
+        setData('content', {
+            'zh-TW': value,
+            en: shouldSync ? value : data.content.en,
+        });
+        if (autoSyncContentEn !== shouldSync) {
+            setAutoSyncContentEn(shouldSync);
+        }
+    };
+
+    const handleContentEnChange = (value: string) => {
+        setData('content', {
+            ...data.content,
+            en: value,
+        });
+        const shouldSync = value.trim() === '' || value === data.content['zh-TW'];
+        setAutoSyncContentEn(shouldSync);
     };
 
     const handleSourceTypeChange = (value: string) => {
@@ -135,70 +198,102 @@ export default function PostForm({
             setData('source_url', '');
             setPreviewHtml('');
             setPreviewError(null);
+            setAutoSyncContentEn(true);
         } else {
             setData('content', { ...emptyContent });
+            setAutoSyncContentEn(false);
         }
     };
 
-    const handleFetchPreview = async () => {
-        if (data.source_type !== 'link') {
+    const submit: FormEventHandler = (event) => {
+        event.preventDefault();
+
+        const titleZh = data.title['zh-TW'].trim();
+        if (titleZh === '') {
+            setError('title.zh-TW', isZh ? '請輸入中文標題。' : 'Please enter the Chinese title.');
             return;
         }
 
-        const csrfToken = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null)?.content;
+        clearErrors('title.zh-TW');
 
-        if (!csrfToken) {
-            setPreviewError('無法取得安全性驗證資訊，請重新整理頁面後再試。');
-            return;
-        }
+        const transformedForm = form.transform((payload) => {
+            const payloadTitleZh = payload.title['zh-TW'].trim();
+            const payloadTitleEn = payload.title.en.trim() === '' ? payloadTitleZh : payload.title.en;
 
-        if (!data.source_url.trim()) {
-            setPreviewError('請先輸入完整的來源網址。');
-            return;
-        }
+            if (payload.source_type === 'manual') {
+                const payloadContentZh = payload.content['zh-TW'];
+                const payloadContentEn = payload.content.en.trim() === '' ? payloadContentZh : payload.content.en;
 
-        setPreviewLoading(true);
-        setPreviewError(null);
-
-        try {
-            const response = await fetch('/admin/posts/fetch-preview', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                },
-                credentials: 'same-origin',
-                body: JSON.stringify({
-                    source_url: data.source_url,
-                }),
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                const message =
-                    result?.message ??
-                    result?.errors?.source_url?.[0] ??
-                    (isZh ? '抓取內容失敗，請稍後再試。' : 'Failed to fetch content.');
-
-                throw new Error(message);
+                return {
+                    ...payload,
+                    title: {
+                        'zh-TW': payloadTitleZh,
+                        en: payloadTitleEn,
+                    },
+                    content: {
+                        'zh-TW': payloadContentZh,
+                        en: payloadContentEn,
+                    },
+                };
             }
 
-            setPreviewHtml(result.html ?? '');
-        } catch (error) {
-            const message =
-                error instanceof Error
-                    ? error.message
-                    : isZh
-                        ? '抓取內容失敗，請稍後再試。'
-                        : 'Failed to fetch remote content.';
-            setPreviewError(message);
-            setPreviewHtml('');
-        } finally {
-            setPreviewLoading(false);
-        }
+            return {
+                ...payload,
+                title: {
+                    'zh-TW': payloadTitleZh,
+                    en: payloadTitleEn,
+                },
+                content: {
+                    'zh-TW': '',
+                    en: '',
+                },
+            };
+        });
+
+        onSubmit(transformedForm);
     };
+
+    const handleFetchPreview = () => {
+        if (data.source_type !== 'link') return;
+
+        if (!data.source_url.trim()) {
+            setPreviewError(isZh ? '請先輸入完整的來源網址。' : 'Please provide a source URL first.');
+            return;
+        }
+
+        // Reset preview state and open original in new tab
+        setPreviewHtml('');
+        setPreviewEmbeddable(false);
+        setPreviewSource(data.source_url);
+        setPreviewError(isZh ? '已在新分頁開啟來源頁面。' : 'Opened source in a new tab.');
+        window.open(data.source_url, '_blank');
+    };
+
+    // Bind showPicker on publishEl using useEffect and cleanup when element changes
+    useEffect(() => {
+        const el = publishEl;
+        if (!el) return;
+
+        const tryShow = () => {
+            // @ts-ignore
+            if (typeof el.showPicker === 'function') {
+                try {
+                    // @ts-ignore
+                    el.showPicker();
+                } catch (e) {
+                    // ignore
+                }
+            }
+        };
+
+        el.addEventListener('focus', tryShow);
+        el.addEventListener('click', tryShow);
+
+        return () => {
+            el.removeEventListener('focus', tryShow);
+            el.removeEventListener('click', tryShow);
+        };
+    }, [publishEl]);
 
     const submitLabels = useMemo(() => getSubmitLabels(isZh, mode), [isZh, mode]);
 
@@ -220,12 +315,7 @@ export default function PostForm({
                             <Input
                                 id="title-zh"
                                 value={data.title['zh-TW']}
-                                onChange={(event) =>
-                                    setData('title', {
-                                        ...data.title,
-                                        'zh-TW': event.target.value,
-                                    })
-                                }
+                                onChange={(event) => handleTitleZhChange(event.target.value)}
                                 placeholder={isZh ? '請輸入中文標題' : 'Enter Chinese title'}
                             />
                             <InputError message={errors['title.zh-TW']} />
@@ -238,12 +328,7 @@ export default function PostForm({
                             <Input
                                 id="title-en"
                                 value={data.title.en}
-                                onChange={(event) =>
-                                    setData('title', {
-                                        ...data.title,
-                                        en: event.target.value,
-                                    })
-                                }
+                                onChange={(event) => handleTitleEnChange(event.target.value)}
                                 placeholder={isZh ? '請輸入英文標題' : 'Enter English title'}
                             />
                             <InputError message={errors['title.en']} />
@@ -295,6 +380,7 @@ export default function PostForm({
                                     type="datetime-local"
                                     value={data.publish_at}
                                     onChange={(event) => setData('publish_at', event.target.value)}
+                                    ref={publishCallbackRef}
                                 />
                             </div>
                         </div>
@@ -356,10 +442,10 @@ export default function PostForm({
                                             {previewLoading ? (
                                                 <span className="flex items-center gap-2">
                                                     <Loader2 className="h-4 w-4 animate-spin" />
-                                                    {isZh ? '抓取中' : 'Fetching'}
+                                                    {isZh ? '開啟中' : 'Opening'}
                                                 </span>
                                             ) : (
-                                                isZh ? '抓取內容' : 'Fetch Content'
+                                                isZh ? '檢視' : 'View'
                                             )}
                                         </Button>
                                     </div>
@@ -379,12 +465,7 @@ export default function PostForm({
                                         id="content-zh"
                                         className="min-h-[200px]"
                                         value={data.content['zh-TW']}
-                                        onChange={(event) =>
-                                            setData('content', {
-                                                ...data.content,
-                                                'zh-TW': event.target.value,
-                                            })
-                                        }
+                                        onChange={(event) => handleContentZhChange(event.target.value)}
                                         placeholder={isZh ? '請輸入中文內容' : 'Enter Chinese content'}
                                     />
                                     <InputError message={errors['content.zh-TW']} />
@@ -398,12 +479,7 @@ export default function PostForm({
                                         id="content-en"
                                         className="min-h-[200px]"
                                         value={data.content.en}
-                                        onChange={(event) =>
-                                            setData('content', {
-                                                ...data.content,
-                                                en: event.target.value,
-                                            })
-                                        }
+                                        onChange={(event) => handleContentEnChange(event.target.value)}
                                         placeholder={isZh ? '請輸入英文內容' : 'Enter English content'}
                                     />
                                     <InputError message={errors['content.en']} />
@@ -412,20 +488,13 @@ export default function PostForm({
                         ) : (
                             <div className="space-y-4">
                                 <Label className="text-sm font-medium text-gray-900">
-                                    {isZh ? '抓取內容預覽' : 'Fetched Preview'}
+                                    {isZh ? '內容' : 'Content Preview'}
                                 </Label>
-                                {previewHtml ? (
-                                    <div
-                                        className="prose max-w-none rounded-lg border border-gray-200 bg-gray-50 p-4"
-                                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(previewHtml) }}
-                                    />
-                                ) : (
-                                    <p className="text-sm text-gray-500">
-                                        {isZh
-                                            ? '輸入網址後點擊「抓取內容」即可預覽遠端內容，儲存時會同步寫入公告。'
-                                            : 'Provide the link and click “Fetch Content” to preview what will be saved.'}
-                                    </p>
-                                )}
+                                <p className="text-sm text-gray-500">
+                                    {isZh
+                                        ? '輸入網址後按「檢視」會在新分頁開啟來源，系統不再儲存外部 HTML。'
+                                        : 'Enter the source URL and click "View" to open it in a new tab. The server no longer stores fetched HTML.'}
+                                </p>
                             </div>
                         )}
                     </CardContent>
@@ -433,11 +502,7 @@ export default function PostForm({
 
                 <div className="flex items-center justify-end space-x-4 rounded-lg border border-gray-200 bg-white p-6">
                     <Link href={cancelUrl}>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            className="border-gray-300 text-gray-700 transition-colors duration-200 hover:border-gray-400 hover:bg-gray-50"
-                        >
+                        <Button type="button" variant="secondary">
                             {isZh ? '取消' : 'Cancel'}
                         </Button>
                     </Link>

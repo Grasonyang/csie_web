@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import type { SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import type { InertiaFormProps } from '@inertiajs/react/types/useForm';
 import { ArrowLeft } from 'lucide-react';
 import PostForm, { type PostCategory, type PostFormValues, type StatusOption } from './components/post-form';
 
@@ -19,7 +18,6 @@ interface AdminPost {
     content_en: string;
     source_type?: 'manual' | 'link';
     source_url?: string | null;
-    fetched_html?: string | null;
 }
 
 interface EditPostProps {
@@ -63,7 +61,7 @@ export default function EditPost({ post, categories }: EditPostProps) {
         source_url: post.source_url ?? '',
     };
 
-    const initialPreviewHtml = post.source_type === 'link' ? post.fetched_html ?? '' : '';
+    const initialPreviewHtml = '';
 
     const statusOptions: StatusOption[] = [
         { value: 'draft', labelZh: '草稿', labelEn: 'Draft' },
@@ -71,9 +69,9 @@ export default function EditPost({ post, categories }: EditPostProps) {
         { value: 'archived', labelZh: '已封存', labelEn: 'Archived' },
     ];
 
-    const handleSubmit = (form: InertiaFormProps<PostFormValues>) => {
+    const handleSubmit = (form: any) => {
         form.put(PostController.update(post.id).url, {
-            onError: (formErrors) => {
+            onError: (formErrors: any) => {
                 // 繫結表單錯誤以便開發時追蹤
                 console.error('Form errors:', formErrors);
             },

@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import type { SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import type { InertiaFormProps } from '@inertiajs/react/types/useForm';
 import { ArrowLeft } from 'lucide-react';
 import PostForm, { type PostCategory, type PostFormValues, type StatusOption } from './components/post-form';
 
@@ -37,9 +36,9 @@ export default function CreatePost({ categories }: CreatePostProps) {
         { value: 'published', labelZh: '已發布', labelEn: 'Published' },
     ];
 
-    const handleSubmit = (form: InertiaFormProps<PostFormValues>) => {
+    const handleSubmit = (form: any) => {
         form.post(PostController.store().url, {
-            onError: (formErrors) => {
+            onError: (formErrors: any) => {
                 // 繫結表單錯誤以便開發時追蹤
                 console.error('Form errors:', formErrors);
             },

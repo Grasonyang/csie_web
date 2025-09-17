@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import type { SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import DOMPurify from 'dompurify';
+// DOMPurify removed: external HTML is no longer stored server-side.
 import { ArrowLeft, Calendar, Clock, Download, ExternalLink, LinkIcon, Paperclip, User } from 'lucide-react';
 
 interface Attachment {
@@ -58,7 +58,7 @@ const statusLabels: Record<AdminPostDetail['status'], { zh: string; en: string }
     archived: { zh: '已封存', en: 'Archived' },
 };
 
-const formatDateTime = (value: string | null, locale: string) => {
+const formatDateTime = (value: any, locale?: string) => {
     if (!value) {
         return locale === 'zh-TW' ? '未設定' : 'Not set';
     }
@@ -102,8 +102,7 @@ export default function ShowPost({ post }: ShowPostProps) {
         </Badge>
     );
 
-    const sanitizedHtml = DOMPurify.sanitize(post.fetched_html ?? '');
-    const hasRemoteContent = post.source_type === 'link';
+    const hasRemoteContent = post.source_type === 'link' && Boolean(post.source_url);
 
     const hasZhContent = Boolean(post.content && post.content.trim().length > 0);
     const hasEnContent = Boolean(post.content_en && post.content_en.trim().length > 0);
@@ -131,7 +130,7 @@ export default function ShowPost({ post }: ShowPostProps) {
                             <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-600">
                                 <span className="inline-flex items-center gap-1">
                                     <Calendar className="h-4 w-4" />
-                                    {isZh ? '發布時間' : 'Published at'}: {formatDateTime(post.publish_at, locale)}
+                                    {isZh ? '發布時間' : 'Published at'}: {formatDateTime(String(post.publish_at ?? ''), locale)}
                                 </span>
                                 <span className="inline-flex items-center gap-1">
                                     <User className="h-4 w-4" />
@@ -196,13 +195,13 @@ export default function ShowPost({ post }: ShowPostProps) {
                             <div>
                                 <p className="text-sm font-medium text-gray-500">{isZh ? '建立時間' : 'Created at'}</p>
                                 <p className="mt-1 text-base text-gray-900">
-                                    {formatDateTime(post.created_at ?? null, locale)}
+                                    {formatDateTime(String(post.created_at ?? ''), locale)}
                                 </p>
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-gray-500">{isZh ? '最後更新' : 'Last Updated'}</p>
                                 <p className="mt-1 text-base text-gray-900">
-                                    {formatDateTime(post.updated_at ?? null, locale)}
+                                    {formatDateTime(String(post.updated_at ?? ''), locale)}
                                 </p>
                             </div>
                         </CardContent>
@@ -229,16 +228,7 @@ export default function ShowPost({ post }: ShowPostProps) {
                                             {isZh ? '前往來源' : 'Open Source'}
                                         </a>
                                     )}
-                                    {sanitizedHtml ? (
-                                        <div
-                                            className="prose max-w-none rounded-lg border border-gray-200 bg-gray-50 p-4"
-                                            dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
-                                        />
-                                    ) : (
-                                        <p className="text-sm text-gray-500">
-                                            {isZh ? '目前沒有可供預覽的遠端內容。' : 'No remote content available for preview.'}
-                                        </p>
-                                    )}
+                                    <p className="text-sm text-gray-500">{isZh ? '系統不再儲存外部 HTML，請按「前往來源」查看原始內容。' : 'External HTML is no longer stored. Click "Open Source" to view the original.'}</p>
                                 </div>
                             ) : (
                                 <div className="space-y-6">

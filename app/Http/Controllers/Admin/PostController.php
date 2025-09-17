@@ -5,33 +5,71 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Models\PostCategory;
-use App\Services\PostContentFetcher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
-use RuntimeException;
+// PostContentFetcher removed from controller; preview endpoint removed
 
 class PostController extends Controller
 {
-    public function __construct(private PostContentFetcher $contentFetcher)
+    public function __construct()
     {
     }
 
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $posts = Post::with(['category', 'creator'])
+        $query = Post::with(['category', 'creator']);
+
+        $search = trim((string) $request->input('search'));
+        if ($search !== '') {
+            $query->where(function ($innerQuery) use ($search) {
+                $innerQuery->where('title', 'like', "%{$search}%")
+                    ->orWhere('title_en', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('category')) {
+            $query->where('category_id', $request->input('category'));
+        }
+
+        $status = $request->input('status');
+        if (in_array($status, ['draft', 'published', 'archived'], true)) {
+            $query->where('status', $status);
+        }
+
+        $pinned = $request->input('pinned');
+        if (in_array($pinned, ['1', '0'], true)) {
+            $query->where('pinned', $pinned === '1');
+        }
+
+        $perPage = (int) $request->input('per_page', 20);
+        $allowedPerPage = [10, 20, 50];
+        if (! in_array($perPage, $allowedPerPage, true)) {
+            $perPage = 20;
+        }
+
+        $posts = $query
             ->orderBy('pinned', 'desc')
             ->orderBy('publish_at', 'desc')
-            ->paginate(20);
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage)
+            ->withQueryString();
 
         return Inertia::render('admin/posts/index', [
             'posts' => $posts,
             'categories' => PostCategory::all(),
+            'filters' => [
+                'search' => $search,
+                'category' => $request->input('category', ''),
+                'status' => $status ?? '',
+                'pinned' => $pinned ?? '',
+                'per_page' => $perPage,
+            ],
+            'perPageOptions' => $allowedPerPage,
         ]);
     }
 
@@ -64,17 +102,16 @@ class PostController extends Controller
         ]);
 
         $sourceType = $validated['source_type'];
-        $fetchedHtml = null;
+        $titleZh = trim($validated['title']['zh-TW'] ?? '');
+        $titleEn = trim($validated['title']['en'] ?? '');
+        if ($titleEn === '') {
+            $titleEn = $titleZh;
+        }
 
-        if ($sourceType === 'link') {
-            try {
-                $fetched = $this->contentFetcher->fetch($validated['source_url']);
-                $fetchedHtml = $fetched['html'];
-            } catch (RuntimeException $exception) {
-                throw ValidationException::withMessages([
-                    'source_url' => '抓取內容失敗：' . $exception->getMessage(),
-                ]);
-            }
+        $manualContentZh = $validated['content']['zh-TW'] ?? '';
+        $manualContentEn = $validated['content']['en'] ?? '';
+        if ($sourceType === 'manual' && trim($manualContentEn) === '') {
+            $manualContentEn = $manualContentZh;
         }
 
         $postData = [
@@ -82,13 +119,12 @@ class PostController extends Controller
             'status' => $validated['status'],
             'pinned' => $request->boolean('pinned'),
             'publish_at' => $validated['publish_at'] ?? null,
-            'title' => $validated['title']['zh-TW'] ?? '',
-            'title_en' => $validated['title']['en'] ?? '',
-            'content' => $sourceType === 'manual' ? ($validated['content']['zh-TW'] ?? '') : '',
-            'content_en' => $sourceType === 'manual' ? ($validated['content']['en'] ?? '') : '',
+            'title' => $titleZh,
+            'title_en' => $titleEn,
+            'content' => $sourceType === 'manual' ? $manualContentZh : '',
+            'content_en' => $sourceType === 'manual' ? $manualContentEn : '',
             'source_type' => $sourceType,
             'source_url' => $sourceType === 'link' ? $validated['source_url'] : null,
-            'fetched_html' => $sourceType === 'link' ? $fetchedHtml : null,
             'created_by' => auth()->id(),
             'updated_by' => auth()->id(),
             'slug' => Str::slug(($validated['title']['zh-TW'] ?? '') . '-' . time()),
@@ -100,29 +136,7 @@ class PostController extends Controller
             ->with('success', '公告建立成功');
     }
 
-    /**
-     * 即時抓取外部內容供後台預覽使用。
-     */
-    public function fetchPreview(Request $request)
-    {
-        $validated = $request->validate([
-            'source_url' => ['required', 'url'],
-        ]);
-
-        try {
-            $result = $this->contentFetcher->fetch($validated['source_url']);
-        } catch (RuntimeException $exception) {
-            return response()->json([
-                'message' => $exception->getMessage(),
-            ], 422);
-        }
-
-        return response()->json([
-            'title' => $result['title'],
-            'description' => $result['description'],
-            'html' => $result['html'],
-        ]);
-    }
+    // Note: preview endpoint removed; external content is not stored server-side anymore.
 
     /**
      * Display the specified resource.
@@ -164,17 +178,17 @@ class PostController extends Controller
         ]);
 
         $sourceType = $validated['source_type'];
-        $fetchedHtml = null;
 
-        if ($sourceType === 'link') {
-            try {
-                $fetched = $this->contentFetcher->fetch($validated['source_url']);
-                $fetchedHtml = $fetched['html'];
-            } catch (RuntimeException $exception) {
-                throw ValidationException::withMessages([
-                    'source_url' => '抓取內容失敗：' . $exception->getMessage(),
-                ]);
-            }
+        $titleZh = trim($validated['title']['zh-TW'] ?? $post->title);
+        $titleEn = trim($validated['title']['en'] ?? '');
+        if ($titleEn === '') {
+            $titleEn = $titleZh;
+        }
+
+        $manualContentZh = $validated['content']['zh-TW'] ?? '';
+        $manualContentEn = $validated['content']['en'] ?? '';
+        if ($sourceType === 'manual' && trim($manualContentEn) === '') {
+            $manualContentEn = $manualContentZh;
         }
 
         $postData = [
@@ -182,13 +196,12 @@ class PostController extends Controller
             'status' => $validated['status'],
             'pinned' => $request->boolean('pinned'),
             'publish_at' => $validated['publish_at'] ?? null,
-            'title' => $validated['title']['zh-TW'] ?? $post->title,
-            'title_en' => $validated['title']['en'] ?? $post->title_en,
-            'content' => $sourceType === 'manual' ? ($validated['content']['zh-TW'] ?? '') : '',
-            'content_en' => $sourceType === 'manual' ? ($validated['content']['en'] ?? '') : '',
+            'title' => $titleZh,
+            'title_en' => $titleEn,
+            'content' => $sourceType === 'manual' ? $manualContentZh : '',
+            'content_en' => $sourceType === 'manual' ? $manualContentEn : '',
             'source_type' => $sourceType,
             'source_url' => $sourceType === 'link' ? $validated['source_url'] : null,
-            'fetched_html' => $sourceType === 'link' ? $fetchedHtml : null,
             'updated_by' => auth()->id(),
         ];
 

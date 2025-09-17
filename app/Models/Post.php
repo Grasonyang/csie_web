@@ -26,7 +26,6 @@ class Post extends Model
         'content_en',
         'source_type',
         'source_url',
-        'fetched_html',
         'created_by',
         'updated_by',
     ];
@@ -39,7 +38,6 @@ class Post extends Model
             'pinned' => 'boolean',
             'source_type' => 'string',
             'source_url' => 'string',
-            'fetched_html' => 'string',
         ];
     }
 
