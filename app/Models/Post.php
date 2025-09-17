@@ -24,6 +24,9 @@ class Post extends Model
         'summary_en',
         'content',
         'content_en',
+        'source_type',
+        'source_url',
+        'fetched_html',
         'created_by',
         'updated_by',
     ];
@@ -34,6 +37,9 @@ class Post extends Model
             'publish_at' => 'datetime',
             'expire_at' => 'datetime',
             'pinned' => 'boolean',
+            'source_type' => 'string',
+            'source_url' => 'string',
+            'fetched_html' => 'string',
         ];
     }
 
