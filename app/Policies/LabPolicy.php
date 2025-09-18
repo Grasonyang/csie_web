@@ -13,13 +13,14 @@ class LabPolicy
     // 判斷使用者是否可檢視列表
     public function viewAny(User $user): bool
     {
-        return $user->role === 'admin';
+        // 一般使用者可瀏覽列表，但僅限管理者可修改
+        return in_array($user->role, ['admin', 'user', 'teacher'], true);
     }
 
     // 判斷使用者是否可檢視單筆資料
     public function view(User $user, Lab $lab): bool
     {
-        return $user->role === 'admin';
+        return in_array($user->role, ['admin', 'user', 'teacher'], true);
     }
 
     // 判斷使用者是否可新增

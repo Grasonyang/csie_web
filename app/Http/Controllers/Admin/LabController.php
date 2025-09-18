@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lab;
+use App\Models\Teacher;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -16,11 +17,57 @@ class LabController extends Controller
     }
 
     // 列出所有實驗室
-    public function index()
+    public function index(Request $request)
     {
-        $labs = Lab::orderBy('sort_order')->get();
+        $query = Lab::query()->with(['teachers:id,name,name_en']);
+
+        $search = trim((string) $request->input('search'));
+        if ($search !== '') {
+            $query->where(function ($innerQuery) use ($search) {
+                $innerQuery->where('name', 'like', "%{$search}%")
+                    ->orWhere('name_en', 'like', "%{$search}%")
+                    ->orWhere('code', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('teacher')) {
+            $teacherId = (int) $request->input('teacher');
+            $query->whereHas('teachers', fn ($teacherQuery) => $teacherQuery->where('teachers.id', $teacherId));
+        }
+
+        $visible = $request->input('visible');
+        if (in_array($visible, ['1', '0'], true)) {
+            $query->where('visible', $visible === '1');
+        }
+
+        $allowedPerPage = [10, 20, 50];
+        $perPage = (int) $request->input('per_page', 20);
+        if (! in_array($perPage, $allowedPerPage, true)) {
+            $perPage = 20;
+        }
+
+        $labs = $query
+            ->orderByDesc('updated_at')
+            ->orderBy('sort_order')
+            ->paginate($perPage)
+            ->withQueryString();
+
+        $teachers = Teacher::query()
+            ->select(['id', 'name', 'name_en'])
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+
         return Inertia::render('admin/labs/index', [
             'labs' => $labs,
+            'teachers' => $teachers,
+            'filters' => [
+                'search' => $search,
+                'teacher' => $request->input('teacher', ''),
+                'visible' => $visible ?? '',
+                'per_page' => $perPage,
+            ],
+            'perPageOptions' => $allowedPerPage,
         ]);
     }
 

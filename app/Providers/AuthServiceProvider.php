@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
-use App\Models\Staff;
 use App\Models\Lab;
-use App\Policies\StaffPolicy;
+use App\Models\Staff;
+use App\Models\User;
 use App\Policies\LabPolicy;
+use App\Policies\StaffPolicy;
+use App\Policies\UserPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -16,6 +18,8 @@ class AuthServiceProvider extends ServiceProvider
         Staff::class => StaffPolicy::class,
         // 實驗室授權政策
         Lab::class => LabPolicy::class,
+        // 使用者管理授權政策
+        User::class => UserPolicy::class,
     ];
 
     public function boot(): void

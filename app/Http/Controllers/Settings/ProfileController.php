@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Models\User;
 class ProfileController extends Controller
 {
     /**
@@ -53,7 +52,11 @@ class ProfileController extends Controller
 
         Auth::logout();
 
-        $user->delete();
+        if ($user->createdPosts()->exists() || $user->updatedPosts()->exists()) {
+            $user->delete();
+        } else {
+            $user->forceDelete();
+        }
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

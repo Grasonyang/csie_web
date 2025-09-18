@@ -54,7 +54,7 @@ interface ShowPostProps {
 
 const statusLabels: Record<AdminPostDetail['status'], { zh: string; en: string }> = {
     draft: { zh: '草稿', en: 'Draft' },
-    published: { zh: '已發布', en: 'Published' },
+    published: { zh: '發布', en: 'Publish' },
     archived: { zh: '已封存', en: 'Archived' },
 };
 

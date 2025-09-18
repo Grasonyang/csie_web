@@ -29,11 +29,15 @@ export default function CreatePost({ categories }: CreatePostProps) {
         publish_at: '',
         source_type: 'manual',
         source_url: '',
+        attachments_files: [],
+        attachments_links: [],
+        attachments_remove: [],
     };
 
     const statusOptions: StatusOption[] = [
         { value: 'draft', labelZh: '草稿', labelEn: 'Draft' },
-        { value: 'published', labelZh: '已發布', labelEn: 'Published' },
+        { value: 'published', labelZh: '發布', labelEn: 'Publish' },
+        { value: 'archived', labelZh: '封存', labelEn: 'Archive' },
     ];
 
     const handleSubmit = (form: any) => {

@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\Admin\StaffController as AdminStaffController;
 use App\Http\Controllers\Admin\LabController as AdminLabController;
 use App\Http\Controllers\Admin\TeacherController as AdminTeacherController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\PostController as AdminPostController;
 use App\Http\Controllers\Admin\PostCategoryController as AdminPostCategoryController;
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\Admin\ProgramController as AdminProgramController;
 use App\Http\Controllers\Admin\ProjectController as AdminProjectController;
 use App\Http\Controllers\Admin\PublicationController as AdminPublicationController;
 use App\Http\Controllers\Admin\ContactMessageController as AdminContactMessageController;
+use App\Http\Controllers\Admin\AttachmentController as AdminAttachmentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,8 +38,13 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
         return Inertia::render('admin/dashboard');
     })->name('dashboard');
 
-    // 系所成員管理
+    // 使用者與系所成員管理
+    Route::resource('users', AdminUserController::class);
     Route::resource('staff', AdminStaffController::class);
+    Route::patch('staff/{staff}/restore', [AdminStaffController::class, 'restore'])
+        ->name('staff.restore');
+    Route::delete('staff/{staff}/force', [AdminStaffController::class, 'forceDelete'])
+        ->name('staff.force-delete');
     Route::resource('teachers', AdminTeacherController::class);
 
     // 學術研究管理
@@ -59,5 +66,12 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
         ->name('contact-messages.spam');
     Route::patch('contact-messages/{contactMessage}/resolved', [AdminContactMessageController::class, 'markAsResolved'])
         ->name('contact-messages.resolved');
+
+    // 附件管理
+    Route::resource('attachments', AdminAttachmentController::class)->only(['index', 'destroy']);
+    Route::patch('attachments/{attachment}/restore', [AdminAttachmentController::class, 'restore'])
+        ->name('attachments.restore');
+    Route::delete('attachments/{attachment}/force', [AdminAttachmentController::class, 'forceDelete'])
+        ->name('attachments.force-delete');
 
 });

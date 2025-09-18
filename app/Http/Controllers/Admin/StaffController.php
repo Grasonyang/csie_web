@@ -16,11 +16,17 @@ class StaffController extends Controller
     }
 
     // 列出所有職員
-    public function index()
+    public function index(Request $request)
     {
-        $staff = Staff::orderBy('sort_order')->get();
+        $staff = Staff::orderBy('sort_order')->orderBy('name')->get();
+        $trashedStaff = Staff::onlyTrashed()
+            ->orderByDesc('deleted_at')
+            ->orderBy('name')
+            ->get();
+
         return Inertia::render('admin/staff/index', [
             'staff' => $staff,
+            'trashedStaff' => $trashedStaff,
         ]);
     }
 
@@ -96,5 +102,25 @@ class StaffController extends Controller
     {
         $staff->delete();
         return redirect()->route('admin.staff.index');
+    }
+
+    public function restore(int $staff)
+    {
+        $record = Staff::onlyTrashed()->findOrFail($staff);
+        $this->authorize('restore', $record);
+
+        $record->restore();
+
+        return redirect()->route('admin.staff.index')->with('success', '職員已復原');
+    }
+
+    public function forceDelete(int $staff)
+    {
+        $record = Staff::onlyTrashed()->findOrFail($staff);
+        $this->authorize('forceDelete', $record);
+
+        $record->forceDelete();
+
+        return redirect()->route('admin.staff.index')->with('success', '職員已永久刪除');
     }
 }

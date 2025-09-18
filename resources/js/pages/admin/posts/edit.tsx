@@ -4,7 +4,7 @@ import AppLayout from '@/layouts/app-layout';
 import type { SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
-import PostForm, { type PostCategory, type PostFormValues, type StatusOption } from './components/post-form';
+import PostForm, { type ExistingAttachment, type PostCategory, type PostFormValues, type StatusOption } from './components/post-form';
 
 interface AdminPost {
     id: number;
@@ -18,6 +18,7 @@ interface AdminPost {
     content_en: string;
     source_type?: 'manual' | 'link';
     source_url?: string | null;
+    attachments?: ExistingAttachment[];
 }
 
 interface EditPostProps {
@@ -59,14 +60,17 @@ export default function EditPost({ post, categories }: EditPostProps) {
         publish_at: formatPublishAt(post.publish_at),
         source_type: (post.source_type ?? 'manual') as 'manual' | 'link',
         source_url: post.source_url ?? '',
+        attachments_files: [],
+        attachments_links: [],
+        attachments_remove: [],
     };
 
     const initialPreviewHtml = '';
 
     const statusOptions: StatusOption[] = [
         { value: 'draft', labelZh: '草稿', labelEn: 'Draft' },
-        { value: 'published', labelZh: '已發布', labelEn: 'Published' },
-        { value: 'archived', labelZh: '已封存', labelEn: 'Archived' },
+        { value: 'published', labelZh: '發布', labelEn: 'Publish' },
+        { value: 'archived', labelZh: '封存', labelEn: 'Archive' },
     ];
 
     const handleSubmit = (form: any) => {
@@ -111,6 +115,7 @@ export default function EditPost({ post, categories }: EditPostProps) {
                         initialValues={initialValues}
                         initialPreviewHtml={initialPreviewHtml}
                         statusOptions={statusOptions}
+                        existingAttachments={post.attachments ?? []}
                         onSubmit={handleSubmit}
                     />
                 </div>

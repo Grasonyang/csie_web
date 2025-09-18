@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
@@ -11,14 +10,13 @@ use App\Http\Controllers\AttachmentDownloadController;
 use App\Http\Controllers\BulletinController;
 use App\Http\Controllers\LabController;
 use App\Http\Controllers\StaffController;
+use App\Http\Controllers\HomeController;
 
 // Admin Controllers
 use App\Http\Controllers\Admin\LabController as AdminLabController;
 use App\Http\Controllers\Admin\StaffController as AdminStaffController;
 
-Route::get('/', function () {
-    return Inertia::render('welcome');
-})->name('home');
+Route::get('/', HomeController::class)->name('home');
 
 // Public Routes
 Route::group(['as' => 'public.'], function () {

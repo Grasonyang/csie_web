@@ -16,6 +16,7 @@
 
 ## 管理頁面設計（Admin Area）
 > 依據《Arhitectrue.md》規劃的後台模組 `/admin/posts`、`/admin/staff`、`/admin/labs` 為首波重點，以下針對資料流、UI 版型、操作流程進行細部設計。
+> 公告列表頁（`resources/js/pages/admin/posts/index.tsx`）已完成第一版，後續模組沿用相同步驟：透過 Inertia 取得分頁資料、集中管理篩選條件、表格欄位抽成可重複使用的小組件。
 
 ### 1. 通用結構
 - **版型**：沿用 `AppLayout`（含 `AppHeader`、`AppSidebar`、`AdminFooter`）。
@@ -27,14 +28,16 @@
   - `admin` 全權使用所有模組。
   - `teacher` 僅能進入師資模組並編輯自己資料、關聯實驗室。
 - **多語內容編輯**：採分頁 Tab（`zh-TW`、`en`），切換時顯示對應欄位，底層儲存 JSON。
+- **前端樣板策略**：以 posts 模組為基礎，提煉 `FilterBar`、`DataTable`、`BulkActions` 等元件至 `resources/js/components/admin/`，建立共用 hook `useAdminFilter` 管理查詢參數與 Inertia reload，所有 CRUD 列表頁統一 flash flow 與 loading indicator。
 
 ### 2. 公告管理 `/admin/posts`
+- **狀態**：原型完成，持續依實際使用調整元件抽象後供其他模組套用。
 - **列表頁**：
-  - 功能列：`新增公告` 按鈕、分類篩選（Select）、狀態篩選（草稿/已發布）、搜尋（標題關鍵字）。
+  - 功能列：`新增公告` 按鈕、分類篩選（Select）、狀態篩選（草稿/發布）、搜尋（標題關鍵字）。
   - 資料表欄位：
     1. 類別（顯示目前語系名稱）
     2. 標題（語系化顯示）
-    3. 發布狀態（草稿/已發布，使用 Badge）
+    3. 發布狀態（草稿/發布，使用 Badge）
     4. 置頂（是/否圖示）
     5. 發布日期（`published_at`）
     6. 操作（`編輯`、`預覽`、`更多` 下拉含 `複製連結`、`刪除`）
@@ -42,7 +45,7 @@
 - **建立/編輯表單**：
   - 左側 `Metadata` 區（佔 4 欄）：
     - 公告類別（Select，多層分類時以樹狀顯示）。
-    - 發布狀態（Radio：草稿、已發布）。
+    - 發布狀態（Radio：草稿、發布）。
     - 發布日期（DateTime picker，預設即時）。
     - 置頂（Switch）。
     - 附件上傳：支援多筆、顯示檔名、大小、下載/刪除。
@@ -58,6 +61,8 @@
   2. 發布時寫入 `published_at`，Inertia 重新導向列表並顯示成功通知。
 
 ### 3. 師資管理 `/admin/staff`
+- **前端待辦**：參照 posts 頁面骨架建立 `resources/js/pages/admin/staff/index.tsx` 與 `EditForm.tsx`，將共同的篩選列、表格欄位渲染抽到共用元件，個人連結維護以 Headless UI Dialog 實作 modal，整合多語 Tab 與圖片上傳流程。
+- **後端待辦**：完成 `Admin\StaffController` CRUD 與對應 Policy，index 回傳分頁資料、角色清單、實驗室選單，store/update 需處理多語 JSON 與關聯同步，刪除前檢查是否仍為其他模組引用。
 - **列表頁**：
   - 篩選：角色（教授/副教授/助理教授/行政）、狀態（啟用/停用）、所屬實驗室。
   - 表格欄位：頭像縮圖、姓名（多語，優先語系）、職稱、Email、排序值、狀態、操作。
@@ -76,6 +81,8 @@
   - 禁止刪除、限制實驗室選擇為自己參與的實驗室。
 
 ### 4. 實驗室管理 `/admin/labs`
+- **前端待辦**：複用 posts 列表與表單結構，建立 `resources/js/pages/admin/labs/index.tsx`、`Form.tsx`，加上主持人/成員選取元件與圖像裁切流程，依照 hook `useAdminFilter` 提供狀態與主持人篩選。
+- **後端待辦**：實作 `Admin\LabController` CRUD，index 須回傳主持人選單、狀態選項與最新更新時間，store/update 處理 slug 唯一性與圖片上傳（整合媒體庫），刪除動作需要確認無相關 Staff 關聯。
 - **列表頁**：
   - 篩選：狀態（啟用/停用）、主持人（Staff）、關鍵字（實驗室名稱）。
   - 表格欄位：封面縮圖、名稱（語系化）、主持人、網站連結、狀態、更新時間、操作。
@@ -86,7 +93,12 @@
   - 狀態切換：啟用/停用，停用時前台不顯示。
 - **內容展示預覽**：於表單右上提供 `前台預覽` 連結（僅已儲存資料可用）。
 
-### 5. 系統整合注意事項
+### 5. 使用者管理 `/admin/users`
+- **狀態**：第一版完成，提供搜尋、角色、狀態篩選與分頁卡片視圖，支援 Inertia 刪除與編輯導向。
+- **前端待辦**：後續抽離 `UserCard`、`UserFilter` 元件供教師/職員管理共用，補上批次角色異動操作與多語 label 移到 i18n。
+- **後端待辦**：補強 `UserPolicy` 對 teacher 權限限制、實作批次啟用/停用 API，刪除改為軟刪除並記錄操作日誌。
+
+### 6. 系統整合注意事項
 - **資料快取**：更新公告/師資/實驗室後，觸發相對應的 cache clear job（後續實作）。
 - **審計紀錄（後續）**：所有 CRUD 操作寫入活動日誌，預留 `ActivityLog` 模型。
 - **錯誤處理**：後端回傳 422 Validation 時，前端自動將錯誤訊息顯示於對應欄位，下方再以 Alert 彙總。

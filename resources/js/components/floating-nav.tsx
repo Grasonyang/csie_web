@@ -55,7 +55,7 @@ export default function FloatingNav({ nav }: { nav: NavItem[] }) {
                 id="floating-nav-button"
                 onClick={onClick}
                 className={cn(
-                    'lg:hidden fixed z-50 size-12 rounded-full bg-[#2a3b3f] text-white shadow-lg ring-1 ring-white/30 active:scale-95 cursor-grab',
+                    'lg:hidden fixed z-50 size-12 rounded-full bg-primary text-primary-foreground shadow-xl ring-4 ring-primary/15 transition-all duration-200 active:scale-95 cursor-grab hover:shadow-2xl',
                 )}
                 style={{
                     left: pos.x,
@@ -70,17 +70,17 @@ export default function FloatingNav({ nav }: { nav: NavItem[] }) {
             </button>
 
             <Sheet open={open} onOpenChange={setOpen}>
-                <SheetContent side="bottom" className="max-h-[75vh] w-full rounded-t-xl p-0">
-                    <SheetHeader className="flex items-center justify-between pb-2">
-                        <SheetTitle>選單</SheetTitle>
+                <SheetContent side="bottom" className="max-h-[75vh] w-full rounded-t-3xl border-none bg-white/95 p-0 shadow-2xl backdrop-blur">
+                    <SheetHeader className="flex items-center justify-between border-b border-neutral-200 px-6 pb-3 pt-4">
+                        <SheetTitle className="text-lg font-semibold text-neutral-900">選單</SheetTitle>
                         <LanguageSwitcher />
                     </SheetHeader>
-                    <nav className="grid grid-cols-2 gap-2 p-4 text-base">
+                    <nav className="grid grid-cols-2 gap-3 px-6 py-6 text-base">
                         {nav.map((item) => (
                             <a
                                 key={item.key}
                                 href={item.href}
-                                className="rounded-md border px-4 py-3 text-center hover:bg-accent hover:text-accent-foreground"
+                                className="group rounded-2xl border border-neutral-200 bg-white/80 px-4 py-3 text-center text-sm font-medium text-neutral-700 transition hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
                                 onClick={() => setOpen(false)}
                             >
                                 {item.label ?? item.key}

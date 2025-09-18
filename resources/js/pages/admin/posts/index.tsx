@@ -240,7 +240,7 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
 
         const labels = {
             draft: isZh ? '草稿' : 'Draft',
-            published: isZh ? '已發布' : 'Published',
+            published: isZh ? '發布' : 'Publish',
             archived: isZh ? '已封存' : 'Archived',
         };
 
@@ -272,7 +272,7 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
 
             <div className="min-h-screen">
                 <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight text-gray-900">{isZh ? '公告管理' : 'Posts Management'}</h1>
                             <p className="mt-2 text-gray-600">{isZh ? '管理系統公告與新聞' : 'Manage system announcements and news'}</p>
@@ -293,21 +293,25 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-6">
-                            <form onSubmit={applyFilters} className="mb-6 grid gap-4 md:grid-cols-6">
-                                <div className="md:col-span-2">
+                            <form onSubmit={applyFilters} className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-6">
+                                <div className="xl:col-span-2">
                                     <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="post-search">
                                         {isZh ? '搜尋公告' : 'Search posts'}
                                     </label>
-                                    <div className="flex gap-2">
+                                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                                         <Input
                                             id="post-search"
                                             type="search"
                                             placeholder={isZh ? '輸入標題或內容關鍵字' : 'Type a keyword'}
                                             value={filterState.search}
                                             onChange={(event) => handleFilterChange('search', event.target.value)}
-                                            className="flex-1"
+                                            className="w-full sm:flex-1"
                                         />
-                                        <Button type="submit" variant="secondary" className="shrink-0">
+                                        <Button
+                                            type="submit"
+                                            variant="secondary"
+                                            className="w-full shrink-0 sm:w-auto"
+                                        >
                                             {isZh ? '搜尋' : 'Search'}
                                         </Button>
                                     </div>
@@ -342,7 +346,7 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
                                     >
                                         <option value="">{isZh ? '全部狀態' : 'All statuses'}</option>
                                         <option value="draft">{isZh ? '草稿' : 'Draft'}</option>
-                                        <option value="published">{isZh ? '已發布' : 'Published'}</option>
+                                        <option value="published">{isZh ? '發布' : 'Publish'}</option>
                                         <option value="archived">{isZh ? '已封存' : 'Archived'}</option>
                                     </Select>
                                 </div>
@@ -387,20 +391,28 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
                                     </Select>
                                 </div>
 
-                                <div className="flex items-end gap-2 md:col-span-6 md:justify-end">
+                                <div className="flex flex-col gap-2 sm:col-span-2 sm:flex-row sm:items-end sm:justify-end sm:gap-3 xl:col-span-6">
                                     {hasActiveFilters && (
-                                        <Button type="button" variant="ghost" onClick={resetFilters}>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            onClick={resetFilters}
+                                            className="w-full md:w-auto"
+                                        >
                                             {isZh ? '清除篩選' : 'Reset filters'}
                                         </Button>
                                     )}
-                                    <Button type="submit" className="bg-blue-600 text-white hover:bg-blue-700">
+                                    <Button
+                                        type="submit"
+                                        className="bg-blue-600 text-white hover:bg-blue-700 w-full md:w-auto"
+                                    >
                                         {isZh ? '套用篩選' : 'Apply filters'}
                                     </Button>
                                 </div>
                             </form>
 
-                            <div className="mb-4 flex flex-col gap-2 text-sm text-gray-500 md:flex-row md:items-center md:justify-between">
-                                <div className="flex items-center gap-2">
+                            <div className="mb-4 flex flex-col gap-3 text-sm text-gray-500 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="flex min-w-0 items-center gap-2">
                                     <Button
                                         type="button"
                                         variant="outline"
@@ -416,7 +428,7 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
                                     >
                                         <ChevronLeft className="h-4 w-4" />
                                     </Button>
-                                    <span className="mx-4 px-3 py-1 rounded-md bg-gray-50 border border-gray-200 text-sm font-medium text-gray-900 select-none z-10">
+                                    <span className="flex-1 select-none rounded-md border border-gray-200 bg-gray-50 px-3 py-1 text-center text-sm font-medium text-gray-900 sm:min-w-[14rem] sm:text-left">
                                         {postsData.length === 0
                                             ? isZh ? '目前查無符合條件的公告' : 'No posts match the current filters'
                                             : isZh
@@ -455,15 +467,15 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
                                     </p>
                                 </div>
                             ) : (
-                                <div className="space-y-3">
+                                <div className="space-y-4">
                                     {postsData.map((post) => (
                                         <div
                                             key={post.id}
-                                            className="rounded-lg border border-gray-200 bg-white p-6 transition-shadow hover:shadow-md"
+                                            className="rounded-lg border border-gray-200 bg-white p-5 transition-shadow hover:shadow-md md:p-6"
                                         >
-                                            <div className="flex items-start justify-between">
-                                                <div className="min-w-0 flex-1">
-                                                    <div className="mb-2 flex items-center gap-2">
+                                            <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+                                                <div className="min-w-0 flex-1 space-y-3">
+                                                    <div className="flex flex-wrap items-start gap-2">
                                                         {post.pinned && (
                                                             <Tooltip>
                                                                 <TooltipTrigger asChild>
@@ -474,41 +486,48 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
                                                                 <TooltipContent>{isZh ? '已置頂公告' : 'Pinned post'}</TooltipContent>
                                                             </Tooltip>
                                                         )}
-                                                        <h3 className="truncate text-lg font-semibold text-gray-900">
+                                                        <h3 className="text-lg font-semibold leading-snug text-gray-900">
                                                             {isZh ? post.title : post.title_en}
                                                         </h3>
                                                         {getStatusBadge(post.status)}
+                                                        {post.status === 'published' && post.publish_at && new Date(post.publish_at).getTime() > Date.now() && (
+                                                            <Badge variant="outline" className="border-amber-300 text-amber-700">
+                                                                {isZh ? '排程' : 'Scheduled'}
+                                                            </Badge>
+                                                        )}
                                                     </div>
 
-                                                    <div className="mb-3 flex items-center gap-4 text-sm text-gray-500">
-                                                        <div className="flex items-center gap-1">
+                                                    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-gray-500">
+                                                        <div className="flex items-center gap-2">
                                                             <Calendar className="h-4 w-4" />
                                                             <Badge
                                                                 variant="outline"
-                                                                className="border-blue-300 bg-blue-100 text-xs font-semibold text-blue-800"
+                                                                className="border-blue-300 bg-blue-50 text-xs font-semibold text-blue-700"
                                                             >
                                                                 {isZh ? post.category.name : post.category.name_en}
                                                             </Badge>
                                                         </div>
 
-                                                        <div className="flex items-center gap-1">
+                                                        <div className="flex items-center gap-2">
                                                             <User className="h-4 w-4" />
                                                             <span>{post.creator.name}</span>
                                                         </div>
 
                                                         {post.publish_at && (
-                                                            <div>
+                                                            <div className="flex items-center gap-2">
                                                                 {isZh ? '發布時間' : 'Published'}: {formatDate(post.publish_at)}
                                                             </div>
                                                         )}
                                                     </div>
 
                                                     <div className="text-sm text-gray-600">
-                                                        <span className="rounded bg-gray-100 px-2 py-1 font-mono text-xs">{post.slug}</span>
+                                                        <span className="inline-flex break-all rounded-md bg-gray-100 px-2 py-1 font-mono text-xs">
+                                                            {post.slug}
+                                                        </span>
                                                     </div>
                                                 </div>
 
-                                                <div className="ml-4 flex items-center gap-2">
+                                                <div className="mt-2 flex items-center gap-1 sm:mt-0 sm:ml-4 sm:self-start sm:border-l sm:border-gray-200 sm:pl-4">
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Link href={PostController.show(post.id).url}>

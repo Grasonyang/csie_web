@@ -12,15 +12,48 @@ class ProgramController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $programs = Program::withCount('courses')
+        $query = Program::withCount('courses');
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name->zh-TW', 'like', "%{$search}%")
+                    ->orWhere('name->en', 'like', "%{$search}%")
+                    ->orWhere('code', 'like', "%{$search}%");
+            });
+        }
+
+        if ($level = $request->input('level')) {
+            $query->where('level', $level);
+        }
+
+        if (!is_null($visible = $request->input('visible'))) {
+            if ($visible === '1' || $visible === 1 || $visible === true) {
+                $query->where('visible', true);
+            } elseif ($visible === '0' || $visible === 0 || $visible === false) {
+                $query->where('visible', false);
+            }
+        }
+
+        $perPage = max(1, (int) $request->input('per_page', 20));
+
+        $programs = $query
             ->orderBy('sort_order')
             ->orderBy('name->zh-TW')
-            ->get();
+            ->paginate($perPage)
+            ->withQueryString();
 
         return Inertia::render('admin/programs/index', [
             'programs' => $programs,
+            'filters' => $request->only(['search', 'level', 'visible', 'per_page']),
+            'levelOptions' => [
+                'bachelor' => 'bachelor',
+                'master' => 'master',
+                'ai_inservice' => 'ai_inservice',
+                'dual' => 'dual',
+            ],
+            'perPageOptions' => [10, 20, 50],
         ]);
     }
 

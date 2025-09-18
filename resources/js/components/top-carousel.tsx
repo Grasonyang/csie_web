@@ -1,3 +1,4 @@
+import { Link } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -89,6 +90,23 @@ export default function TopCarousel({
                                 draggable={false}
                             />
                         ))}
+                        {item.title && (
+                            <div className="pointer-events-none absolute inset-0 flex items-end bg-gradient-to-t from-black/70 via-black/10 to-transparent p-6 text-left text-white md:p-10">
+                                <div className="pointer-events-auto flex max-w-2xl flex-col gap-4">
+                                    <h3 className="text-2xl font-semibold md:text-4xl">{item.title}</h3>
+                                    {item.subtitle && <p className="text-sm text-white/80 md:text-base">{item.subtitle}</p>}
+                                    {item.href && (
+                                        <Link
+                                            href={item.href}
+                                            className="inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-5 py-2 text-sm font-medium text-white backdrop-blur transition hover:bg-white/30"
+                                        >
+                                            {item.cta ?? 'View more'}
+                                            <span aria-hidden>→</span>
+                                        </Link>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* arrows */}

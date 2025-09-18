@@ -12,15 +12,41 @@ class ContactMessageController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $messages = ContactMessage::with(['processedBy'])
+        $query = ContactMessage::with(['processor']);
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('subject', 'like', "%{$search}%")
+                    ->orWhere('message', 'like', "%{$search}%");
+            });
+        }
+
+        if ($status = $request->input('status')) {
+            $query->where('status', $status);
+        }
+
+        $perPage = max(1, (int) $request->input('per_page', 20));
+
+        $messages = $query
             ->orderBy('status', 'asc')
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->paginate($perPage)
+            ->withQueryString();
 
         return Inertia::render('admin/contact-messages/index', [
             'messages' => $messages,
+            'filters' => $request->only(['search', 'status', 'per_page']),
+            'statusOptions' => [
+                'new' => 'new',
+                'in_progress' => 'in_progress',
+                'resolved' => 'resolved',
+                'spam' => 'spam',
+            ],
+            'perPageOptions' => [10, 20, 50],
         ]);
     }
 

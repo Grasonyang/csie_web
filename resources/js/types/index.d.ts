@@ -37,9 +37,12 @@ export interface User {
     id: number;
     name: string;
     email: string;
+    role: 'admin' | 'teacher' | 'user';
+    status?: 'active' | 'suspended';
+    locale?: string | null;
     avatar?: string;
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
-    [key: string]: unknown; // This allows for additional properties...
+    [key: string]: unknown;
 }

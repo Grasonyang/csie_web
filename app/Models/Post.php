@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -49,17 +50,35 @@ class Post extends Model
 
     public function creator()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(User::class, 'created_by')->withTrashed();
     }
 
     public function updater()
     {
-        return $this->belongsTo(User::class, 'updated_by');
+        return $this->belongsTo(User::class, 'updated_by')->withTrashed();
     }
 
     public function attachments()
     {
         return $this->morphMany(Attachment::class, 'attachable');
     }
-}
 
+    /**
+     * Scope a query to only include published and active posts.
+     */
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query
+            ->where('status', 'published')
+            ->where(function (Builder $subQuery) {
+                $subQuery
+                    ->whereNull('publish_at')
+                    ->orWhere('publish_at', '<=', now());
+            })
+            ->where(function (Builder $subQuery) {
+                $subQuery
+                    ->whereNull('expire_at')
+                    ->orWhere('expire_at', '>', now());
+            });
+    }
+}

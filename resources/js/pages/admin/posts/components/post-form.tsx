@@ -6,10 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 import type { SharedData } from '@/types';
 import { Link, useForm, usePage } from '@inertiajs/react';
 import DOMPurify from 'dompurify';
-import { Calendar, Loader2 } from 'lucide-react';
+import { Calendar, Loader2, Link as LinkIcon, Paperclip, Plus, Trash2 } from 'lucide-react';
 import type { FormEventHandler } from 'react';
 import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 
@@ -18,6 +19,21 @@ export interface PostCategory {
     name: string;
     name_en: string;
     slug: string;
+}
+
+export interface AttachmentLinkInput {
+    id: string;
+    title: string;
+    url: string;
+}
+
+export interface ExistingAttachment {
+    id: number;
+    type: 'image' | 'document' | 'link';
+    title: string | null;
+    file_url: string | null;
+    external_url: string | null;
+    mime_type: string | null;
 }
 
 export interface PostFormValues {
@@ -36,6 +52,9 @@ export interface PostFormValues {
     publish_at: string;
     source_type: 'manual' | 'link';
     source_url: string;
+    attachments_files: File[];
+    attachments_links: AttachmentLinkInput[];
+    attachments_remove: number[];
 }
 
 export interface StatusOption {
@@ -51,6 +70,7 @@ interface PostFormProps {
     initialValues: PostFormValues;
     statusOptions: StatusOption[];
     initialPreviewHtml?: string;
+    existingAttachments?: ExistingAttachment[];
     onSubmit: (form: any) => void;
 }
 
@@ -80,6 +100,7 @@ export default function PostForm({
     initialValues,
     statusOptions,
     initialPreviewHtml = '',
+    existingAttachments = [],
     onSubmit,
 }: PostFormProps) {
     const { locale } = usePage<SharedData>().props;
@@ -100,9 +121,16 @@ export default function PostForm({
         publish_at: initialValues.publish_at,
         source_type: initialValues.source_type,
         source_url: initialValues.source_url,
+        attachments_files: initialValues.attachments_files ?? [],
+        attachments_links: initialValues.attachments_links ?? [],
+        attachments_remove: initialValues.attachments_remove ?? [],
     });
 
     const { data, setData, errors, processing, setError, clearErrors } = form;
+
+    const [pendingFiles, setPendingFiles] = useState<File[]>(data.attachments_files ?? []);
+    const [linkInputs, setLinkInputs] = useState<AttachmentLinkInput[]>(data.attachments_links ?? []);
+    const [attachmentsToRemove, setAttachmentsToRemove] = useState<number[]>(data.attachments_remove ?? []);
 
     const [autoSyncTitleEn, setAutoSyncTitleEn] = useState(
         () => initialValues.title.en.trim() === '' || initialValues.title.en === initialValues.title['zh-TW']
@@ -137,6 +165,18 @@ export default function PostForm({
             setPreviewHtml('');
         }
     }, [data.source_url]);
+
+    useEffect(() => {
+        setData('attachments_files', pendingFiles);
+    }, [pendingFiles, setData]);
+
+    useEffect(() => {
+        setData('attachments_links', linkInputs);
+    }, [linkInputs, setData]);
+
+    useEffect(() => {
+        setData('attachments_remove', attachmentsToRemove);
+    }, [attachmentsToRemove, setData]);
 
     const handleTitleZhChange = (value: string) => {
         const shouldSync = autoSyncTitleEn || data.title.en.trim() === '';
@@ -189,6 +229,47 @@ export default function PostForm({
         setAutoSyncContentEn(shouldSync);
     };
 
+    const makeLinkInput = (): AttachmentLinkInput => ({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        title: '',
+        url: '',
+    });
+
+    const handleFilesSelected = (fileList: FileList | null) => {
+        if (!fileList || fileList.length === 0) {
+            return;
+        }
+        const newFiles = Array.from(fileList);
+        setPendingFiles((prev) => [...prev, ...newFiles]);
+    };
+
+    const handleRemovePendingFile = (index: number) => {
+        setPendingFiles((prev) => prev.filter((_, idx) => idx !== index));
+    };
+
+    const handleLinkInputChange = (id: string, key: 'title' | 'url', value: string) => {
+        setLinkInputs((prev) =>
+            prev.map((item) => (item.id === id ? { ...item, [key]: value } : item))
+        );
+    };
+
+    const handleAddLinkInput = () => {
+        setLinkInputs((prev) => [...prev, makeLinkInput()]);
+    };
+
+    const handleRemoveLinkInput = (id: string) => {
+        setLinkInputs((prev) => prev.filter((item) => item.id !== id));
+    };
+
+    const toggleRemoveExistingAttachment = (attachmentId: number) => {
+        setAttachmentsToRemove((prev) => {
+            if (prev.includes(attachmentId)) {
+                return prev.filter((id) => id !== attachmentId);
+            }
+            return [...prev, attachmentId];
+        });
+    };
+
     const handleSourceTypeChange = (value: string) => {
         const newValue = value === 'link' ? 'link' : 'manual';
 
@@ -216,41 +297,52 @@ export default function PostForm({
 
         clearErrors('title.zh-TW');
 
-        const transformedForm = form.transform((payload) => {
+        form.transform((payload) => {
             const payloadTitleZh = payload.title['zh-TW'].trim();
-            const payloadTitleEn = payload.title.en.trim() === '' ? payloadTitleZh : payload.title.en;
+            const payloadTitleEn = payload.title.en.trim() === '' ? payloadTitleZh : payload.title.en.trim();
+            const isManual = payload.source_type === 'manual';
+            const contentZh = isManual ? payload.content['zh-TW'] : '';
+            const contentEn = isManual
+                ? (payload.content.en.trim() === '' ? payload.content['zh-TW'] : payload.content.en)
+                : '';
 
-            if (payload.source_type === 'manual') {
-                const payloadContentZh = payload.content['zh-TW'];
-                const payloadContentEn = payload.content.en.trim() === '' ? payloadContentZh : payload.content.en;
-
-                return {
-                    ...payload,
-                    title: {
-                        'zh-TW': payloadTitleZh,
-                        en: payloadTitleEn,
-                    },
-                    content: {
-                        'zh-TW': payloadContentZh,
-                        en: payloadContentEn,
-                    },
-                };
+            const formData = new FormData();
+            formData.append('category_id', payload.category_id ?? '');
+            formData.append('status', payload.status);
+            formData.append('pinned', payload.pinned ? '1' : '0');
+            formData.append('title[zh-TW]', payloadTitleZh);
+            formData.append('title[en]', payloadTitleEn);
+            formData.append('content[zh-TW]', contentZh);
+            formData.append('content[en]', contentEn);
+            formData.append('source_type', payload.source_type);
+            if (payload.source_type === 'link') {
+                formData.append('source_url', payload.source_url ?? '');
             }
+            formData.append('publish_at', payload.publish_at ?? '');
 
-            return {
-                ...payload,
-                title: {
-                    'zh-TW': payloadTitleZh,
-                    en: payloadTitleEn,
-                },
-                content: {
-                    'zh-TW': '',
-                    en: '',
-                },
-            };
+            (payload.attachments_files ?? []).forEach((file, index) => {
+                if (file) {
+                    formData.append(`attachments[files][${index}]`, file);
+                }
+            });
+
+            (payload.attachments_links ?? []).forEach((link, index) => {
+                const url = link.url.trim();
+                if (url === '') {
+                    return;
+                }
+                formData.append(`attachments[links][${index}][url]`, url);
+                formData.append(`attachments[links][${index}][title]`, link.title?.trim() ?? '');
+            });
+
+            (payload.attachments_remove ?? []).forEach((id, index) => {
+                formData.append(`attachments[remove][${index}]`, String(id));
+            });
+
+            return formData;
         });
 
-        onSubmit(transformedForm);
+        onSubmit(form);
     };
 
     const handleFetchPreview = () => {
@@ -495,6 +587,176 @@ export default function PostForm({
                                         ? '輸入網址後按「檢視」會在新分頁開啟來源，系統不再儲存外部 HTML。'
                                         : 'Enter the source URL and click "View" to open it in a new tab. The server no longer stores fetched HTML.'}
                                 </p>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                <Card className="border-gray-200 bg-white shadow-sm">
+                    <CardHeader className="border-b border-gray-100 bg-gray-50/50">
+                        <CardTitle className="flex items-center gap-2 text-gray-900">
+                            <Paperclip className="h-5 w-5 text-blue-600" />
+                            {isZh ? '附件' : 'Attachments'}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6 p-8">
+                        <div className="space-y-3">
+                            <Label className="text-sm font-medium text-gray-900" htmlFor="attachment-files">
+                                {isZh ? '上傳檔案' : 'Upload files'}
+                            </Label>
+                            <Input
+                                id="attachment-files"
+                                type="file"
+                                multiple
+                                onChange={(event) => {
+                                    handleFilesSelected(event.target.files);
+                                    if (event.target) {
+                                        event.target.value = '';
+                                    }
+                                }}
+                            />
+                            {pendingFiles.length > 0 && (
+                                <ul className="space-y-2 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-4 text-sm">
+                                    {pendingFiles.map((file, index) => (
+                                        <li key={`${file.name}-${file.size}-${index}`} className="flex items-center justify-between gap-3">
+                                            <span className="truncate">
+                                                {file.name}{' '}
+                                                <span className="text-gray-400">({(file.size / 1024).toFixed(1)} KB)</span>
+                                            </span>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="text-red-600 hover:text-red-800"
+                                                onClick={() => handleRemovePendingFile(index)}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+
+                        <div className="space-y-3">
+                            <Label className="text-sm font-medium text-gray-900">
+                                {isZh ? '外部連結' : 'External links'}
+                            </Label>
+                            <div className="space-y-4">
+                                {linkInputs.length === 0 && (
+                                    <p className="text-sm text-gray-500">
+                                        {isZh ? '暫無外部連結。' : 'No external links added yet.'}
+                                    </p>
+                                )}
+                                {linkInputs.map((link) => (
+                                    <div key={link.id} className="grid gap-3 rounded-lg border border-gray-200 p-4 md:grid-cols-2">
+                                        <div className="space-y-2">
+                                            <Label className="text-xs font-medium text-gray-600">
+                                                {isZh ? '顯示名稱' : 'Display name'}
+                                            </Label>
+                                            <Input
+                                                value={link.title}
+                                                onChange={(event) => handleLinkInputChange(link.id, 'title', event.target.value)}
+                                                placeholder={isZh ? '例如：申請表下載' : 'e.g. Application form'}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-xs font-medium text-gray-600">URL</Label>
+                                            <div className="flex items-center gap-2">
+                                                <Input
+                                                    value={link.url}
+                                                    onChange={(event) => handleLinkInputChange(link.id, 'url', event.target.value)}
+                                                    placeholder="https://example.com/file.pdf"
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="text-red-600 hover:text-red-800"
+                                                    onClick={() => handleRemoveLinkInput(link.id)}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="flex items-center gap-2"
+                                    onClick={handleAddLinkInput}
+                                >
+                                    <Plus className="h-4 w-4" />
+                                    {isZh ? '新增外部連結' : 'Add external link'}
+                                </Button>
+                            </div>
+                        </div>
+
+                        {existingAttachments.length > 0 && (
+                            <div className="space-y-3">
+                                <Label className="text-sm font-medium text-gray-900">
+                                    {isZh ? '現有附件' : 'Existing attachments'}
+                                </Label>
+                                <ul className="space-y-2">
+                                    {existingAttachments.map((attachment) => {
+                                        const markedForRemoval = attachmentsToRemove.includes(attachment.id);
+                                        return (
+                                            <li
+                                                key={attachment.id}
+                                                className={cn(
+                                                    'flex flex-col gap-2 rounded-lg border border-gray-200 p-4 md:flex-row md:items-center md:justify-between',
+                                                    markedForRemoval && 'border-red-200 bg-red-50'
+                                                )}
+                                            >
+                                                <div className="space-y-1">
+                                                    <p className="text-sm font-semibold text-gray-900">
+                                                        {attachment.title ?? attachment.file_url ?? attachment.external_url ?? `#${attachment.id}`}
+                                                    </p>
+                                                    <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                                                        <span className="inline-flex items-center gap-1">
+                                                            <LinkIcon className="h-4 w-4" />
+                                                            {attachment.type}
+                                                        </span>
+                                                        {attachment.file_url && (
+                                                            <a
+                                                                href={attachment.file_url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-blue-600 hover:underline"
+                                                            >
+                                                                {isZh ? '預覽檔案' : 'View file'}
+                                                            </a>
+                                                        )}
+                                                        {attachment.external_url && (
+                                                            <a
+                                                                href={attachment.external_url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-blue-600 hover:underline"
+                                                            >
+                                                                {attachment.external_url}
+                                                            </a>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <Button
+                                                    type="button"
+                                                    variant={markedForRemoval ? 'default' : 'outline'}
+                                                    size="sm"
+                                                    className={cn(
+                                                        'flex items-center gap-2',
+                                                        markedForRemoval ? 'bg-red-600 text-white hover:bg-red-700' : 'text-red-600 hover:text-red-800'
+                                                    )}
+                                                    onClick={() => toggleRemoveExistingAttachment(attachment.id)}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                    {markedForRemoval ? (isZh ? '取消刪除' : 'Undo remove') : (isZh ? '移除' : 'Remove')}
+                                                </Button>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
                             </div>
                         )}
                     </CardContent>

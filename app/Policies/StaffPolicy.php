@@ -39,4 +39,14 @@ class StaffPolicy
     {
         return $user->role === 'admin';
     }
+
+    public function restore(User $user, Staff $staff): bool
+    {
+        return $user->role === 'admin';
+    }
+
+    public function forceDelete(User $user, Staff $staff): bool
+    {
+        return $user->role === 'admin';
+    }
 }
