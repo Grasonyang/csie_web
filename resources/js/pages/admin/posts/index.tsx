@@ -225,10 +225,10 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
 
     const paginationButtonClass = (disabled: boolean) =>
         cn(
-            'h-8 w-8 border transition-colors',
+            'h-8 w-8 border transition-colors inline-flex items-center justify-center rounded-md',
             disabled
-                ? 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400 hover:bg-gray-100'
-                : 'border-gray-300 text-gray-600 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700'
+                ? 'cursor-not-allowed border-gray-300 bg-gray-200 text-gray-500'
+                : 'border-transparent bg-amber-700 text-white shadow-sm hover:bg-amber-800 focus:outline-none focus:ring-2 focus:ring-amber-400'
         );
 
     const getStatusBadge = (status: string) => {
@@ -416,7 +416,7 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
                                     >
                                         <ChevronLeft className="h-4 w-4" />
                                     </Button>
-                                    <span>
+                                    <span className="mx-4 px-3 py-1 rounded-md bg-gray-50 border border-gray-200 text-sm font-medium text-gray-900 select-none z-10">
                                         {postsData.length === 0
                                             ? isZh ? '目前查無符合條件的公告' : 'No posts match the current filters'
                                             : isZh
@@ -440,7 +440,7 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
                                     </Button>
                                 </div>
                                 {hasActiveFilters && postsData.length > 0 && (
-                                    <span className="inline-flex items-center gap-1 text-xs uppercase tracking-wide text-blue-600">
+                                    <span className="inline-flex items-center gap-1 text-xs uppercase tracking-wide text-amber-700">
                                         {isZh ? '篩選中' : 'Filters active'}
                                     </span>
                                 )}
@@ -591,7 +591,8 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
                                                 replace: true,
                                             });
                                         }}
-                                        className={`inline-flex items-center justify-center rounded-md px-3 py-1 text-sm font-medium transition-colors ${link.active ? 'bg-blue-600 text-white hover:bg-blue-700' : 'border border-input bg-background hover:bg-accent'}`}
+                                        className={`inline-flex items-center justify-center rounded-md px-3 py-1 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400 ${link.active ? 'bg-amber-800 text-white shadow-md hover:bg-amber-900' : 'border border-gray-300 bg-white text-gray-800 hover:bg-gray-50'}`}
+                                        aria-current={link.active ? 'page' : undefined}
                                     >
                                         {sanitizedLabel}
                                     </button>
