@@ -13,6 +13,13 @@
 - **可及性**：文字顏色對比符合 WCAG AA，互動元素需保留 focus 樣式與 aria 屬性。
 
 ## 全局版面規範
+### Page Layout Registry
+- 新增 `resources/js/styles/layout-system.ts` 與 `resources/js/styles/page-layouts.ts` 作為唯一資訊來源，集中定義頁面配色、版面分區（hero、sections、surfaces）與語意化 class。
+- 每個頁面於元件內透過 `getPageLayout('<pageKey>')` 取得預設，並以 `cn(layout.section.container, ...)` 套用，避免手寫重複 utility class。
+- 頁面 key 與描述詳見 `page-layouts.ts`，目前涵蓋 `welcome`、`dashboard`、`bulletinsIndex` 等 17 個頁面，未來新增頁面時請同步補登記。
+- 若需新增 surface 或版型變化，應先擴充 `layout-system.ts` 的 `surfaceTokens`、`heroVariants` 或 `sectionVariants`，再於 `page-layouts.ts` 使用，避免在頁面內直接拼接 class。
+- 針對 Sidebar/Timeline/Metric 等易重複模組，優先使用 `page-layouts.ts` 內預留的 `surfaces.*`，並視情況抽成共用 React component。
+
 ### 斷點與容器
 - Tailwind 斷點採 `sm=640px`, `md=768px`, `lg=1024px`, `xl=1280px`, `2xl=1536px`。
 - 公開頁面主要內容寬度：`max-w-7xl` (1280px)，左右 `px-4 md:px-6 lg:px-8`。
@@ -77,148 +84,89 @@
 
 ## 公開網站頁面
 ### Welcome (`resources/js/pages/welcome.tsx`)
-**排版規格**
-- Hero：全螢幕 Banner + 漸層遮罩，上層浮出公告輪播；下方資訊塊使用玻璃擬態卡片。
-- Hero 下方依序為「最新公告」、「重點資訊」、「實驗室/課程精選」、「快速連結」。
-- 每個區塊採 `grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6`。
-**RWD**
-- 手機：Carousel 佔高度 40vh，英雄標題壓縮為 `text-3xl`，資訊卡改為水平捲動 `snap-x`。
-- 桌機：Hero 標題 `text-6xl`, 內容使用 `max-w-4xl`。
-**開發步驟**
-1. 抽離 `HeroSection` 元件，接受背景圖、輪播資料、CTA。
-2. 建立 `HighlightCard`、`QuickLinkCard` 共用元件。
-3. 追加 `LatestNewsSection`，串接公告 API。
-4. 完成 `lg` 版面後，針對 `md`、`sm` 加入橫向捲動與縮放。
+- **Layout**：Split hero（左側訊息、右側輪播 + 指標），接續最新公告時間線、常用快捷、研究實驗室 spotlight + 支援卡網格、全師資滑桿、產學合作清單與聯絡 CTA。每個分段皆透過 `pageLayouts.welcome.sections` 定義容器與間距，確保模組化。
+- **Color Palette**：Hero 與 labs 使用品牌深藍 `#050f2e`/`#1d3bb8` 漸層，搭配亮黃 `#fca311`、青綠 `#4dd5c8` 作為強調；文字維持 `text-neutral-900` / `text-white`。玻璃卡採 `bg-white/80` + `border-white/40`。
+- **Components & Interactions**：`TopCarousel` 處理 hero 輪播；`SectionHeader` 統一標題層級；最新公告採 timeline 樣式；師資區為全等尺寸卡片，提供水平滑桿與「瀏覽全部師資」連結，手機端可直接水平滑動；各區搭配 `useScrollReveal` 漸進出現。
+- **RWD**：`<md` 時 hero 改為單欄堆疊、卡片 track 轉水平捲動；`md~lg` 顯示兩欄、保留陰影；`xl+` 將 labs spotlight 與 quick links 擴展為多欄。師資滑桿在窄螢幕仍可滑動，並提供按鈕於桌機控制。
+- **Optimization Ideas**：後續可串接實際公告 API 替換暫存資料、在 quick links 加入 icon 或統計徽章、於師資滑桿顯示分頁指示或自動播放（可透過 IntersectionObserver 啟停）。
 
 ### Bulletins Index (`resources/js/pages/bulletins/index.tsx`)
-**排版規格**
-- 頁首為標題 + 描述 + 搜尋欄位，使用寬版卡片。
-- 分類改為橫向可捲動 pill 列，選中狀態 `bg-[#151f54] text-white`。
-- 公告列表改為卡片式：標題、摘要、標籤、日期、CTA。
-- 右側在 `lg+` 顯示「熱門公告」、「快速篩選」。
-**RWD**
-- `md-` 轉單欄並將右側資訊移至列表底部 Accordion。
-- `xl` 版面採雙欄：主內容 8 欄、側欄 4 欄。
-**開發步驟**
-1. 建立 `BulletinFilterBar` 元件封裝搜尋+分類。
-2. 引入 `BulletinCard`，切換 `list`/`grid` 模式（可留待後續）。
-3. 將側欄資料抽至 `BulletinSidebar`，在 `md` 以下收折。
-4. 補上空狀態與 Skeleton。
+- **Layout**：採 `heroVariants.split` 呈現標題與搜尋卡片；下方為 pill 篩選列，主體為「列表 + 側欄」組合，列表用 editorial 卡片、側欄顯示置頂與快速分類。布局全部來自 `pageLayouts.bulletinsIndex`。
+- **Color Palette**：背景維持品牌淺灰 `var(--surface-muted)`，卡片採白底加 `border-primary/12`，pill 選中狀態使用 `bg-primary` 與白字對比。
+- **Components & Interactions**：搜尋欄保留清除、submit；分類 pill 可即時呼叫 `router.get`；列表使用 `hover:bg-primary/5` 提供視覺回饋；側欄顯示置頂公告、分類導覽、快速連結。
+- **RWD**：`<lg` 自動堆疊為單欄，側欄內容移至主欄底部； pill 列在手機啟用 `overflow-x-auto`；hero 於手機保留搜尋表單並縮小 padding。
+- **Optimization Ideas**：後續可加入排序（日期/瀏覽數）、顯示結果統計、在 pill 上加上筆數徽章；另可記錄使用者最後一次篩選條件。
 
 ### Bulletins Show (`resources/js/pages/bulletins/show.tsx`)
-**排版規格**
-- Hero 區顯示標題、類別、發布日期、附件數量。
-- 內容區使用 `prose prose-lg` 搭配兩欄排版（主內容 + 附件列表）。
-- 增加「分享」按鈕與「回列表」固定在頁面右下角的浮動按鈕。
-**RWD**
-- 內容在手機版改為單欄，自動縮排圖片。
-- 附件列表在手機使用 `accordion`。
-**開發步驟**
-1. 擴充 `PostMeta` 結構（類別、作者、日期、瀏覽數）。
-2. 建立 `AttachmentList` 元件，顯示檔案類型 icon。
-3. 套用 `Typography` 樣式，支援 HTML 內容安全渲染。
-4. 加入 Breadcrumb 與固定 CTA。
+- **Layout**：全寬 hero banner 疊加遮罩與回列表 CTA，下方使用 `sectionVariants.withAside` 分成文章主体與附件/延伸資訊側欄。
+- **Color Palette**：Hero 使用封面圖與黑色漸層確保文字對比；內文區採 `bg-surface-soft`，側欄沿用白底/淺灰，重點按鈕使用品牌藍。
+- **Components & Interactions**：文章使用 `prose` 樣式，附件列表依檔案型別顯示 icon；支援原生分享或複製連結；提供來源連結與回到列表互動。
+- **RWD**：`<lg` 自動將側欄落在主內容下方；Hero 高度縮短並讓 CTA 轉為 pill；附件列表在窄螢幕維持可點擊區域。
+- **Optimization Ideas**：補強上一篇/下一篇導覽、引入「相關公告」模組、針對長篇文章新增目錄軸或浮動分享按鈕。
 
 ### People Index (`resources/js/pages/people/index.tsx`)
-**排版規格**
-- 頂部為標題 + 簡介 + 篩選器（角色、研究領域、關鍵字）。
-- 人員清單以 `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3` 卡片呈現，每張卡片含頭像、姓名、職稱、聯絡方式。
-- 支援排序（姓名、職稱、權重）。
-**RWD**
-- 手機：卡片採 `flex` 左圖右文，篩選器改為下拉抽屜。
-- 桌機：卡片加上 hover 陰影與 CTA（查看詳細）。
-**開發步驟**
-1. 建立 `PeopleFilterPanel`（抽屜 + pill 列）。
-2. 製作 `PersonCard` 元件，接受 `locale`、`role`、`highlight`。
-3. 將列表資料改為 `grid` 呈現，添加 Skeleton。
-4. 串接排序與分頁（如資料量大）。
+- **Layout**：Hero split 展示師資/行政統計與篩選表單，列表區以主人物 spotlight + 卡片網格呈現；抽屜式篩選與 `SectionHeader` 導引內容。
+- **Color Palette**：Hero 仍採品牌藍 + 玻璃卡；人物卡背底為白色搭配 `border-primary/10`，重點統計使用漸層晶片。
+- **Components & Interactions**：支援角色 pill、關鍵字搜尋、清除按鈕；卡片顯示專長標籤與聯絡方式；列表備有 skeleton 與空狀態提示。
+- **RWD**：`<md` 篩選器落在卡片底、列表改為單欄；`lg` 以上顯示 spotlight + grid；保留 `no-scrollbar` 避免溢出。
+- **Optimization Ideas**：加入排序下拉、提供快速切換「卡片/表格」檢視、在 spotlight 加入輪播或隨機顯示，並串接追蹤熱門搜尋。
 
 ### People Show (`resources/js/pages/people/show.tsx`)
-**排版規格**
-- Hero：背景使用淡色漸層 + 圓角卡片呈現姓名、職稱、聯絡資訊、主要研究。
-- 內容區拆段：
-  1. `簡介`（多語段落）
-  2. `研究領域`（標籤）
-  3. `學歷與經歷`（時間軸）
-  4. `著作`（表格或 Accordion）
-  5. `指導學生`（列表）
-- 右側（`lg+`）顯示聯絡卡與快速連結。
-**RWD**
-- 手機：Hero 改為上下堆疊，時間軸改為條列。
-- 平板：維持雙欄，僅縮減字級。
-**開發步驟**
-1. 擴充分段資料結構於後端 API。
-2. 實作 `ProfileHero`、`TimelineSection`、`TagList`、`ResourceList` 元件。
-3. 完成 `lg` 雙欄後，調整 `md` 斷點為單欄。
-4. 增加 `Back to list` CTA 與分享按鈕。
+- **Layout**：Hero 漸層卡片顯示姓名、職稱、聯絡資訊與社群；主體包含介紹、研究標籤、學經歷時間軸、著作、指導學生，側欄提供聯絡卡與快速連結。
+- **Color Palette**：Hero 用品牌藍→青綠漸層，主內容卡片為白底 + `border-primary/12`；標籤 `bg-primary/10`；CTA 採品牌藍。
+- **Components & Interactions**：`ProfileHero`、`TimelineSection`、`TagList`、`ResourceList` 等片段化組件便於重用；支援社群連結、分享與回列表 CTA。
+- **RWD**：`<lg` 側欄內容移至底部，時間軸改為直向條列；Hero 在小螢幕縮短高度並上下堆疊元素。
+- **Optimization Ideas**：加入「相關課程/實驗室」區塊、PDF 履歷匯出、標籤快速過濾、校友推薦語等行銷內容。
 
 ### Labs Index (`resources/js/pages/labs/index.tsx`)
-**排版規格**
-- 頁首展示總覽：Hero + 統計（實驗室數、教授數、研究主題）。
-- 實驗室列表為卡片網格，每張卡含封面圖、名稱、領域標籤、主持人、CTA。
-- 提供篩選：主持人、領域、關鍵字。
-**RWD**
-- 手機：卡片變為水平捲動，圖片佔上方，資訊在下。
-- 桌機：`grid-cols-3`，hover 顯示更多資訊。
-**開發步驟**
-1. 建立 `LabsOverview`（統計 + 搜尋）元件。
-2. 建立 `LabCard` 與 `LabFilterBar`。
-3. 過濾邏輯外抽 hook（例如 `useFilter`）。
-4. 加入空狀態、Skeleton。
+- **Layout**：Split hero 顯示統計與搜尋欄，列表區包含一張 spotlight 深色卡與白底卡片網格（來源自 `pageLayouts.labsIndex.sections.listing`）。
+- **Color Palette**：Hero 與 spotlight 使用午夜藍漸層搭配品牌黃，列表卡片採白底與 `border-primary/10`，統計晶片使用玻璃效果。
+- **Components & Interactions**：搜尋欄支援清除、提交；卡片露出教師數、研究重點與 CTA；`useScrollReveal` 提供漸進顯示；空狀態與篩選文案需雙語。
+- **RWD**：`<md` 單欄並啟用水平滑動卡片；`lg+` 展開為 spotlight + 雙/三欄網格；保持 `line-clamp` 避免文字溢出。
+- **Optimization Ideas**：加入領域篩選與排序、收藏對比、lazy loading 圖片與骨架佔位；搜尋參數可同步到 URL 分享。
 
 ### Labs Show (`resources/js/pages/labs/show.tsx`)
-**排版規格**
-- Hero 使用實驗室封面 + 遮罩，中央顯示名稱、代號、主持人、社群連結。
-- 內容：
-  1. `實驗室介紹`
-  2. `研究主題`（Chip 列）
-  3. `成員`（卡片列表）
-  4. `研究成果`（Accordion 或列表）
-  5. `相簿`（Masonry Gallery）
-  6. `加入我們`（CTA）
-**RWD**
-- 手機：Hero 降為 50vh，Gallery 改為 2 欄。
-- 桌機：內容區分兩欄（主文 + 側欄資訊）。
-**開發步驟**
-1. 後端補齊主題、成果、相簿資料結構。
-2. 實作 `LabHero`、`MemberGrid`、`Gallery`。
-3. 加上錨點導覽（sticky nav）供快速跳段。
-4. 補上 `Contact` CTA 與返回列表按鈕。
+- **Layout**：Hero 以封面漸層呈現關鍵資料；內容依序為介紹、主題 chip、成員卡片、成果列表、相簿、CTA，並提供側欄聯絡資訊與快速導覽。
+- **Color Palette**：Hero 使用品牌藍到青綠漸層；主內容卡片採白底 + `border-primary/12`；主題 chip 與 CTA 以品牌黃/藍強調；時間軸/列表節點用品牌藍。
+- **Components & Interactions**：`TagList` 顯示研究主題、`MemberGrid` 列出成員、成果採 `Accordion`/list、相簿使用 Masonry + lightbox。頂部 sticky nav 協助跳段。
+- **RWD**：`<lg` 將側欄內容移至底部；相簿在手機縮為二列；Hero 高度減少並調整文字大小；CTA 改為滿版按鈕。
+- **Optimization Ideas**：新增「下載簡介」按鈕、串接活動或成果連結、相簿導入懶加載、成員支援篩選與排序。
 
 ## 認證流程頁面 (`resources/js/pages/auth/*`)
-### 通用規格
-- 標題與描述集中置中，下方卡片統一寬 420px。
-- 表單欄位採 `space-y-4`，提示訊息用 `Alert` 元件。
-- 加入第三方登入預留區塊（後續可啟用）。
+- **Base Layout**：`AuthLayout` 提供雙欄（插圖 + 表單）與單欄簡約兩種；表單容器寬 420px，使用玻璃感白底與 `shadow-2xl`。
+- **Color Palette**：背景採品牌漸層 `#151f54 → #1e2968 → #050a30`，按鈕使用品牌藍與輔色黃；錯誤訊息採 `text-rose-600` 與 `bg-rose-50`。
+- **Components & Interactions**：表單欄位統一使用 `rounded-xl border border-gray-300 focus:border-[#ffb401] focus:ring-[#ffb401]`；訊息採 `Alert`; 支援第三方登入區塊預留；所有按鈕提供 loading 狀態。
+- **RWD**：`<md` 移除插圖僅保留表單；將次要連結（註冊、忘記密碼）堆疊；表單邊距使用 `px-6` 保留呼吸空間。
+- **Optimization Ideas**：導入表單驗證即時提示、提供密碼強度條、整合社群登入與安全公告，並於成功頁提供導引至 Dashboard 或公開頁。
 
 ### Login / Register
-- `md+` 時加入右側品牌圖像（高 100%，寬 45%），文字置左。
-- `Remember me` 與 `忘記密碼` 置於同一行，使用柔和灰色文字。
-- `Register` 多欄表單在 `lg` 分兩欄。
+- **Layout**：左右分欄；左側表單含標題、表單欄位與第三方登入預留；右側顯示品牌插圖或學生故事。
+- **Color Palette**：插圖背景使用品牌藍漸層搭配白色文字；表單按鈕 `bg-primary`，次要連結為灰色。
+- **Interactions**：Remember me 與忘記密碼同列；註冊表單於 `lg` 分兩欄；提供密碼顯示切換與即時驗證。
+- **RWD**：`<md` 隱藏插圖、表單滿版；`md+` 顯示插圖並固定高度。
+- **Enhancements**：加入社群登入按鈕、顯示密碼強度，不同步驟提示與伺服器錯誤訊息。
 
 ### Forgot / Reset Password
-- 以流程指示器顯示目前步驟（輸入信箱 → 驗證 → 重設）。
-- SF 表單加入驗證圖示（成功/失敗）與即時提示。
+- **Layout**：流程導覽（輸入信箱 → 驗證 → 重設），每步驟使用卡片與說明文字。
+- **Color Palette**：成功/警示採品牌黃與紅色系；主要 CTA 使用品牌藍。
+- **Interactions**：顯示倒數重新寄送、提供複製連結；密碼重設加入即時比對與顯示需求列表。
+- **RWD**：保持單欄並縮短說明文字；CTA 寬度 100% 方便點擊。
+- **Enhancements**：記錄最後一次寄送時間、提供客服連結、加入鍵盤快捷（Enter 送出）。
 
 ### Confirm Password / Verify Email
-- 通知卡片加 icon（Shield/Check），並提供「重新寄送」按鈕倒數顯示。
-
-**開發步驟**
-1. 擴充 `AuthLayout` 支援左右分欄版型。
-2. 建立 `AuthIllustration`、`AuthAlert` 元件。
-3. 統一所有表單欄位樣式，抽至 `AuthFormField`。
-4. 加入 `motion` 動畫（Framer Motion）可延後實作。
+- **Layout**：通知卡片置中顯示狀態，底部提供返回與重新寄送按鈕。
+- **Color Palette**：使用品牌藍 + 綠色成功顏色搭配；錯誤狀態以紅色提示。
+- **Interactions**：提供倒數計時、顯示收件信箱、支援再次送出 email（失敗時顯示訊息）。
+- **RWD**：卡片保持 360~420px；在手機縮減陰影與邊距；CTA 全寬。
+- **Enhancements**：加入裝置信任選項、顯示最近登入活動、整合客服連結。
 
 ## 後台儀表與模組 (`resources/js/pages/admin/*`)
 ### Dashboard (`dashboard.tsx`)
-- 上方加 `summary bar`：系統狀態、通知、快速建立。
-- 主內容分三列：
-  1. `StatGrid`（4 卡）
-  2. `Quick Actions`（6 個）
-  3. `Latest` 區（公告、待辦、系統日誌）
-- 右側在 `xl` 顯示「待審批」、「系統公告」。
-**RWD**：`md` 轉為雙欄，`sm` 單欄，保留卡片陰影。
-**步驟**：抽離 `StatCard`, `ActionCard`, `ActivityList`, `TodoList` 元件；加上資料來源 placeholder。
+- **Layout**：沉浸式 hero 顯示營運摘要與 KPI 晶片，後續為四格指標卡、六格快速操作、雙欄活動與待辦。所有區塊由 `pageLayouts.dashboard` 控制。
+- **Color Palette**：採 `palettes.midnight` 深藍底，指標卡與任務列以白色/透明度白作對比；快速操作卡根據 tone 套入 indigo/emerald/violet/amber 營造成熟感。
+- **Components & Interactions**：`StatCard`、`QuickActionCard`、`Activity` timeline、`TaskSummary`、`ScheduleList`；快速操作提供 hover 位移與焦點樣式；Hero CTA 連至公告建立與收件匣。
+- **RWD**：`<md` 單欄堆疊、Hero 晶片水平捲動；`lg+` 顯示雙欄活動與側欄；保持 `scroll-behavior: smooth` 及按鈕焦點圈。
+- **Optimization Ideas**：串接實際統計 API、於卡片加入趨勢 sparkline、提供客製化排列與深色主題切換、將任務列表加入拖曳排序。
 
 ### Posts 模組 (`resources/js/pages/admin/posts/*`)
 - Index：

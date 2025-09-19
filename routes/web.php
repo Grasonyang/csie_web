@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Session;
+use Inertia\Inertia;
 
 // Frontend Controllers
 use App\Http\Controllers\AttachmentDownloadController;

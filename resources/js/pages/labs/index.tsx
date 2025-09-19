@@ -4,7 +4,7 @@ import useScrollReveal from '@/hooks/use-scroll-reveal';
 import type { SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
-import { ArrowRight, Mail, MapPin, Phone, Search, Users } from 'lucide-react';
+import { ArrowRight, Mail, Phone, Search, Users } from 'lucide-react';
 
 interface LocaleRecord {
     ['zh-TW']?: string | null;
@@ -54,6 +54,8 @@ export default function LabsIndex({ labs, filters }: LabsIndexProps) {
             return name.includes(keyword) || desc.includes(keyword);
         });
     }, [labs, filters?.q, isZh]);
+
+    const [primaryLab, ...secondaryLabs] = filteredLabs;
 
     const applyFilters = (query: { q?: string | null }) => {
         const params: Record<string, string> = {};
@@ -157,78 +159,139 @@ export default function LabsIndex({ labs, filters }: LabsIndexProps) {
                         }
                     />
 
-                    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                        {filteredLabs.map((lab) => {
-                            const name = pickLocale(isZh ? 'zh-TW' : 'en', lab.name, '');
-                            const description = pickLocale(isZh ? 'zh-TW' : 'en', lab.description, '');
-                            const href = lab.code ? `/labs/${lab.code}` : '/labs';
-
-                            return (
-                                <Link
-                                    key={lab.id}
-                                    href={href}
-                                    className="group flex h-full flex-col overflow-hidden rounded-3xl border border-neutral-200 bg-surface-soft shadow-sm hover-lift"
-                                >
-                                    <div className="relative h-48 overflow-hidden">
-                                        <img
-                                            src={lab.cover_image_url ?? '/images/banner/banner1.png'}
-                                            alt={name}
-                                            className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.05]"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                                        {lab.code && (
-                                            <span className="absolute left-4 top-4 inline-flex items-center rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-neutral-700">
-                                                {lab.code}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className="flex flex-1 flex-col gap-4 p-6">
-                                        <div>
-                                            <h2 className="text-lg font-semibold text-neutral-900 transition group-hover:text-primary">{name}</h2>
-                                            {description && (
-                                                <p className="mt-2 text-sm text-neutral-600 line-clamp-3">{description}</p>
-                                            )}
-                                        </div>
-                                        {lab.teachers.length > 0 && (
-                                            <div className="flex flex-wrap items-center gap-2 text-xs text-primary">
-                                                <Users className="size-4" />
-                                                {lab.teachers.slice(0, 3).map((teacher) => (
-                                                    <span key={`lab-${lab.id}-teacher-${teacher.id}`}>
-                                                        {pickLocale(isZh ? 'zh-TW' : 'en', teacher.name, '')}
-                                                    </span>
-                                                ))}
-                                                {lab.teachers.length > 3 && <span>+{lab.teachers.length - 3}</span>}
-                                            </div>
-                                        )}
-                                        <div className="mt-auto flex flex-wrap gap-2 text-xs text-neutral-500">
-                                            {lab.email && (
-                                                <span className="inline-flex items-center gap-2 rounded-full bg-primary/5 px-3 py-1 text-primary">
-                                                    <Mail className="size-3" />
-                                                    {lab.email}
-                                                </span>
-                                            )}
-                                            {lab.phone && (
-                                                <span className="inline-flex items-center gap-2 rounded-full bg-primary/5 px-3 py-1 text-primary">
-                                                    <Phone className="size-3" />
-                                                    {lab.phone}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <span className="inline-flex items-center gap-2 text-sm font-medium text-primary/80">
-                                            {isZh ? '查看實驗室' : 'View lab'}
-                                            <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                    {primaryLab ? (
+                        <div className="grid gap-8 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+                            <Link
+                                href={primaryLab.code ? `/labs/${primaryLab.code}` : '/labs'}
+                                className="group relative flex min-h-[360px] flex-col overflow-hidden rounded-[2.5rem] border border-primary/15 bg-[#060d29] text-white shadow-[0_36px_110px_-60px_rgba(8,13,36,0.85)]"
+                            >
+                                <img
+                                    src={primaryLab.cover_image_url ?? '/images/placeholders/lab.svg'}
+                                    alt={pickLocale(isZh ? 'zh-TW' : 'en', primaryLab.name, `Lab ${primaryLab.id}`)}
+                                    className="absolute inset-0 h-full w-full object-cover opacity-75 transition duration-700 group-hover:scale-[1.05]"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-tr from-[#050f2e]/88 via-[#0f1c4d]/45 to-transparent" />
+                                <div className="relative z-10 flex flex-1 flex-col justify-end gap-5 p-10">
+                                    <div className="flex flex-wrap items-center gap-3 text-xs text-white/70">
+                                        <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 font-semibold uppercase tracking-[0.3em]">
+                                            {primaryLab.code ?? (isZh ? '研究團隊' : 'Research Lab')}
+                                        </span>
+                                        <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1">
+                                            {isZh
+                                                ? `${primaryLab.teachers.length} 位合作教師`
+                                                : `${primaryLab.teachers.length} faculty mentors`}
                                         </span>
                                     </div>
-                                </Link>
-                            );
-                        })}
+                                    <h3 className="text-3xl font-semibold md:text-4xl">
+                                        {pickLocale(isZh ? 'zh-TW' : 'en', primaryLab.name, `Lab ${primaryLab.id}`)}
+                                    </h3>
+                                    <p className="max-w-2xl text-sm text-white/75 md:text-base line-clamp-4">
+                                        {pickLocale(isZh ? 'zh-TW' : 'en', primaryLab.description, '')}
+                                    </p>
+                                    {(primaryLab.email || primaryLab.phone) && (
+                                        <div className="flex flex-wrap gap-3 text-xs text-white/70">
+                                            {primaryLab.email && (
+                                                <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1">
+                                                    <Mail className="size-3" />
+                                                    {primaryLab.email}
+                                                </span>
+                                            )}
+                                            {primaryLab.phone && (
+                                                <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1">
+                                                    <Phone className="size-3" />
+                                                    {primaryLab.phone}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
+                                    {primaryLab.teachers.length > 0 && (
+                                        <div className="flex flex-wrap items-center gap-2 text-xs text-white/70">
+                                            <Users className="size-4" />
+                                            {primaryLab.teachers.slice(0, 4).map((teacher) => (
+                                                <span key={teacher.id}>
+                                                    {pickLocale(isZh ? 'zh-TW' : 'en', teacher.name, '')}
+                                                </span>
+                                            ))}
+                                            {primaryLab.teachers.length > 4 && <span>+{primaryLab.teachers.length - 4}</span>}
+                                        </div>
+                                    )}
+                                    <span className="inline-flex items-center gap-2 text-sm font-medium text-white/80">
+                                        {isZh ? '深入了解實驗室' : 'Discover this lab'}
+                                        <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                                    </span>
+                                </div>
+                            </Link>
 
-                        {filteredLabs.length === 0 && (
-                            <div className="rounded-3xl border border-dashed border-neutral-200 bg-surface-soft p-12 text-center text-neutral-500">
-                                {isZh ? '沒有符合條件的實驗室。' : 'No labs match your filters.'}
+                            <div className="overflow-hidden rounded-[2.5rem] border border-primary/12 bg-white/85 shadow-[0_24px_70px_-48px_rgba(18,35,90,0.25)]">
+                                {secondaryLabs.length > 0 ? (
+                                    <ul className="divide-y divide-primary/10">
+                                        {secondaryLabs.map((lab) => {
+                                            const name = pickLocale(isZh ? 'zh-TW' : 'en', lab.name, '');
+                                            const description = pickLocale(isZh ? 'zh-TW' : 'en', lab.description, '');
+                                            const href = lab.code ? `/labs/${lab.code}` : '/labs';
+
+                                            return (
+                                                <li key={lab.id}>
+                                                    <Link
+                                                        href={href}
+                                                        className="group grid gap-4 p-6 transition hover:bg-primary/5 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center"
+                                                    >
+                                                        <span className="relative flex size-16 items-center justify-center overflow-hidden rounded-2xl border border-primary/10 bg-primary/5">
+                                                            <img
+                                                                src={lab.cover_image_url ?? '/images/placeholders/lab.svg'}
+                                                                alt={name}
+                                                                className="h-full w-full object-cover"
+                                                            />
+                                                        </span>
+                                                        <div className="flex flex-col gap-2">
+                                                            <span className="text-base font-semibold text-neutral-900 md:text-lg">{name}</span>
+                                                            {lab.teachers.length > 0 && (
+                                                                <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+                                                                    <Users className="size-4 text-primary" />
+                                                                    {lab.teachers.slice(0, 3).map((teacher) => (
+                                                                        <span key={teacher.id}>
+                                                                            {pickLocale(isZh ? 'zh-TW' : 'en', teacher.name, '')}
+                                                                        </span>
+                                                                    ))}
+                                                                    {lab.teachers.length > 3 && <span>+{lab.teachers.length - 3}</span>}
+                                                                </div>
+                                                            )}
+                                                            {description && <p className="text-sm text-neutral-600 line-clamp-2">{description}</p>}
+                                                            {(lab.email || lab.phone) && (
+                                                                <div className="flex flex-wrap gap-2 text-xs text-neutral-500">
+                                                                    {lab.email && (
+                                                                        <span className="inline-flex items-center gap-2 rounded-full bg-primary/5 px-3 py-1 text-primary">
+                                                                            <Mail className="size-3" />
+                                                                            {lab.email}
+                                                                        </span>
+                                                                    )}
+                                                                    {lab.phone && (
+                                                                        <span className="inline-flex items-center gap-2 rounded-full bg-primary/5 px-3 py-1 text-primary">
+                                                                            <Phone className="size-3" />
+                                                                            {lab.phone}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <ArrowRight className="size-4 text-primary/60 transition-transform group-hover:translate-x-1" />
+                                                    </Link>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                ) : (
+                                    <div className="p-8 text-center text-sm text-neutral-600">
+                                        {isZh ? '僅顯示單一實驗室。' : 'Only one lab matches the filters.'}
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    ) : (
+                        <div className="rounded-[2.5rem] border border-dashed border-primary/20 bg-white/70 p-12 text-center text-neutral-500">
+                            {isZh ? '沒有符合條件的實驗室。' : 'No labs match your filters.'}
+                        </div>
+                    )}
                 </div>
             </section>
         </PublicLayout>

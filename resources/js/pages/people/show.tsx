@@ -130,7 +130,7 @@ export default function PeopleShow({ person }: PeopleShowProps) {
                         </div>
                         <div className="relative mx-auto h-72 w-72 overflow-hidden rounded-[2.5rem] border-4 border-white/40 shadow-xl">
                             <img
-                                src={person.photo_url ?? '/images/placeholder/faculty.png'}
+                                src={person.photo_url ?? '/images/placeholders/faculty.svg'}
                                 alt={name}
                                 className="h-full w-full object-cover"
                             />

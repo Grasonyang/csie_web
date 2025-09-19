@@ -1,11 +1,13 @@
 import PublicLayout from '@/layouts/public-layout';
 import SectionHeader from '@/components/public/section-header';
-import { QuickLinkCard } from '@/components/public/quick-link-card';
 import TopCarousel from '@/components/top-carousel';
 import useScrollReveal from '@/hooks/use-scroll-reveal';
 import type { SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowRight, MapPin, Mail, Phone, Users } from 'lucide-react';
+import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, MapPin, Mail, Phone, Users } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { getPageLayout } from '@/styles/page-layouts';
+import { useRef } from 'react';
 
 interface LocaleRecord {
     ['zh-TW']?: string | null;
@@ -37,6 +39,7 @@ interface PostSummary {
         name_en: string;
         slug: string;
     } | null;
+    pinned?: boolean;
 }
 
 interface LabSummary {
@@ -46,10 +49,12 @@ interface LabSummary {
     cover_image_url?: string | null;
     description: LocaleRecord;
     teachers_count: number;
+    website_url?: string | null;
 }
 
 interface TeacherSummary {
     id: number;
+    slug?: string | null;
     name: LocaleRecord;
     title: LocaleRecord;
     photo_url?: string | null;
@@ -150,6 +155,51 @@ export default function Welcome() {
     const projectsRef = useScrollReveal<HTMLDivElement>({ threshold: 0.2 });
     const contactRef = useScrollReveal<HTMLDivElement>({ threshold: 0.2 });
 
+    const layout = getPageLayout('welcome');
+    const heroLayout = layout.hero!;
+    const highlightsLayout = layout.sections.highlights;
+    const quickLinksLayout = layout.sections.quickLinks;
+    const labsLayout = layout.sections.labs;
+    const facultyLayout = layout.sections.faculty;
+    const projectsLayout = layout.sections.projects;
+    const contactLayout = layout.sections.contact;
+
+    const [primaryHighlight, ...moreHighlights] = latestPosts;
+    const [featuredLab, ...remainingLabs] = featuredLabs;
+
+    const timelinePosts = moreHighlights.slice(0, 4);
+    const supportingLabs = remainingLabs.slice(0, 4);
+    const teacherList = spotlightTeachers;
+    const teacherSliderRef = useRef<HTMLDivElement | null>(null);
+    const scrollTeachers = (direction: 'prev' | 'next') => {
+        const container = teacherSliderRef.current;
+        if (!container) return;
+        const sampleCard = container.querySelector('[data-teacher-card]') as HTMLElement | null;
+        const scrollAmount = sampleCard ? sampleCard.clientWidth + 24 : 320;
+        container.scrollBy({ left: direction === 'next' ? scrollAmount : -scrollAmount, behavior: 'smooth' });
+    };
+    const hasTeachers = teacherList.length > 0;
+    const formatDate = (value?: string | null) => (value ? dateFormatter.format(new Date(value)) : null);
+
+    const highlightTitle = primaryHighlight ? pickLocale(localeKey, primaryHighlight.title, primaryHighlight.slug) : null;
+    const highlightSummary = primaryHighlight ? pickLocale(localeKey, primaryHighlight.summary, '') : '';
+    const highlightCategory = primaryHighlight?.category
+        ? isZh
+            ? primaryHighlight.category.name
+            : primaryHighlight.category.name_en
+        : undefined;
+    const highlightDate = primaryHighlight?.publish_at ? formatDate(primaryHighlight.publish_at) : null;
+
+    const quickLinkHighlights = isZh
+        ? ['招生資訊與報名', '最新活動快訊', '學生常用資源', '系友服務與系務專區']
+        : ['Admissions & applications', 'Event highlights', 'Student resources hub', 'Alumni and department services'];
+
+    const quickLinkAccents = [
+        'bg-gradient-to-r from-[#4dd5c8]/15 via-white/10 to-transparent',
+        'bg-gradient-to-r from-[#fca311]/20 via-white/10 to-transparent',
+        'bg-gradient-to-r from-white/18 via-white/6 to-transparent',
+    ];
+
     const copy = isZh
         ? {
               heroEyebrow: 'NCUE CSIE',
@@ -198,9 +248,9 @@ export default function Welcome() {
             </Head>
 
             {/* Hero */}
-            <section id="about" className="section-padding">
-                <div className="content-container grid gap-10 lg:grid-cols-[minmax(0,1fr),minmax(0,1.2fr)] lg:items-center">
-                    <div ref={heroInfoRef} className="flex flex-col gap-6">
+            <section id="about" className={heroLayout.section}>
+                <div className={cn(heroLayout.container, heroLayout.wrapper)}>
+                    <div ref={heroInfoRef} className={cn(heroLayout.surfaces?.primary, heroLayout.primary)}>
                         <span className="inline-flex w-fit items-center gap-2 rounded-full bg-primary/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.4em] text-primary">
                             {copy.heroEyebrow}
                         </span>
@@ -232,250 +282,499 @@ export default function Welcome() {
                             )}
                         </div>
                     </div>
-                    <div
-                        ref={heroCarouselRef}
-                        className="relative h-[360px] overflow-hidden rounded-[2.5rem] shadow-2xl ring-1 ring-primary/10 md:h-[440px]"
-                    >
-                        <TopCarousel className="h-full" items={heroItems} />
+                    <div ref={heroCarouselRef} className={cn(heroLayout.surfaces?.secondary, heroLayout.secondary)}>
+                        <div className="relative h-[320px] w-full overflow-hidden rounded-[2rem] shadow-2xl ring-1 ring-primary/10 md:h-[420px]">
+                            <TopCarousel className="h-full" items={heroItems} />
+                        </div>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            {quickLinkHighlights.slice(0, 4).map((text, index) => (
+                                <div
+                                    key={text}
+                                    className={cn(
+                                        'flex items-center gap-3 rounded-2xl border border-white/40 bg-white/70 p-4 text-sm font-medium text-neutral-700 shadow-sm transition hover:border-primary/40 hover:text-primary',
+                                        quickLinkAccents[index % quickLinkAccents.length],
+                                    )}
+                                >
+                                    <ArrowRight className="size-4 shrink-0 text-primary" />
+                                    <span>{text}</span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </section>
 
             {/* Latest bulletins */}
-            <section id="highlights" className="section-padding">
-                <div ref={highlightsRef} className="content-container space-y-10">
+            <section id="highlights" className={highlightsLayout.section}>
+                <div ref={highlightsRef} className={cn(highlightsLayout.container, 'space-y-10')}>
                     <SectionHeader
                         eyebrow={isZh ? '最新訊息' : 'Highlights'}
                         title={copy.highlightsTitle}
                         description={copy.highlightsDesc}
                     />
-                    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                        {latestPosts.map((post) => {
-                            const title = pickLocale(localeKey, post.title, post.slug);
-                            const summary = pickLocale(localeKey, post.summary);
-                            const categoryLabel = post.category ? (isZh ? post.category.name : post.category.name_en) : undefined;
-                            const publishDate = post.publish_at ? dateFormatter.format(new Date(post.publish_at)) : null;
-
-                            return (
+                    {latestPosts.length > 0 ? (
+                        <div className={cn(highlightsLayout.wrapper)}>
+                            {primaryHighlight && (
                                 <Link
-                                    key={post.id}
-                                    href={`/bulletins/${post.slug}`}
-                                    className="card-elevated group flex h-full flex-col gap-4 overflow-hidden p-6"
-                                >
-                                    {post.cover_image_url && (
-                                        <div className="relative overflow-hidden rounded-2xl">
-                                            <img
-                                                src={post.cover_image_url}
-                                                alt={title}
-                                                className="h-44 w-full rounded-2xl object-cover transition duration-700 group-hover:scale-[1.05]"
-                                            />
-                                            <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/40 to-transparent" />
-                                        </div>
+                                    key={primaryHighlight.id}
+                                    href={`/bulletins/${primaryHighlight.slug}`}
+                                    className={cn(
+                                        'group relative flex min-h-[320px] flex-col overflow-hidden rounded-[2.5rem] shadow-[0_30px_95px_-65px_rgba(7,12,42,0.8)] ring-1 ring-white/20',
+                                        highlightsLayout.surfaces?.feature,
                                     )}
-                                    <div className="flex flex-col gap-3">
-                                        <div className="flex items-center gap-3 text-xs text-neutral-500">
-                                            {categoryLabel && (
-                                                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 font-medium text-primary">
-                                                    {categoryLabel}
+                                >
+                                    <img
+                                        src={primaryHighlight.cover_image_url ?? '/images/banner/banner1.png'}
+                                        alt={highlightTitle ?? primaryHighlight.slug}
+                                        className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.05]"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-[#050f2e]/85 via-[#0f1c4d]/45 to-transparent" />
+                                    <div className="relative z-10 flex flex-1 flex-col justify-end gap-4 p-8 text-white sm:p-10">
+                                        <div className="flex flex-wrap items-center gap-3 text-xs text-white/70">
+                                            {highlightCategory && (
+                                                <span className="inline-flex items-center rounded-full bg-white/20 px-3 py-1 font-medium uppercase tracking-[0.2em]">
+                                                    {highlightCategory}
                                                 </span>
                                             )}
-                                            {publishDate && <span>{publishDate}</span>}
+                                            {highlightDate && (
+                                                <span className="inline-flex items-center gap-2">
+                                                    <CalendarDays className="size-4" />
+                                                    {highlightDate}
+                                                </span>
+                                            )}
+                                            {primaryHighlight.pinned && (
+                                                <span className="inline-flex items-center rounded-full bg-secondary/25 px-2.5 py-1 text-[11px] font-semibold text-secondary-foreground/90">
+                                                    {isZh ? '置頂' : 'Pinned'}
+                                                </span>
+                                            )}
                                         </div>
-                                        <h3 className="text-xl font-semibold text-neutral-900 transition group-hover:text-primary">
-                                            {title}
-                                        </h3>
-                                        {summary && <p className="text-sm text-neutral-600">{summary}</p>}
+                                        {highlightTitle && <h3 className="text-3xl font-semibold leading-tight md:text-4xl">{highlightTitle}</h3>}
+                                        {highlightSummary && (
+                                            <p className="max-w-2xl text-sm text-white/80 md:text-base line-clamp-3">{highlightSummary}</p>
+                                        )}
+                                        <span className="inline-flex items-center gap-2 text-sm font-medium text-white/80">
+                                            {isZh ? '閱讀全文' : 'Read article'}
+                                            <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                                        </span>
                                     </div>
-                                    <span className="mt-auto inline-flex items-center gap-2 text-sm font-medium text-primary/80">
-                                        {isZh ? '閱讀更多' : 'Read more'}
-                                        <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-                                    </span>
                                 </Link>
-                            );
-                        })}
-                        {latestPosts.length === 0 && (
-                            <div className="card-elevated flex flex-col items-center justify-center gap-3 p-8 text-center text-neutral-500">
-                                <p>{isZh ? '目前沒有公告，敬請期待。' : 'No announcements available at the moment.'}</p>
-                                <Link href="/bulletins" className="text-primary underline">
-                                    {isZh ? '查看公告列表' : 'View all bulletins'}
-                                </Link>
+                            )}
+
+                            <div className={cn(highlightsLayout.secondary)}>
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-lg font-semibold text-neutral-900">
+                                        {isZh ? '最新消息' : 'Latest updates'}
+                                    </h3>
+                                    <Link
+                                        href="/bulletins"
+                                        className="inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:text-primary/80"
+                                    >
+                                        {isZh ? '更多公告' : 'View all'}
+                                        <ArrowRight className="size-4" />
+                                    </Link>
+                                </div>
+                                {timelinePosts.length > 0 ? (
+                                    <ol className={cn(highlightsLayout.surfaces?.timeline, 'space-y-6')}>
+                                        {timelinePosts.map((post) => {
+                                            const title = pickLocale(localeKey, post.title, post.slug);
+                                            const summary = pickLocale(localeKey, post.summary, '');
+                                            const categoryLabel = post.category
+                                                ? isZh
+                                                    ? post.category.name
+                                                    : post.category.name_en
+                                                : undefined;
+                                            const publishDate = post.publish_at ? formatDate(post.publish_at) : null;
+
+                                            return (
+                                                <li key={post.id} className={cn('pl-6', highlightsLayout.surfaces?.timelineItem)}>
+                                                    <div className="flex flex-col gap-1.5">
+                                                        <Link
+                                                            href={`/bulletins/${post.slug}`}
+                                                            className="text-base font-semibold text-neutral-900 transition hover:text-primary"
+                                                        >
+                                                            {title}
+                                                        </Link>
+                                                        <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+                                                            {categoryLabel && (
+                                                                <span className="mr-2 inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 font-medium text-primary">
+                                                                    {categoryLabel}
+                                                                </span>
+                                                            )}
+                                                            {publishDate && (
+                                                                <span className="inline-flex items-center gap-1">
+                                                                    <CalendarDays className="size-3" />
+                                                                    {publishDate}
+                                                                </span>
+                                                            )}
+                                                            {post.pinned && (
+                                                                <span className="inline-flex items-center rounded-full bg-secondary/25 px-2 py-0.5 text-[11px] font-semibold text-secondary-foreground/80">
+                                                                    {isZh ? '置頂' : 'Pinned'}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        {summary && <p className="text-sm text-neutral-600 line-clamp-2">{summary}</p>}
+                                                    </div>
+                                                </li>
+                                            );
+                                        })}
+                                    </ol>
+                                ) : (
+                                    <div className="rounded-2xl border border-dashed border-primary/20 bg-white/60 p-6 text-sm text-neutral-500">
+                                        {isZh ? '更多公告即將更新，敬請期待。' : 'More announcements are on the way.'}
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    ) : (
+                        <div className="rounded-[2.5rem] border border-dashed border-primary/20 bg-white/70 p-12 text-center text-neutral-500">
+                            {isZh ? '公告資訊更新中，敬請期待。' : 'Bulletin updates will be published shortly.'}
+                        </div>
+                    )}
                 </div>
             </section>
 
             {/* Quick links */}
-            <section className="section-padding bg-[var(--surface-muted)]">
-                <div ref={quickLinksRef} className="content-container space-y-10">
+            <section className={quickLinksLayout.section}>
+                <div ref={quickLinksRef} className={cn(quickLinksLayout.container, 'space-y-10')}>
                     <SectionHeader
                         eyebrow={isZh ? '快速入口' : 'Shortcuts'}
                         title={copy.quickLinksTitle}
                         description={copy.quickLinksDesc}
                     />
-                    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-                        {quickLinks.map((link) => (
-                            <QuickLinkCard
-                                key={link.href}
-                                href={link.href}
-                                title={pickLocale(localeKey, link.title, link.href)}
-                                description={pickLocale(localeKey, link.description)}
-                                ctaLabel={isZh ? '前往' : 'Explore'}
-                            />
-                        ))}
+                    <div className={cn('grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]', quickLinksLayout.wrapper)}>
+                        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/12 bg-[#060d29]/95 p-10 text-white shadow-[0_40px_120px_-60px_rgba(6,13,41,0.85)]">
+                            <span className="pointer-events-none absolute -left-24 -top-24 h-64 w-64 rounded-full bg-[#4dd5c8]/25 blur-3xl" aria-hidden />
+                            <span className="pointer-events-none absolute bottom-0 right-[-120px] h-80 w-80 rounded-full bg-[#fca311]/20 blur-3xl" aria-hidden />
+                            <div className="relative flex flex-col gap-6">
+                                <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-white/70">
+                                    {isZh ? '服務導覽' : 'Service Hub'}
+                                </span>
+                                <h3 className="text-3xl font-semibold md:text-4xl">{copy.quickLinksTitle}</h3>
+                                <p className="max-w-xl text-sm text-white/75 md:text-base">{copy.quickLinksDesc}</p>
+                                <ul className="grid gap-3 text-sm text-white/75 sm:grid-cols-2">
+                                    {quickLinkHighlights.slice(0, 4).map((item, index) => (
+                                        <li key={`quick-highlight-${index}`} className="flex items-center gap-2">
+                                            <span className="size-2.5 rounded-full bg-secondary/80" />
+                                            {item}
+                                        </li>
+                                    ))}
+                                </ul>
+                                <p className="text-xs uppercase tracking-[0.3em] text-white/45">
+                                    {isZh ? '向下滑動選擇適合您的入口' : 'Scroll to pick the entry that fits you'}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex flex-col gap-4">
+                            {quickLinks.length > 0 ? (
+                                quickLinks.map((link, index) => {
+                                    const title = pickLocale(localeKey, link.title, link.href);
+                                    const description = pickLocale(localeKey, link.description, '');
+                                    const accent = quickLinkAccents[index % quickLinkAccents.length];
+
+                                    return (
+                                        <Link
+                                            key={`${link.href}-${index}`}
+                                            href={link.href}
+                                            className={cn(quickLinksLayout.surfaces?.tile, accent)}
+                                        >
+                                            <span className="flex size-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-sm font-semibold text-white/80">
+                                                {String(index + 1).padStart(2, '0')}
+                                            </span>
+                                            <div className="flex flex-1 flex-col gap-1">
+                                                <span className="text-lg font-semibold md:text-xl">{title}</span>
+                                                {description && <p className="text-sm text-white/70 line-clamp-2">{description}</p>}
+                                            </div>
+                                            <ArrowRight className="size-5 text-white/70 transition-transform group-hover:translate-x-1" />
+                                        </Link>
+                                    );
+                                })
+                            ) : (
+                                <div className="rounded-3xl border border-dashed border-white/20 bg-white/60 p-8 text-center text-sm text-neutral-600">
+                                    {isZh ? '快速入口建置中，敬請期待。' : 'Quick links are coming soon.'}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </section>
 
             {/* Labs */}
-            <section id="labs" className="section-padding">
-                <div ref={labsRef} className="content-container space-y-10">
+            <section id="labs" className={labsLayout.section}>
+                <div ref={labsRef} className={cn(labsLayout.container, 'space-y-10')}>
                     <SectionHeader
                         eyebrow={isZh ? '研究亮點' : 'Research'}
                         title={copy.labsTitle}
                         description={copy.labsDesc}
                     />
-                    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                        {featuredLabs.map((lab) => {
-                            const name = pickLocale(localeKey, lab.name, `Lab ${lab.id}`);
-                            const description = pickLocale(localeKey, lab.description, '');
-                            const href = lab.code ? `/labs/${lab.code}` : '/labs';
-                            return (
-                                <Link key={lab.id} href={href} className="card-elevated group flex h-full flex-col overflow-hidden">
-                                    <div className="relative h-48 overflow-hidden">
-                                        <img
-                                            src={lab.cover_image_url ?? '/images/banner/banner2.png'}
-                                            alt={name}
-                                            className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.05]"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                                        <span className="absolute left-4 top-4 inline-flex items-center rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-neutral-900">
-                                            {isZh ? `${lab.teachers_count} 位指導教授` : `${lab.teachers_count} faculty`}
+                    {featuredLab ? (
+                        <div className={cn(labsLayout.wrapper)}>
+                            <div className={cn(labsLayout.primary)}>
+                                <Link
+                                    href={featuredLab.code ? `/labs/${featuredLab.code}` : '/labs'}
+                                    className={cn(
+                                        'group relative flex min-h-[360px] flex-col overflow-hidden rounded-[2.5rem] border border-primary/15 bg-[#060d29] text-white shadow-[0_38px_110px_-60px_rgba(8,12,36,0.9)]',
+                                        labsLayout.surfaces?.feature,
+                                    )}
+                                >
+                                    <img
+                                        src={featuredLab.cover_image_url ?? '/images/placeholders/lab.svg'}
+                                        alt={pickLocale(localeKey, featuredLab.name, `Lab ${featuredLab.id}`)}
+                                        className="absolute inset-0 h-full w-full object-cover opacity-70 transition duration-700 group-hover:scale-[1.05]"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-[#050f2e]/85 via-[#0f1c4d]/50 to-transparent" />
+                                    <div className="relative z-10 flex flex-1 flex-col justify-end gap-4 p-10">
+                                        <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-white/70">
+                                            {featuredLab.code ?? (isZh ? '研究團隊' : 'Research Lab')}
                                         </span>
-                                    </div>
-                                    <div className="flex flex-1 flex-col gap-3 p-6">
-                                        <h3 className="text-lg font-semibold text-neutral-900 transition group-hover:text-primary">{name}</h3>
-                                        {description && <p className="text-sm text-neutral-600 line-clamp-3">{description}</p>}
-                                        <span className="mt-auto inline-flex items-center gap-2 text-sm font-medium text-primary/80">
-                                            {isZh ? '深入了解' : 'Discover more'}
+                                        <h3 className="text-3xl font-semibold md:text-4xl">
+                                            {pickLocale(localeKey, featuredLab.name, `Lab ${featuredLab.id}`)}
+                                        </h3>
+                                        <p className="max-w-2xl text-sm text-white/75 md:text-base line-clamp-4">
+                                            {pickLocale(localeKey, featuredLab.description, '')}
+                                        </p>
+                                        <div className="flex flex-wrap items-center gap-3 text-xs text-white/70">
+                                            <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 font-semibold">
+                                                {isZh
+                                                    ? `${featuredLab.teachers_count} 位指導教授`
+                                                    : `${featuredLab.teachers_count} faculty mentors`}
+                                            </span>
+                                            {featuredLab.website_url && (
+                                                <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1">
+                                                    {featuredLab.website_url.replace(/^https?:\/\//, '')}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <span className="inline-flex items-center gap-2 text-sm font-medium text-white/80">
+                                            {isZh ? '探索實驗室' : 'Explore the lab'}
                                             <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                                         </span>
                                     </div>
                                 </Link>
-                            );
-                        })}
-                        {featuredLabs.length === 0 && (
-                            <div className="card-elevated flex items-center justify-center p-8 text-neutral-500">
-                                {isZh ? '實驗室資訊更新中，敬請期待。' : 'Lab information is coming soon.'}
+                                <div className={cn('grid gap-4 sm:grid-cols-2', labsLayout.surfaces?.grid)}>
+                                    {supportingLabs.length > 0 ? (
+                                        supportingLabs.map((lab, index) => {
+                                            const name = pickLocale(localeKey, lab.name, `Lab ${lab.id}`);
+                                            const description = pickLocale(localeKey, lab.description, '');
+                                            const href = lab.code ? `/labs/${lab.code}` : '/labs';
+                                            const isEven = index % 2 === 0;
+
+                                            return (
+                                                <Link
+                                                    key={lab.id}
+                                                    href={href}
+                                                    className={cn(
+                                                        'group relative flex min-h-[180px] flex-col overflow-hidden rounded-3xl border border-primary/10 bg-white/80 p-5 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-lg',
+                                                        isEven ? 'sm:col-span-2' : 'sm:col-span-1',
+                                                        labsLayout.surfaces?.card,
+                                                    )}
+                                                >
+                                                    <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.28em] text-primary/70">
+                                                        {lab.code ?? (isZh ? '研究團隊' : 'Lab')}
+                                                    </span>
+                                                    <h4 className="mt-2 text-lg font-semibold text-neutral-900">{name}</h4>
+                                                    {description && (
+                                                        <p className="mt-2 text-sm text-neutral-600 line-clamp-3">{description}</p>
+                                                    )}
+                                                    <div className="mt-auto flex items-center justify-between text-xs text-neutral-500">
+                                                        <span>
+                                                            {isZh
+                                                                ? `${lab.teachers_count} 位合作教師`
+                                                                : `${lab.teachers_count} mentors`}
+                                                        </span>
+                                                        <ArrowRight className="size-4 text-primary/60 transition-transform group-hover:translate-x-1" />
+                                                    </div>
+                                                </Link>
+                                            );
+                                        })
+                                    ) : (
+                                        <div className="rounded-3xl border border-dashed border-primary/20 bg-white/70 p-8 text-center text-sm text-neutral-600 sm:col-span-2">
+                                            {isZh ? '更多實驗室資訊即將發布。' : 'More lab profiles are coming soon.'}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    ) : (
+                        <div className="rounded-[2.5rem] border border-dashed border-primary/20 bg-white/70 p-12 text-center text-neutral-500">
+                            {isZh ? '實驗室資訊更新中，敬請期待。' : 'Lab information is coming soon.'}
+                        </div>
+                    )}
                 </div>
             </section>
 
-            {/* Faculty spotlight */}
-            <section id="faculty" className="section-padding bg-[var(--surface-muted)]">
-                <div ref={facultyRef} className="content-container space-y-10">
+            {/* Faculty roster */}
+            <section id="faculty" className={facultyLayout.section}>
+                <div ref={facultyRef} className={cn(facultyLayout.container, facultyLayout.wrapper)}>
                     <SectionHeader
                         eyebrow={isZh ? '教學團隊' : 'Faculty'}
                         title={copy.teachersTitle}
                         description={copy.teachersDesc}
                     />
-                    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-                        {spotlightTeachers.map((teacher) => {
-                            const name = pickLocale(localeKey, teacher.name, '');
-                            const title = pickLocale(localeKey, teacher.title, '');
-                            const expertise = pickLocale(localeKey, teacher.expertise, '');
-                            return (
-                                <div key={teacher.id} className="card-elevated flex h-full flex-col overflow-hidden">
-                                    <div className="relative h-48 overflow-hidden bg-primary/10">
-                                        <img
-                                            src={teacher.photo_url ?? '/images/placeholder/faculty.png'}
-                                            alt={name}
-                                            className="h-full w-full object-cover"
-                                        />
-                                    </div>
-                                    <div className="flex flex-1 flex-col gap-3 p-6">
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-neutral-900">{name}</h3>
-                                            <p className="text-sm text-neutral-500">{title}</p>
+                    {hasTeachers ? (
+                        <div className={cn(facultyLayout.primary)}>
+                            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                                <p className="text-sm text-neutral-600">
+                                    {isZh
+                                        ? `目前收錄 ${teacherList.length} 位專任師資`
+                                        : `Featuring ${teacherList.length} faculty members`}
+                                </p>
+                                <div className="flex flex-wrap items-center gap-3">
+                                    {teacherList.length > 1 && (
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => scrollTeachers('prev')}
+                                                className={cn(facultyLayout.surfaces?.navButton)}
+                                                aria-label={isZh ? '上一組師資' : 'Scroll previous faculty cards'}
+                                            >
+                                                <ChevronLeft className="size-4" />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => scrollTeachers('next')}
+                                                className={cn(facultyLayout.surfaces?.navButton)}
+                                                aria-label={isZh ? '下一組師資' : 'Scroll next faculty cards'}
+                                            >
+                                                <ChevronRight className="size-4" />
+                                            </button>
                                         </div>
-                                        {expertise && <p className="text-sm text-neutral-600 line-clamp-3">{expertise}</p>}
-                                        <Link
-                                            href="/people"
-                                            className="mt-auto inline-flex items-center gap-2 text-sm font-medium text-primary/80"
-                                        >
-                                            {isZh ? '查看師資' : 'View all faculty'}
-                                            <ArrowRight className="size-4" />
-                                        </Link>
-                                    </div>
+                                    )}
+                                    <Link
+                                        href="/people"
+                                        className="inline-flex items-center gap-2 rounded-full border border-primary/20 px-4 py-2 text-sm font-semibold text-primary transition hover:border-primary/40"
+                                    >
+                                        {isZh ? '瀏覽全部師資' : 'Browse all faculty'}
+                                        <ArrowRight className="size-4" />
+                                    </Link>
                                 </div>
-                            );
-                        })}
-                        {spotlightTeachers.length === 0 && (
-                            <div className="card-elevated flex items-center justify-center p-8 text-neutral-500">
-                                {isZh ? '師資資料更新中。' : 'Faculty spotlight will be updated soon.'}
                             </div>
-                        )}
-                    </div>
+                            <div className="relative">
+                                <div ref={teacherSliderRef} className={cn(facultyLayout.surfaces?.track)}>
+                                    {teacherList.map((teacher) => {
+                                        const name = pickLocale(localeKey, teacher.name, '');
+                                        const title = pickLocale(localeKey, teacher.title, '');
+                                        const expertise = pickLocale(localeKey, teacher.expertise, '');
+                                        const profileHref = teacher.slug ? `/people/${teacher.slug}` : '/people';
+
+                                        return (
+                                            <Link
+                                                key={`${teacher.id}-${name}`}
+                                                href={profileHref}
+                                                data-teacher-card
+                                                className={cn(
+                                                    facultyLayout.surfaces?.card,
+                                                    'group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
+                                                )}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <span className="relative flex size-14 items-center justify-center overflow-hidden rounded-2xl bg-primary/10 text-sm font-semibold text-primary">
+                                                        {teacher.photo_url ? (
+                                                            <img
+                                                                src={teacher.photo_url}
+                                                                alt={name}
+                                                                className="h-full w-full object-cover"
+                                                                loading="lazy"
+                                                            />
+                                                        ) : (
+                                                            name.charAt(0)
+                                                        )}
+                                                    </span>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-base font-semibold text-neutral-900">{name}</span>
+                                                        {title && (
+                                                            <span className="text-xs uppercase tracking-[0.25em] text-primary/70">{title}</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                {expertise && (
+                                                    <p className="mt-4 text-sm text-neutral-600 line-clamp-3">{expertise}</p>
+                                                )}
+                                                <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary">
+                                                    {isZh ? '詳細介紹' : 'View profile'}
+                                                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                                                </span>
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="rounded-[2.5rem] border border-dashed border-primary/20 bg-white/70 p-12 text-center text-neutral-500">
+                            {isZh ? '師資資料更新中。' : 'Faculty profiles will be updated soon.'}
+                        </div>
+                    )}
                 </div>
             </section>
 
             {/* Projects / Partners */}
-            <section id="partners" className="section-padding">
-                <div ref={projectsRef} className="content-container space-y-10">
+            <section id="partners" className={projectsLayout.section}>
+                <div ref={projectsRef} className={cn(projectsLayout.container, 'space-y-10')}>
                     <SectionHeader
                         eyebrow={isZh ? '產學合作' : 'Partnerships'}
                         title={copy.projectsTitle}
                         description={copy.projectsDesc}
                     />
-                    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                        {activeProjects.map((project) => {
-                            const title = pickLocale(localeKey, project.title, project.code ?? '');
-                            const duration = project.start_date
-                                ? project.end_date
-                                    ? `${dateFormatter.format(new Date(project.start_date))} - ${dateFormatter.format(new Date(project.end_date))}`
-                                    : `${dateFormatter.format(new Date(project.start_date))} - ${isZh ? '進行中' : 'Ongoing'}`
-                                : undefined;
-                            const href = project.website_url ?? '#';
-                            const isExternal = project.website_url && project.website_url.startsWith('http');
-                            const content = (
-                                <div className="card-soft flex h-full flex-col gap-4 rounded-2xl p-6 transition hover:-translate-y-1 hover:shadow-lg">
-                                    <span className="text-xs font-semibold uppercase tracking-[0.25em] text-primary/70">
-                                        {project.sponsor ?? (isZh ? '合作單位' : 'Partner')}
-                                    </span>
-                                    <h3 className="text-lg font-semibold text-neutral-900">{title}</h3>
-                                    {duration && <p className="text-xs text-neutral-500">{duration}</p>}
-                                    <span className="mt-auto inline-flex items-center gap-2 text-sm font-medium text-primary/80">
-                                        {isZh ? '瞭解計畫' : 'Explore project'}
-                                        <ArrowRight className="size-4" />
-                                    </span>
-                                </div>
-                            );
+                    {activeProjects.length > 0 ? (
+                        <div className={cn(projectsLayout.primary)}>
+                            <ul className="divide-y divide-primary/10">
+                                {activeProjects.map((project) => {
+                                    const title = pickLocale(localeKey, project.title, project.code ?? '');
+                                    const duration = project.start_date
+                                        ? project.end_date
+                                            ? `${formatDate(project.start_date)} - ${formatDate(project.end_date)}`
+                                            : `${formatDate(project.start_date)} - ${isZh ? '進行中' : 'Ongoing'}`
+                                        : undefined;
+                                    const href = project.website_url ?? '#';
+                                    const isExternal = project.website_url && project.website_url.startsWith('http');
+                                    const sponsor = project.sponsor ?? (isZh ? '合作單位' : 'Partner');
+                                    const body = (
+                                        <div className={cn(projectsLayout.surfaces?.tableRow)}>
+                                            <div className="flex flex-col gap-2">
+                                                <span className="text-xs font-semibold uppercase tracking-[0.3em] text-primary/70">{sponsor}</span>
+                                                <h3 className="text-lg font-semibold text-neutral-900 md:text-xl">{title}</h3>
+                                            </div>
+                                            <div className="text-sm text-neutral-500">
+                                                {duration ?? (isZh ? '期間資訊更新中' : 'Timeline coming soon')}
+                                            </div>
+                                            <span className="inline-flex items-center gap-2 whitespace-nowrap text-sm font-semibold text-primary">
+                                                {isExternal ? (isZh ? '前往網站' : 'Visit site') : isZh ? '了解計畫' : 'View details'}
+                                                <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                                            </span>
+                                        </div>
+                                    );
 
-                            return isExternal ? (
-                                <a key={project.id} href={href} target="_blank" rel="noopener noreferrer">
-                                    {content}
-                                </a>
-                            ) : (
-                                <div key={project.id}>{content}</div>
-                            );
-                        })}
-                        {activeProjects.length === 0 && (
-                            <div className="card-elevated flex items-center justify-center p-8 text-neutral-500">
-                                {isZh ? '合作計畫更新中。' : 'Partnership updates coming soon.'}
-                            </div>
-                        )}
-                    </div>
+                                    return (
+                                        <li key={project.id}>
+                                            {isExternal ? (
+                                                <a href={href} target="_blank" rel="noopener noreferrer">
+                                                    {body}
+                                                </a>
+                                            ) : (
+                                                <div>{body}</div>
+                                            )}
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        </div>
+                    ) : (
+                        <div className="rounded-[2.5rem] border border-dashed border-primary/20 bg-white/70 p-12 text-center text-neutral-500">
+                            {isZh ? '合作計畫更新中。' : 'Partnership updates coming soon.'}
+                        </div>
+                    )}
                 </div>
             </section>
 
             {/* Contact */}
-            <section id="contact" className="section-padding bg-gradient-to-r from-primary/10 via-transparent to-secondary/20">
-                <div className="content-container">
+            <section id="contact" className={contactLayout.section}>
+                <div className={cn(contactLayout.container)}>
                     <div
                         ref={contactRef}
-                        className="card-elevated grid gap-8 rounded-3xl p-10 shadow-2xl backdrop-blur md:grid-cols-[2fr,1fr]"
+                        className={cn(
+                            contactLayout.wrapper,
+                            'card-elevated rounded-3xl p-10 shadow-2xl backdrop-blur md:grid-cols-[2fr,1fr] gap-8',
+                        )}
                     >
                         <div className="flex flex-col gap-4">
                             <h2 className="text-3xl font-semibold text-neutral-900">{copy.contactTitle}</h2>

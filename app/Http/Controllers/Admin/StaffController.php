@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Staff;
+use App\Models\Teacher;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -24,9 +25,21 @@ class StaffController extends Controller
             ->orderBy('name')
             ->get();
 
+        $teachers = Teacher::with('user:id,name,email')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+
+        $trashedTeachers = Teacher::onlyTrashed()
+            ->orderByDesc('deleted_at')
+            ->orderBy('name')
+            ->get();
+
         return Inertia::render('admin/staff/index', [
             'staff' => $staff,
             'trashedStaff' => $trashedStaff,
+            'teachers' => $teachers,
+            'trashedTeachers' => $trashedTeachers,
         ]);
     }
 
@@ -57,6 +70,9 @@ class StaffController extends Controller
             // 儲存上傳圖片路徑
             $data['photo_url'] = $request->file('photo')->store('staff', 'public');
         }
+
+        $data['bio'] = $this->sanitizeRichText($data['bio'] ?? null);
+        $data['bio_en'] = $this->sanitizeRichText($data['bio_en'] ?? null);
 
         Staff::create($data);
 
@@ -91,6 +107,9 @@ class StaffController extends Controller
         if ($request->hasFile('photo')) {
             $data['photo_url'] = $request->file('photo')->store('staff', 'public');
         }
+
+        $data['bio'] = $this->sanitizeRichText($data['bio'] ?? null);
+        $data['bio_en'] = $this->sanitizeRichText($data['bio_en'] ?? null);
 
         $staff->update($data);
 

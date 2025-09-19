@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1d3bb8" />
+      <stop offset="55%" stop-color="#2744ac" />
+      <stop offset="100%" stop-color="#4dd5c8" />
+    </linearGradient>
+    <linearGradient id="figure" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.92)" />
+      <stop offset="100%" stop-color="rgba(238,242,255,0.65)" />
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="14" result="blur" />
+      <feBlend in="SourceGraphic" in2="blur" mode="normal" />
+    </filter>
+  </defs>
+  <rect width="640" height="640" fill="url(#bg)" rx="48" />
+  <g filter="url(#soft)">
+    <circle cx="320" cy="230" r="120" fill="url(#figure)" />
+    <path d="M160 512c0-92.8 71.2-168 160-168s160 75.2 160 168" fill="url(#figure)" />
+  </g>
+  <circle cx="480" cy="124" r="46" fill="rgba(255,180,17,0.85)" />
+  <circle cx="118" cy="158" r="32" fill="rgba(76,180,200,0.65)" />
+  <circle cx="520" cy="460" r="56" fill="rgba(255,255,255,0.12)" />
+</svg>

@@ -17,7 +17,7 @@ class TeacherController extends Controller
     {
         $teachers = Teacher::with(['user', 'labs'])
             ->orderBy('sort_order')
-            ->orderBy('name->zh-TW')
+            ->orderBy('name')
             ->paginate(20);
 
         return Inertia::render('admin/teachers/index', [
@@ -42,23 +42,27 @@ class TeacherController extends Controller
     {
         $validated = $request->validate([
             'user_id' => 'nullable|exists:users,id',
-            'name' => 'required|array',
-            'name.zh-TW' => 'required|string|max:255',
-            'name.en' => 'nullable|string|max:255',
-            'title' => 'required|array',
-            'title.zh-TW' => 'required|string|max:255',
-            'title.en' => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
+            'name_en' => 'nullable|string|max:255',
+            'title' => 'required|string|max:255',
+            'title_en' => 'nullable|string|max:255',
             'email' => 'nullable|email',
             'phone' => 'nullable|string',
             'office' => 'nullable|string',
             'job_title' => 'nullable|string',
             'photo_url' => 'nullable|url',
-            'bio' => 'nullable|array',
-            'expertise' => 'nullable|array',
-            'education' => 'nullable|array',
+            'bio' => 'nullable|string',
+            'bio_en' => 'nullable|string',
+            'expertise' => 'nullable|string',
+            'expertise_en' => 'nullable|string',
+            'education' => 'nullable|string',
+            'education_en' => 'nullable|string',
             'sort_order' => 'integer',
             'visible' => 'boolean',
         ]);
+
+        $validated['bio'] = $this->sanitizeRichText($validated['bio'] ?? null);
+        $validated['bio_en'] = $this->sanitizeRichText($validated['bio_en'] ?? null);
 
         Teacher::create($validated);
 
@@ -98,23 +102,27 @@ class TeacherController extends Controller
     {
         $validated = $request->validate([
             'user_id' => 'nullable|exists:users,id',
-            'name' => 'required|array',
-            'name.zh-TW' => 'required|string|max:255',
-            'name.en' => 'nullable|string|max:255',
-            'title' => 'required|array',
-            'title.zh-TW' => 'required|string|max:255',
-            'title.en' => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
+            'name_en' => 'nullable|string|max:255',
+            'title' => 'required|string|max:255',
+            'title_en' => 'nullable|string|max:255',
             'email' => 'nullable|email',
             'phone' => 'nullable|string',
             'office' => 'nullable|string',
             'job_title' => 'nullable|string',
             'photo_url' => 'nullable|url',
-            'bio' => 'nullable|array',
-            'expertise' => 'nullable|array',
-            'education' => 'nullable|array',
+            'bio' => 'nullable|string',
+            'bio_en' => 'nullable|string',
+            'expertise' => 'nullable|string',
+            'expertise_en' => 'nullable|string',
+            'education' => 'nullable|string',
+            'education_en' => 'nullable|string',
             'sort_order' => 'integer',
             'visible' => 'boolean',
         ]);
+
+        $validated['bio'] = $this->sanitizeRichText($validated['bio'] ?? null);
+        $validated['bio_en'] = $this->sanitizeRichText($validated['bio_en'] ?? null);
 
         $teacher->update($validated);
 

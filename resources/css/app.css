@@ -79,6 +79,12 @@
     --surface-panel: #eef1ff;
     --surface-soft: #f7f9ff;
 
+    --glass-border: rgba(148, 163, 184, 0.26);
+    --glass-border-strong: rgba(255, 255, 255, 0.38);
+    --glass-overlay: rgba(255, 255, 255, 0.12);
+    --glass-highlight: rgba(255, 255, 255, 0.65);
+    --glass-shadow: 0 46px 120px -64px rgba(21, 31, 84, 0.55);
+
     --foreground: #111827;
     --muted: #edf1f7;
     --muted-foreground: #4b5563;
@@ -118,6 +124,12 @@
     --surface-card: #111730;
     --surface-muted: #17203f;
     --surface-glass: rgba(15, 23, 42, 0.72);
+
+    --glass-border: rgba(148, 163, 184, 0.28);
+    --glass-border-strong: rgba(164, 183, 255, 0.32);
+    --glass-overlay: rgba(148, 163, 184, 0.14);
+    --glass-highlight: rgba(255, 255, 255, 0.28);
+    --glass-shadow: 0 46px 120px -64px rgba(3, 7, 23, 0.7);
 
     --foreground: #f8fafc;
     --muted: rgba(148, 163, 184, 0.16);
@@ -188,29 +200,35 @@
         text-decoration: none;
         text-underline-offset: 0.35em;
         text-decoration-thickness: 2px;
+        transition: color 200ms ease, box-shadow 200ms ease;
     }
 
     a:hover {
-        @apply text-primary/70;
-        text-decoration: underline;
+        @apply text-primary/80;
+        text-decoration: none;
+        box-shadow: 0 12px 22px -18px rgba(29, 59, 184, 0.45);
     }
 }
 
 @layer components {
     .card-elevated {
         border-radius: var(--radius-2xl);
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(240, 244, 255, 0.95));
-        box-shadow: 0 24px 72px -40px rgba(36, 54, 120, 0.3);
-        border: 1px solid color-mix(in srgb, var(--border) 70%, rgba(30, 68, 170, 0.15));
-        transition: transform 220ms ease, box-shadow 220ms ease;
+        background:
+            radial-gradient(circle at 15% 12%, rgba(77, 213, 200, 0.16) 0%, transparent 55%),
+            linear-gradient(150deg, rgba(255, 255, 255, 0.94) 0%, rgba(236, 240, 253, 0.96) 100%);
+        box-shadow: 0 28px 72px -44px rgba(20, 32, 84, 0.34);
+        border: 1px solid color-mix(in srgb, var(--border) 55%, rgba(29, 59, 184, 0.2));
+        transition: transform 240ms ease, box-shadow 240ms ease;
     }
 
     .card-soft {
         border-radius: var(--radius-xl);
-        background: linear-gradient(135deg, rgba(250, 252, 255, 0.9), rgba(233, 236, 251, 0.85));
+        background:
+            radial-gradient(circle at 80% 0%, rgba(252, 163, 17, 0.16) 0%, transparent 60%),
+            linear-gradient(160deg, rgba(255, 255, 255, 0.9) 0%, rgba(233, 239, 255, 0.9) 100%);
         box-shadow: var(--shadow-soft);
-        border: 1px solid color-mix(in srgb, var(--border) 55%, rgba(30, 68, 170, 0.12));
-        transition: transform 220ms ease, box-shadow 220ms ease;
+        border: 1px solid color-mix(in srgb, var(--border) 60%, rgba(29, 59, 184, 0.12));
+        transition: transform 240ms ease, box-shadow 240ms ease;
     }
 
     .card-elevated:hover,
@@ -219,12 +237,118 @@
         box-shadow: 0 28px 88px -42px rgba(15, 23, 42, 0.35);
     }
 
-    .glass-panel {
+    :where(.glass-panel, .glass-surface, .glass-tile, .glass-chip) {
+        position: relative;
         border-radius: var(--radius-2xl);
-        background: var(--surface-glass);
-        border: 1px solid rgba(255, 255, 255, 0.35);
-        box-shadow: 0 24px 60px -36px rgba(21, 31, 84, 0.35);
-        backdrop-filter: blur(18px);
+        background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.14) 100%),
+            var(--surface-glass);
+        border: 1px solid var(--glass-border-strong);
+        box-shadow: var(--glass-shadow);
+        backdrop-filter: blur(24px) saturate(140%);
+        transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease, background 220ms ease;
+        overflow: hidden;
+    }
+
+    :where(.glass-panel, .glass-surface, .glass-tile, .glass-chip)::before {
+        content: '';
+        position: absolute;
+        inset: 1px;
+        border-radius: inherit;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.02) 55%, transparent 100%);
+        pointer-events: none;
+        opacity: 0.9;
+        mix-blend-mode: lighten;
+    }
+
+    :where(.glass-panel, .glass-surface, .glass-tile, .glass-chip)::after {
+        content: '';
+        position: absolute;
+        inset: -40% -40% auto;
+        height: 75%;
+        border-radius: 9999px;
+        background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.45), transparent 70%);
+        opacity: 0.3;
+        filter: blur(0.5px);
+        transform: translateY(-10%);
+        transition: opacity 200ms ease;
+        pointer-events: none;
+    }
+
+    :where(.glass-panel, .glass-surface, .glass-tile, .glass-chip):hover {
+        transform: translateY(-4px) scale(1.005);
+        box-shadow: 0 52px 140px -70px rgba(15, 23, 42, 0.65);
+    }
+
+    :where(.glass-panel, .glass-surface, .glass-tile, .glass-chip):hover::after {
+        opacity: 0.5;
+    }
+
+    .dark :where(.glass-panel, .glass-surface, .glass-tile, .glass-chip) {
+        background:
+            linear-gradient(155deg, rgba(14, 22, 48, 0.78) 0%, rgba(14, 22, 48, 0.35) 100%),
+            var(--surface-glass);
+    }
+
+    .glass-panel {
+        padding: var(--glass-padding, 0);
+    }
+
+    .glass-surface {
+        padding: var(--glass-padding, 0);
+    }
+
+    .glass-tile {
+        border-radius: var(--radius-xl);
+        padding: var(--glass-padding, 0);
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        box-shadow: 0 28px 80px -56px rgba(15, 23, 42, 0.45);
+    }
+
+    .glass-chip {
+        border-radius: 9999px;
+        padding: 0.35rem 1.1rem;
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.08) 100%),
+            var(--surface-glass);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 18px 45px -32px rgba(15, 23, 42, 0.38);
+        font-weight: 600;
+    }
+
+    .glass-ring {
+        position: relative;
+        border-radius: 9999px;
+        padding: 0.25rem;
+    }
+
+    .glass-ring::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.35), transparent 65%);
+        opacity: 0.5;
+        filter: blur(1px);
+        pointer-events: none;
+    }
+
+    .hover-lift {
+        transition: transform 220ms ease, box-shadow 220ms ease, filter 220ms ease;
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-6px);
+        filter: saturate(115%);
+    }
+
+    .interactive-tilt {
+        transition: transform 280ms ease;
+        will-change: transform;
+    }
+
+    .interactive-tilt:hover {
+        transform: perspective(900px) rotateX(4deg) rotateY(-4deg) translateY(-3px);
     }
 
     .section-header {
@@ -284,13 +408,143 @@
         color: transparent;
     }
 
-    .hover-lift {
-        transition: transform 220ms ease, box-shadow 220ms ease;
+    @keyframes floaty {
+        0%,
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+
+        50% {
+            transform: translate3d(0, -8px, 0);
+        }
     }
 
-    .hover-lift:hover {
-        transform: translateY(-6px) scale(1.01);
-        box-shadow: 0 32px 80px -46px rgba(25, 36, 92, 0.4);
+    @keyframes floatyX {
+        0%,
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+
+        50% {
+            transform: translate3d(6px, 0, 0);
+        }
+    }
+
+    @keyframes fadeSlideUp {
+        0% {
+            opacity: 0;
+            transform: translate3d(0, 18px, 0);
+        }
+
+        100% {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+    @keyframes glassShimmer {
+        0% {
+            transform: translateX(-80%) skewX(-12deg);
+            opacity: 0;
+        }
+
+        30% {
+            opacity: 0.75;
+        }
+
+        60% {
+            opacity: 0;
+        }
+
+        100% {
+            transform: translateX(120%) skewX(-12deg);
+            opacity: 0;
+        }
+    }
+
+    .animate-float-slow {
+        animation: floaty 12s ease-in-out infinite;
+        will-change: transform;
+    }
+
+    .animate-float-medium {
+        animation: floaty 8s ease-in-out infinite;
+        will-change: transform;
+    }
+
+    .animate-float-horizontal {
+        animation: floatyX 10s ease-in-out infinite;
+        will-change: transform;
+    }
+
+    .animate-fade-slide {
+        animation: fadeSlideUp 520ms ease both;
+    }
+
+    .glimmer-border {
+        position: relative;
+        overflow: hidden;
+        isolation: isolate;
+    }
+
+    .glimmer-border::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent 25%, rgba(255, 255, 255, 0.45) 50%, transparent 75%);
+        mix-blend-mode: screen;
+        opacity: 0.8;
+        animation: glassShimmer 6s ease-in-out infinite;
+        pointer-events: none;
+    }
+
+    .glass-spotlight {
+        position: relative;
+        isolation: isolate;
+    }
+
+    .glass-spotlight::before {
+        content: '';
+        position: absolute;
+        inset: -30% -20%;
+        background: radial-gradient(circle at var(--spotlight-x, 50%) var(--spotlight-y, 30%), rgba(255, 255, 255, 0.22), transparent 60%);
+        mix-blend-mode: screen;
+        opacity: 0.7;
+        filter: blur(28px);
+        pointer-events: none;
+        transition: opacity 220ms ease;
+    }
+
+    .glass-spotlight:hover::before {
+        opacity: 1;
+    }
+
+    .interactive-glow {
+        transition: box-shadow 200ms ease, border-color 200ms ease;
+        box-shadow: 0 18px 48px -30px rgba(29, 59, 184, 0.35);
+    }
+
+    .interactive-glow:hover {
+        border-color: rgba(255, 255, 255, 0.5);
+        box-shadow: 0 32px 80px -48px rgba(45, 80, 170, 0.55);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .animate-float-slow,
+        .animate-float-medium,
+        .animate-float-horizontal,
+        .animate-fade-slide,
+        .glimmer-border::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+        }
+
+        .hover-lift,
+        .interactive-tilt,
+        .interactive-glow {
+            transition: none !important;
+            transform: none !important;
+        }
     }
 
     .hero-overlay {

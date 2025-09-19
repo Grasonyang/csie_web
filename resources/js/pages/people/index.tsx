@@ -41,7 +41,7 @@ interface PeopleIndexProps {
     };
 }
 
-const FALLBACK_IMAGE = '/images/placeholder/faculty.png';
+const FALLBACK_IMAGE = '/images/placeholders/faculty.svg';
 
 function pickLocale(locale: string, value?: LocaleRecord, fallback = ''): string {
     if (!value) return fallback;
@@ -72,6 +72,8 @@ export default function PeopleIndex({ people, filters, statistics }: PeopleIndex
         if (!filters.role) return people;
         return people.filter((person) => person.role === filters.role);
     }, [people, filters.role]);
+
+    const [primaryPerson, ...secondaryPeople] = filteredPeople;
 
     const applyFilters = (overrides: Partial<{ role?: 'faculty' | 'staff' | null; q?: string | null }>) => {
         const query = {
@@ -207,98 +209,150 @@ export default function PeopleIndex({ people, filters, statistics }: PeopleIndex
                         }
                     />
 
-                    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                        {filteredPeople.map((person) => {
-                            const name = pickLocale(isZh ? 'zh-TW' : 'en', person.name, '');
-                            const title = pickLocale(isZh ? 'zh-TW' : 'en', person.title, '');
-                            const expertiseText = pickLocale(isZh ? 'zh-TW' : 'en', person.expertise, '');
-                            const expertiseTags = expertiseText ? toTags(expertiseText) : [];
-                            const labs = (person.labs ?? []).map((lab) => ({
-                                code: lab.code,
-                                name: pickLocale(isZh ? 'zh-TW' : 'en', lab.name, ''),
-                            }));
-
-                            return (
-                                <Link
-                                    key={person.slug}
-                                    href={`/people/${person.slug}`}
-                                    className="group flex h-full flex-col overflow-hidden rounded-3xl border border-neutral-200 bg-surface-soft shadow-sm hover-lift"
-                                >
-                                    <div className="relative h-52 overflow-hidden bg-primary/5">
+                    {primaryPerson ? (
+                        <div className="grid gap-8 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+                            <Link
+                                href={`/people/${primaryPerson.slug}`}
+                                className="group relative flex min-h-[360px] flex-col overflow-hidden rounded-[2.5rem] border border-primary/15 bg-white/90 shadow-[0_36px_110px_-62px_rgba(28,37,82,0.4)]"
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-br from-[#4dd5c8]/12 via-transparent to-[#1d3bb8]/12" aria-hidden />
+                                <div className="grid gap-0 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+                                    <div className="relative h-full min-h-[320px] overflow-hidden md:rounded-l-[2.5rem]">
                                         <img
-                                            src={person.photo_url ?? FALLBACK_IMAGE}
-                                            alt={name}
-                                            className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.05]"
+                                            src={primaryPerson.photo_url ?? FALLBACK_IMAGE}
+                                            alt={pickLocale(isZh ? 'zh-TW' : 'en', primaryPerson.name, '')}
+                                            className="h-full w-full object-cover"
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-                                        <span className="absolute left-4 top-4 inline-flex items-center rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-neutral-700">
-                                            {person.role === 'faculty' ? (isZh ? '師資' : 'Faculty') : isZh ? '行政' : 'Staff'}
-                                        </span>
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent md:bg-gradient-to-r" />
                                     </div>
-                                    <div className="flex flex-1 flex-col gap-4 p-6">
+                                    <div className="relative flex flex-col gap-4 p-8 md:p-10">
+                                        <span className="inline-flex w-fit items-center gap-2 rounded-full bg-primary/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-primary/80">
+                                            {primaryPerson.role === 'faculty' ? (isZh ? '專任師資' : 'Faculty') : isZh ? '行政團隊' : 'Staff'}
+                                        </span>
                                         <div>
-                                            <h2 className="text-xl font-semibold text-neutral-900">{name}</h2>
-                                            <p className="text-sm text-neutral-500">{title}</p>
+                                            <h3 className="text-3xl font-semibold text-neutral-900 md:text-4xl">
+                                                {pickLocale(isZh ? 'zh-TW' : 'en', primaryPerson.name, '')}
+                                            </h3>
+                                            <p className="mt-2 text-sm text-neutral-500 md:text-base">
+                                                {pickLocale(isZh ? 'zh-TW' : 'en', primaryPerson.title, '')}
+                                            </p>
                                         </div>
-                                        {(person.email || person.phone || person.office) && (
-                                            <div className="flex flex-wrap gap-3 text-xs text-neutral-500">
-                                                {person.email && (
-                                                    <span className="inline-flex items-center gap-2 rounded-full bg-primary/5 px-3 py-1 text-primary">
-                                                        <Mail className="size-3" />
-                                                        {person.email}
-                                                    </span>
-                                                )}
-                                                {person.phone && (
-                                                    <span className="inline-flex items-center gap-2 rounded-full bg-primary/5 px-3 py-1 text-primary">
-                                                        <Phone className="size-3" />
-                                                        {person.phone}
-                                                    </span>
-                                                )}
-                                                {person.office && (
-                                                    <span className="inline-flex items-center gap-2 rounded-full bg-primary/5 px-3 py-1 text-primary">
-                                                        <MapPin className="size-3" />
-                                                        {person.office}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        )}
-                                        {expertiseTags.length > 0 && (
-                                            <div className="flex flex-wrap gap-2 text-xs text-neutral-500">
-                                                {expertiseTags.map((tag, index) => (
-                                                    <span
-                                                        key={`${person.slug}-tag-${index}`}
-                                                        className="rounded-full bg-neutral-100 px-3 py-1"
-                                                    >
-                                                        {tag}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        )}
-                                        {labs.length > 0 && (
-                                            <div className="flex flex-wrap items-center gap-2 text-xs text-primary">
+                                        <div className="flex flex-wrap gap-2 text-xs text-neutral-500">
+                                            {primaryPerson.email && (
+                                                <span className="inline-flex items-center gap-2 rounded-full bg-primary/5 px-3 py-1 text-primary">
+                                                    <Mail className="size-3" />
+                                                    {primaryPerson.email}
+                                                </span>
+                                            )}
+                                            {primaryPerson.phone && (
+                                                <span className="inline-flex items-center gap-2 rounded-full bg-primary/5 px-3 py-1 text-primary">
+                                                    <Phone className="size-3" />
+                                                    {primaryPerson.phone}
+                                                </span>
+                                            )}
+                                            {primaryPerson.office && (
+                                                <span className="inline-flex items-center gap-2 rounded-full bg-primary/5 px-3 py-1 text-primary">
+                                                    <MapPin className="size-3" />
+                                                    {primaryPerson.office}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="text-sm text-neutral-600 md:text-base">
+                                            {pickLocale(isZh ? 'zh-TW' : 'en', primaryPerson.expertise, '')}
+                                        </p>
+                                        {(primaryPerson.labs ?? []).length > 0 && (
+                                            <div className="mt-auto flex flex-wrap items-center gap-2 text-xs text-primary">
                                                 <Users className="size-4" />
-                                                {labs.map((lab, index) => (
-                                                    <span key={`${person.slug}-lab-${index}`}>
-                                                        {lab.code ? `${lab.code}` : ''} {lab.name}
+                                                {primaryPerson.labs?.map((lab, index) => (
+                                                    <span key={`${primaryPerson.slug}-lab-${index}`}>
+                                                        {lab.code ? `${lab.code} ` : ''}
+                                                        {pickLocale(isZh ? 'zh-TW' : 'en', lab.name, '')}
                                                     </span>
                                                 ))}
                                             </div>
                                         )}
-                                        <span className="mt-auto inline-flex items-center gap-2 text-sm font-medium text-primary/80">
-                                            {isZh ? '查看詳情' : 'View profile'}
+                                        <span className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
+                                            {isZh ? '查看詳細資料' : 'View full profile'}
                                             <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                                         </span>
                                     </div>
-                                </Link>
-                            );
-                        })}
+                                </div>
+                            </Link>
 
-                        {filteredPeople.length === 0 && (
-                            <div className="rounded-3xl border border-dashed border-neutral-200 bg-surface-soft p-12 text-center text-neutral-500">
-                                {isZh ? '沒有符合條件的成員。' : 'No members matched your filters.'}
+                            <div className="overflow-hidden rounded-[2.5rem] border border-primary/12 bg-white/85 shadow-[0_24px_70px_-48px_rgba(18,35,90,0.25)]">
+                                {secondaryPeople.length > 0 ? (
+                                    <ul className="divide-y divide-primary/10">
+                                        {secondaryPeople.map((person) => {
+                                            const name = pickLocale(isZh ? 'zh-TW' : 'en', person.name, '');
+                                            const title = pickLocale(isZh ? 'zh-TW' : 'en', person.title, '');
+                                            const expertiseText = pickLocale(isZh ? 'zh-TW' : 'en', person.expertise, '');
+                                            const expertiseTags = expertiseText ? toTags(expertiseText) : [];
+
+                                            return (
+                                                <li key={person.slug}>
+                                                    <Link
+                                                        href={`/people/${person.slug}`}
+                                                        className="group grid gap-4 p-6 transition hover:bg-primary/5 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center"
+                                                    >
+                                                        <span className="relative flex size-16 items-center justify-center overflow-hidden rounded-2xl border border-primary/10 bg-primary/5">
+                                                            <img
+                                                                src={person.photo_url ?? FALLBACK_IMAGE}
+                                                                alt={name}
+                                                                className="h-full w-full object-cover"
+                                                            />
+                                                        </span>
+                                                        <div className="flex flex-col gap-2">
+                                                            <div className="flex flex-wrap items-center gap-2">
+                                                                <span className="text-base font-semibold text-neutral-900 md:text-lg">{name}</span>
+                                                                <span className="rounded-full bg-primary/10 px-3 py-0.5 text-[11px] font-semibold uppercase tracking-[0.25em] text-primary/70">
+                                                                    {person.role === 'faculty' ? (isZh ? '師資' : 'Faculty') : isZh ? '行政' : 'Staff'}
+                                                                </span>
+                                                            </div>
+                                                            <span className="text-xs uppercase tracking-[0.3em] text-neutral-500">{title}</span>
+                                                            {(person.email || person.phone) && (
+                                                                <div className="flex flex-wrap gap-3 text-xs text-neutral-500">
+                                                                    {person.email && (
+                                                                        <span className="inline-flex items-center gap-2 rounded-full bg-primary/5 px-3 py-1 text-primary">
+                                                                            <Mail className="size-3" />
+                                                                            {person.email}
+                                                                        </span>
+                                                                    )}
+                                                                    {person.phone && (
+                                                                        <span className="inline-flex items-center gap-2 rounded-full bg-primary/5 px-3 py-1 text-primary">
+                                                                            <Phone className="size-3" />
+                                                                            {person.phone}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                            {expertiseTags.length > 0 && (
+                                                                <div className="flex flex-wrap gap-2 text-xs text-neutral-500">
+                                                                    {expertiseTags.map((tag, index) => (
+                                                                        <span key={`${person.slug}-tag-${index}`} className="rounded-full bg-neutral-100 px-3 py-1">
+                                                                            {tag}
+                                                                        </span>
+                                                                    ))}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <ArrowRight className="size-4 text-primary/60 transition-transform group-hover:translate-x-1" />
+                                                    </Link>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                ) : (
+                                    <div className="p-8 text-center text-sm text-neutral-600">
+                                        {isZh ? '僅顯示單一成員。' : 'Only one member matches the filters.'}
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    ) : (
+                        <div className="rounded-[2.5rem] border border-dashed border-primary/20 bg-white/70 p-12 text-center text-neutral-500">
+                            {isZh ? '沒有符合條件的成員。' : 'No members matched your filters.'}
+                        </div>
+                    )}
                 </div>
             </section>
         </PublicLayout>

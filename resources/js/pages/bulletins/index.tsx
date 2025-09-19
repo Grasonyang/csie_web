@@ -1,10 +1,12 @@
 import PublicLayout from '@/layouts/public-layout';
 import SectionHeader from '@/components/public/section-header';
 import useScrollReveal from '@/hooks/use-scroll-reveal';
+import { cn } from '@/lib/utils';
+import { getPageLayout } from '@/styles/page-layouts';
 import type { SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
-import { ArrowRight, Filter, Search } from 'lucide-react';
+import { ArrowRight, CalendarDays, Filter, Search } from 'lucide-react';
 
 interface BulletinCategory {
     id: number;
@@ -69,6 +71,13 @@ export default function BulletinIndex({ posts, categories, filters }: BulletinsP
     const locale = page.props.locale ?? 'zh-TW';
     const isZh = locale.toLowerCase() === 'zh-tw';
 
+    const dateFormatter = new Intl.DateTimeFormat(isZh ? 'zh-TW' : 'en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+    });
+    const formatDate = (value?: string | null) => (value ? dateFormatter.format(new Date(value)) : null);
+
     const [searchValue, setSearchValue] = useState(filters.q ?? '');
 
     const applyFilters = (overrides: Partial<{ cat?: string | null; q?: string | null }>) => {
@@ -102,27 +111,32 @@ export default function BulletinIndex({ posts, categories, filters }: BulletinsP
     const listRef = useScrollReveal<HTMLDivElement>({ threshold: 0.15 });
     const sidebarRef = useScrollReveal<HTMLDivElement>({ threshold: 0.2 });
 
+    const layout = getPageLayout('bulletinsIndex');
+    const heroLayout = layout.hero!;
+    const categoriesLayout = layout.sections.categories;
+    const listingLayout = layout.sections.listing;
+
     return (
         <PublicLayout>
             <Head title={isZh ? '系所公告' : 'Bulletins'} />
 
-            <section className="section-padding bg-[var(--surface-muted)]">
-                <div ref={heroRef} className="content-container space-y-6">
-                    <div className="flex flex-col gap-6 rounded-3xl bg-surface-panel p-8 shadow-lg backdrop-blur md:flex-row md:items-center md:justify-between">
-                        <div className="max-w-2xl space-y-2">
-                            <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-primary">
-                                {isZh ? '公告' : 'Bulletin'}
-                            </span>
-                            <h1 className="text-3xl font-semibold text-neutral-900 md:text-4xl">
-                                {isZh ? '系所公告與最新快訊' : 'Department announcements and updates'}
-                            </h1>
-                            <p className="text-neutral-600">
-                                {isZh
-                                    ? '瀏覽系所招生、活動、行政與學術公告，掌握所有重要訊息。'
-                                    : 'Find the latest admission news, academic events, and administrative announcements in one place.'}
-                            </p>
-                        </div>
-                        <form onSubmit={onSubmitSearch} className="flex w-full max-w-xl items-center gap-3 rounded-full border border-neutral-200 bg-surface-soft px-4 py-2 shadow-sm">
+            <section className={heroLayout.section}>
+                <div ref={heroRef} className={cn(heroLayout.container, heroLayout.wrapper)}>
+                    <div className={cn(heroLayout.surfaces?.primary, heroLayout.primary)}>
+                        <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-primary">
+                            {isZh ? '公告' : 'Bulletin'}
+                        </span>
+                        <h1 className="text-3xl font-semibold text-neutral-900 md:text-4xl">
+                            {isZh ? '系所公告與最新快訊' : 'Department announcements and updates'}
+                        </h1>
+                        <p className="max-w-2xl text-neutral-600">
+                            {isZh
+                                ? '瀏覽系所招生、活動、行政與學術公告，掌握所有重要訊息。'
+                                : 'Find the latest admission news, academic events, and administrative announcements in one place.'}
+                        </p>
+                    </div>
+                    <form onSubmit={onSubmitSearch} className={cn(heroLayout.secondary, heroLayout.surfaces?.search)}>
+                        <div className="flex w-full items-center gap-3 rounded-full border border-neutral-200 bg-white px-4 py-2 shadow-sm">
                             <Search className="size-5 text-primary" />
                             <input
                                 type="search"
@@ -144,26 +158,33 @@ export default function BulletinIndex({ posts, categories, filters }: BulletinsP
                                     {isZh ? '清除' : 'Clear'}
                                 </button>
                             )}
-                            <button
-                                type="submit"
-                                className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
-                            >
-                                {isZh ? '搜尋' : 'Search'}
-                            </button>
-                        </form>
-                    </div>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-neutral-400">
+                            <span>{isZh ? '支援標籤與全文搜尋' : 'Supports tags & full-text search'}</span>
+                        </div>
+                        <button
+                            type="submit"
+                            className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+                        >
+                            {isZh ? '搜尋' : 'Search'}
+                        </button>
+                    </form>
+                </div>
+            </section>
 
-                    <div ref={categoryRef} className="flex items-center gap-2 text-sm text-neutral-500">
+            <section className={categoriesLayout.section}>
+                <div ref={categoryRef} className={cn(categoriesLayout.container, categoriesLayout.wrapper)}>
+                    <div className="flex items-center gap-2 text-sm text-neutral-500">
                         <Filter className="size-4" />
                         <span>{isZh ? '公告分類' : 'Categories'}</span>
                     </div>
-                    <div className="no-scrollbar flex gap-3 overflow-x-auto pb-2">
+                    <div className={cn(categoriesLayout.primary)}>
                         <button
                             type="button"
                             onClick={() => applyFilters({ cat: null })}
-                            className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition ${
-                                !filters.cat ? 'bg-primary text-white shadow-lg' : 'bg-surface-soft text-neutral-600 shadow'
-                            }`}
+                            className={cn(
+                                !filters.cat ? categoriesLayout.surfaces?.pillActive : categoriesLayout.surfaces?.pill,
+                            )}
                         >
                             {isZh ? '全部公告' : 'All'}
                         </button>
@@ -172,11 +193,11 @@ export default function BulletinIndex({ posts, categories, filters }: BulletinsP
                                 type="button"
                                 key={category.id}
                                 onClick={() => applyFilters({ cat: category.slug })}
-                                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm transition ${
+                                className={cn(
                                     filters.cat === category.slug
-                                        ? 'bg-primary text-white shadow-lg'
-                                        : 'bg-surface-soft text-neutral-600 shadow'
-                                }`}
+                                        ? categoriesLayout.surfaces?.pillActive
+                                        : categoriesLayout.surfaces?.pill,
+                                )}
                             >
                                 {isZh ? category.name : category.name_en}
                             </button>
@@ -185,9 +206,9 @@ export default function BulletinIndex({ posts, categories, filters }: BulletinsP
                 </div>
             </section>
 
-            <section className="section-padding">
-                <div className="content-container grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
-                    <div ref={listRef} className="space-y-6">
+            <section className={listingLayout.section}>
+                <div className={cn(listingLayout.container, listingLayout.wrapper)}>
+                    <div ref={listRef} className={cn(listingLayout.primary, 'space-y-6')}>
                         <SectionHeader
                             eyebrow={isZh ? '最新' : 'Latest'}
                             title={isZh ? '最新公告' : 'Recent Bulletins'}
@@ -206,62 +227,69 @@ export default function BulletinIndex({ posts, categories, filters }: BulletinsP
                             }
                         />
 
-                        <div className="grid gap-6">
-                            {posts.data.map((post) => {
-                                const title = isZh ? post.title : post.title_en ?? post.title;
-                                const summary = isZh ? post.summary ?? '' : post.summary_en ?? post.summary ?? '';
-                                const publishDate = post.publish_at ? new Date(post.publish_at) : null;
-                                const categoryLabel = post.category
-                                    ? isZh
-                                        ? post.category.name
-                                        : post.category.name_en
-                                    : undefined;
+                        {posts.data.length > 0 ? (
+                            <div
+                                className={cn(
+                                    'overflow-hidden rounded-[2.5rem] border border-primary/12 bg-white/85 shadow-[0_28px_88px_-58px_rgba(18,35,90,0.3)]',
+                                    listingLayout.surfaces?.card,
+                                )}
+                            >
+                                <ul className="divide-y divide-primary/10">
+                                    {posts.data.map((post) => {
+                                        const title = isZh ? post.title : post.title_en ?? post.title;
+                                        const summary = isZh ? post.summary ?? '' : post.summary_en ?? post.summary ?? '';
+                                        const categoryLabel = post.category
+                                            ? isZh
+                                                ? post.category.name
+                                                : post.category.name_en
+                                            : undefined;
+                                        const publishDate = formatDate(post.publish_at);
 
-                                return (
-                                    <Link
-                                        href={`/bulletins/${post.slug}`}
-                                        key={post.id}
-                                        className="group flex flex-col gap-4 rounded-3xl border border-neutral-200 bg-surface-soft p-6 shadow-sm hover-lift"
-                                    >
-                                        <div className="flex items-center gap-3 text-xs text-neutral-500">
-                                            {categoryLabel && (
-                                                <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 font-medium text-primary">
-                                                    {categoryLabel}
-                                                </span>
-                                            )}
-                                            {publishDate && (
-                                                <time dateTime={publishDate.toISOString()}>
-                                                    {new Intl.DateTimeFormat(isZh ? 'zh-TW' : 'en-US', {
-                                                        year: 'numeric',
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                    }).format(publishDate)}
-                                                </time>
-                                            )}
-                                            {post.pinned && (
-                                                <span className="inline-flex items-center rounded-full bg-secondary/20 px-2 py-1 text-[11px] font-semibold text-primary">
-                                                    {isZh ? '置頂' : 'Pinned'}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <h2 className="text-2xl font-semibold text-neutral-900 transition group-hover:text-primary">
-                                            {title}
-                                        </h2>
-                                        {summary && <p className="text-sm text-neutral-600">{summary}</p>}
-                                        <span className="inline-flex items-center gap-2 text-sm font-medium text-primary/80">
-                                            {isZh ? '閱讀全文' : 'Read article'}
-                                            <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-                                        </span>
-                                    </Link>
-                                );
-                            })}
-
-                            {posts.data.length === 0 && (
-                                <div className="rounded-3xl border border-dashed border-neutral-200 bg-surface-soft p-12 text-center text-neutral-500">
-                                    {isZh ? '查無符合條件的公告。' : 'No bulletins match your filters.'}
-                                </div>
-                            )}
-                        </div>
+                                        return (
+                                            <li key={post.id}>
+                                                <Link
+                                                    href={`/bulletins/${post.slug}`}
+                                                    className="group grid gap-3 p-6 transition hover:bg-primary/5 md:grid-cols-[minmax(0,0.7fr)_minmax(0,1fr)_auto] md:items-center"
+                                                >
+                                                    <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+                                                        {categoryLabel && (
+                                                            <span className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 font-medium text-primary">
+                                                                {categoryLabel}
+                                                            </span>
+                                                        )}
+                                                        {publishDate && (
+                                                            <span className="inline-flex items-center gap-1">
+                                                                <CalendarDays className="size-3" />
+                                                                {publishDate}
+                                                            </span>
+                                                        )}
+                                                        {post.pinned && (
+                                                            <span className="inline-flex items-center rounded-full bg-secondary/25 px-2 py-0.5 text-[11px] font-semibold text-secondary-foreground/80">
+                                                                {isZh ? '置頂' : 'Pinned'}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex flex-col gap-2">
+                                                        <span className="text-lg font-semibold text-neutral-900 md:text-xl">
+                                                            {title}
+                                                        </span>
+                                                        {summary && <p className="text-sm text-neutral-600 line-clamp-2">{summary}</p>}
+                                                    </div>
+                                                    <div className="flex items-center gap-2 text-sm font-semibold text-primary md:justify-self-end">
+                                                        {isZh ? '閱讀' : 'Read'}
+                                                        <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                                                    </div>
+                                                </Link>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </div>
+                        ) : (
+                            <div className="rounded-[2.5rem] border border-dashed border-primary/20 bg-white/70 p-12 text-center text-neutral-500">
+                                {isZh ? '查無符合條件的公告。' : 'No bulletins match your filters.'}
+                            </div>
+                        )}
 
                         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-neutral-200 pt-6 text-sm text-neutral-500">
                             <div>
@@ -291,8 +319,8 @@ export default function BulletinIndex({ posts, categories, filters }: BulletinsP
                         </div>
                     </div>
 
-                    <aside ref={sidebarRef} className="space-y-6">
-                        <div className="rounded-3xl border border-neutral-200 bg-surface-soft p-6 shadow-sm">
+                    <aside ref={sidebarRef} className={cn(listingLayout.secondary, 'space-y-6')}>
+                        <div className={cn(listingLayout.surfaces?.sidebarCard)}>
                             <h3 className="text-lg font-semibold text-neutral-900">{isZh ? '置頂公告' : 'Pinned bulletins'}</h3>
                             <div className="mt-4 space-y-3">
                                 {pinnedPosts.length ? (
@@ -324,7 +352,7 @@ export default function BulletinIndex({ posts, categories, filters }: BulletinsP
                             </div>
                         </div>
 
-                        <div className="rounded-3xl border border-neutral-200 bg-surface-soft p-6 shadow-sm">
+                        <div className={cn(listingLayout.surfaces?.sidebarCard)}>
                             <h3 className="text-lg font-semibold text-neutral-900">{isZh ? '分類總覽' : 'Categories'}</h3>
                             <ul className="mt-4 space-y-2 text-sm text-neutral-600">
                                 {categories.map((category) => (
