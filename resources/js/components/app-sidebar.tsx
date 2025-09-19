@@ -10,7 +10,6 @@ import {
     Users,
     UserCheck,
     Beaker,
-    BookOpen,
     GraduationCap,
     Megaphone,
     FileText,
@@ -48,13 +47,8 @@ export function AppSidebar() {
             icon: Beaker,
         },
         {
-            title: isZh ? '課程管理' : 'Courses',
-            href: '/admin/courses',
-            icon: BookOpen,
-        },
-        {
-            title: isZh ? '學程管理' : 'Programs',
-            href: '/admin/programs',
+            title: isZh ? '課程與學程' : 'Courses & Programs',
+            href: '/admin/academics',
             icon: GraduationCap,
         },
         {

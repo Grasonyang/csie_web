@@ -15,45 +15,10 @@ class CourseController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Course::with(['program']);
-
-        if ($search = $request->input('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('code', 'like', "%{$search}%")
-                    ->orWhere('name->zh-TW', 'like', "%{$search}%")
-                    ->orWhere('name->en', 'like', "%{$search}%");
-            });
-        }
-
-        if ($program = $request->input('program')) {
-            $query->where('program_id', $program);
-        }
-
-        if ($level = $request->input('level')) {
-            $query->where('level', $level);
-        }
-
-        if (!is_null($visible = $request->input('visible'))) {
-            if ($visible === '1' || $visible === 1 || $visible === true) {
-                $query->where('visible', true);
-            } elseif ($visible === '0' || $visible === 0 || $visible === false) {
-                $query->where('visible', false);
-            }
-        }
-
-        $perPage = max(1, (int) $request->input('per_page', 20));
-
-        $courses = $query
-            ->orderBy('code')
-            ->paginate($perPage)
-            ->withQueryString();
-
-        return Inertia::render('admin/courses/index', [
-            'courses' => $courses,
-            'programs' => Program::orderBy('name->zh-TW')->get(['id', 'name']),
-            'filters' => $request->only(['search', 'program', 'level', 'visible', 'per_page']),
-            'perPageOptions' => [10, 20, 50],
-        ]);
+        return redirect()->route('admin.academics.index', array_merge(
+            $request->query(),
+            ['tab' => 'courses']
+        ));
     }
 
     /**
@@ -87,7 +52,7 @@ class CourseController extends Controller
 
         Course::create($validated);
 
-        return redirect()->route('admin.courses.index')
+        return redirect()->route('admin.academics.index', ['tab' => 'courses'])
             ->with('success', '課程建立成功');
     }
 
@@ -133,7 +98,7 @@ class CourseController extends Controller
 
         $course->update($validated);
 
-        return redirect()->route('admin.courses.index')
+        return redirect()->route('admin.academics.index', ['tab' => 'courses'])
             ->with('success', '課程更新成功');
     }
 
@@ -144,7 +109,7 @@ class CourseController extends Controller
     {
         $course->delete();
 
-        return redirect()->route('admin.courses.index')
+        return redirect()->route('admin.academics.index', ['tab' => 'courses'])
             ->with('success', '課程刪除成功');
     }
 }
