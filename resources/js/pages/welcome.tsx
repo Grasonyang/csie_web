@@ -6,6 +6,7 @@ import type { SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, MapPin, Mail, Phone, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { isRichTextEmpty } from '@/lib/rich-text';
 import { getPageLayout } from '@/styles/page-layouts';
 import { useRef } from 'react';
 
@@ -654,6 +655,7 @@ export default function Welcome() {
                                         const name = pickLocale(localeKey, teacher.name, '');
                                         const title = pickLocale(localeKey, teacher.title, '');
                                         const expertise = pickLocale(localeKey, teacher.expertise, '');
+                                        const hasExpertise = !isRichTextEmpty(expertise);
                                         const profileHref = teacher.slug ? `/people/${teacher.slug}` : '/people';
 
                                         return (
@@ -686,8 +688,11 @@ export default function Welcome() {
                                                         )}
                                                     </div>
                                                 </div>
-                                                {expertise && (
-                                                    <p className="mt-4 text-sm text-neutral-600 line-clamp-3">{expertise}</p>
+                                                {hasExpertise && (
+                                                    <div
+                                                        className="mt-4 line-clamp-3 text-sm text-neutral-600 [&>p]:m-0 [&>p]:leading-relaxed [&_ul]:my-1 [&_ul]:list-disc [&_ol]:my-1 [&_ol]:list-decimal [&_li]:ml-5 [&_a]:text-primary [&_a]:underline"
+                                                        dangerouslySetInnerHTML={{ __html: expertise }}
+                                                    />
                                                 )}
                                                 <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary">
                                                     {isZh ? '詳細介紹' : 'View profile'}

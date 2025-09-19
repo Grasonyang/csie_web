@@ -1,8 +1,8 @@
+import RichTextEditor from '@/components/admin/rich-text-editor';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useForm } from '@inertiajs/react';
 import { FormEventHandler, useState } from 'react';
@@ -106,141 +106,33 @@ export default function TeacherForm({ teacher, users = [], onSubmit }: TeacherFo
             visible: teacher.visible ?? true,
             ...(teacher.id ? { _method: 'put' } : {}),
         };
-    }; const form = useForm<TeacherFormData>(transformTeacherData(teacher));
+    };
+    const form = useForm<TeacherFormData>(transformTeacherData(teacher));
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
         onSubmit(form);
     };
 
-    // 簡易富文本編輯器功能
-    const formatText = (field: keyof TeacherFormData, format: string) => {
-        const textarea = document.getElementById(field as string) as HTMLTextAreaElement;
-        if (!textarea) return;
-
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const selectedText = textarea.value.substring(start, end);
-
-        let formattedText = '';
-        switch (format) {
-            case 'bold':
-                formattedText = `**${selectedText || '粗體文字'}**`;
-                break;
-            case 'italic':
-                formattedText = `*${selectedText || '斜體文字'}*`;
-                break;
-            case 'underline':
-                formattedText = `__${selectedText || '底線文字'}__`;
-                break;
-            case 'list':
-                formattedText = `\n- ${selectedText || '列表項目'}`;
-                break;
-            case 'link':
-                formattedText = `[${selectedText || '連結文字'}](http://example.com)`;
-                break;
-        }
-
-        const newValue =
-            textarea.value.substring(0, start) +
-            formattedText +
-            textarea.value.substring(end);
-
-        form.setData(field as keyof TeacherFormData, newValue);
-
-        // 設定游標位置
-        setTimeout(() => {
-            textarea.focus();
-            textarea.setSelectionRange(start + formattedText.length, start + formattedText.length);
-        }, 0);
-    };
-
-    const insertText = (field: keyof TeacherFormData, text: string) => {
-        const currentValue = form.data[field] as string || '';
-        form.setData(field, currentValue + text);
-    };
-
-    const TextEditor = ({ field, label, rows = 6 }: {
-        field: keyof TeacherFormData;
-        label: string;
-        rows?: number;
-    }) => {
-        const value = form.data[field] as string || '';
+    const renderRichTextField = (
+        field: keyof TeacherFormData,
+        label: string,
+        placeholder: string,
+        helpText: string
+    ) => {
+        const value = (form.data[field] as string) || '';
 
         return (
             <div className="space-y-2">
                 <Label htmlFor={field as string}>{label}</Label>
-
-                {/* 簡易工具列 */}
-                <div className="flex flex-wrap gap-1 rounded border bg-gray-50 p-2">
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => formatText(field, 'bold')}
-                        className="h-8 px-2 text-xs"
-                    >
-                        <strong>B</strong>
-                    </Button>
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => formatText(field, 'italic')}
-                        className="h-8 px-2 text-xs"
-                    >
-                        <em>I</em>
-                    </Button>
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => formatText(field, 'underline')}
-                        className="h-8 px-2 text-xs"
-                    >
-                        <u>U</u>
-                    </Button>
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => formatText(field, 'list')}
-                        className="h-8 px-2 text-xs"
-                    >
-                        •
-                    </Button>
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => formatText(field, 'link')}
-                        className="h-8 px-2 text-xs"
-                    >
-                        🔗
-                    </Button>
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => insertText(field, '\n\n---\n\n')}
-                        className="h-8 px-2 text-xs"
-                    >
-                        ───
-                    </Button>
-                </div>
-
-                <Textarea
+                <RichTextEditor
                     id={field as string}
-                    rows={rows}
                     value={value}
-                    onChange={(e) => form.setData(field, e.target.value)}
-                    className="min-h-[150px] font-mono text-sm"
-                    placeholder="請輸入內容..."
+                    placeholder={placeholder}
+                    onChange={(html) => form.setData(field, html)}
                 />
                 <InputError message={form.errors[field]} />
-                <p className="text-xs text-gray-500">
-                    支援 Markdown 語法：**粗體** *斜體* __底線__ [連結](網址) - 列表
-                </p>
+                <p className="text-xs text-gray-500">{helpText}</p>
             </div>
         );
     };
@@ -411,9 +303,24 @@ export default function TeacherForm({ teacher, users = [], onSubmit }: TeacherFo
                                         <InputError message={form.errors.title} />
                                     </div>
 
-                                    <TextEditor field="bio" label="個人簡介" rows={8} />
-                                    <TextEditor field="expertise" label="專長領域" rows={4} />
-                                    <TextEditor field="education" label="學歷" rows={4} />
+                                    {renderRichTextField(
+                                        'bio',
+                                        '個人簡介',
+                                        '請輸入個人簡介...',
+                                        '支援粗體、斜體、底線、項目符號與超連結。'
+                                    )}
+                                    {renderRichTextField(
+                                        'expertise',
+                                        '專長領域',
+                                        '請輸入專長領域...',
+                                        '建議以條列或段落形式說明，支援基本格式與連結。'
+                                    )}
+                                    {renderRichTextField(
+                                        'education',
+                                        '學歷',
+                                        '請輸入學歷資訊...',
+                                        '可使用段落或列表呈現學歷，支援基本格式與連結。'
+                                    )}
                                 </div>
                             )}
 
@@ -439,9 +346,24 @@ export default function TeacherForm({ teacher, users = [], onSubmit }: TeacherFo
                                         <InputError message={form.errors.title_en} />
                                     </div>
 
-                                    <TextEditor field="bio_en" label="Biography" rows={8} />
-                                    <TextEditor field="expertise_en" label="Expertise" rows={4} />
-                                    <TextEditor field="education_en" label="Education" rows={4} />
+                                    {renderRichTextField(
+                                        'bio_en',
+                                        'Biography',
+                                        'Enter biography...',
+                                        'Supports bold, italic, underline, bullet list, and hyperlinks.'
+                                    )}
+                                    {renderRichTextField(
+                                        'expertise_en',
+                                        'Expertise',
+                                        'Describe the areas of expertise...',
+                                        'Use paragraphs or lists to highlight expertise. Basic formatting and links are supported.'
+                                    )}
+                                    {renderRichTextField(
+                                        'education_en',
+                                        'Education',
+                                        'List academic background...',
+                                        'Provide education history with paragraphs or bullet points. Formatting and links are supported.'
+                                    )}
                                 </div>
                             )}
                         </CardContent>

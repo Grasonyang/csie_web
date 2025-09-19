@@ -108,11 +108,14 @@ export default function TeacherList({ teachers }: TeacherListProps) {
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        {teachers.data.map((teacher) => (
-                            <div
-                                key={teacher.id}
-                                className="flex flex-col gap-4 rounded-lg border border-gray-200 p-4 sm:flex-row sm:items-start"
-                            >
+                        {teachers.data.map((teacher) => {
+                            const bioHtml = isZh ? teacher.bio : teacher.bio_en || teacher.bio;
+
+                            return (
+                                <div
+                                    key={teacher.id}
+                                    className="flex flex-col gap-4 rounded-lg border border-gray-200 p-4 sm:flex-row sm:items-start"
+                                >
                                 <div className="flex-shrink-0">
                                     {teacher.photo_url ? (
                                         <img
@@ -177,12 +180,11 @@ export default function TeacherList({ teachers }: TeacherListProps) {
                                         )}
                                     </div>
 
-                                    {teacher.bio && (
-                                        <div className="text-sm text-gray-600">
-                                            <p className="line-clamp-2">
-                                                {isZh ? teacher.bio : teacher.bio_en || teacher.bio}
-                                            </p>
-                                        </div>
+                                    {bioHtml && (
+                                        <div
+                                            className="line-clamp-3 text-sm text-gray-600 [&>p]:m-0 [&>p]:leading-relaxed [&_ul]:my-1 [&_ul]:list-disc [&_ol]:my-1 [&_ol]:list-decimal [&_li]:ml-5 [&_a]:text-blue-600 [&_a]:underline"
+                                            dangerouslySetInnerHTML={{ __html: bioHtml }}
+                                        />
                                     )}
 
                                     {teacher.labs && teacher.labs.length > 0 && (
@@ -215,8 +217,9 @@ export default function TeacherList({ teachers }: TeacherListProps) {
                                         </Button>
                                     )}
                                 </div>
-                            </div>
-                        ))}
+                                </div>
+                            );
+                        })}
                     </div>
                 )}
 

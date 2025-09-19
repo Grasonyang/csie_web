@@ -5,13 +5,13 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
     ArrowRight,
-    GraduationCap,
     LinkIcon,
     Mail,
     MapPin,
     Phone,
     Users,
 } from 'lucide-react';
+import { isRichTextEmpty } from '@/lib/rich-text';
 
 interface LocaleRecord {
     ['zh-TW']?: string | string[] | null;
@@ -55,15 +55,6 @@ function pickLocale(locale: string, record?: LocaleRecord, fallback = ''): strin
     return value ?? alt ?? fallback;
 }
 
-function normalizeList(value: string | string[] | undefined): string[] {
-    if (!value) return [];
-    if (Array.isArray(value)) return value.filter((item) => Boolean(item)).map((item) => item.toString().trim());
-    return value
-        .split(/[,\n\r]+/)
-        .map((item) => item.trim())
-        .filter(Boolean);
-}
-
 export default function PeopleShow({ person }: PeopleShowProps) {
     const page = usePage<SharedData>();
     const locale = page.props.locale ?? 'zh-TW';
@@ -71,9 +62,9 @@ export default function PeopleShow({ person }: PeopleShowProps) {
 
     const name = pickLocale(isZh ? 'zh-TW' : 'en', person.name, '') as string;
     const title = pickLocale(isZh ? 'zh-TW' : 'en', person.title, '') as string;
-    const bio = pickLocale(isZh ? 'zh-TW' : 'en', person.bio, '') as string;
-    const expertiseList = normalizeList(pickLocale(isZh ? 'zh-TW' : 'en', person.expertise));
-    const educationList = normalizeList(pickLocale(isZh ? 'zh-TW' : 'en', person.education));
+    const bioHtml = pickLocale(isZh ? 'zh-TW' : 'en', person.bio, '') as string;
+    const expertiseHtml = pickLocale(isZh ? 'zh-TW' : 'en', person.expertise, '') as string;
+    const educationHtml = pickLocale(isZh ? 'zh-TW' : 'en', person.education, '') as string;
 
     const labs = (person.labs ?? []).map((lab) => ({
         code: lab.code,
@@ -142,37 +133,33 @@ export default function PeopleShow({ person }: PeopleShowProps) {
             <section className="section-padding">
                 <div className="content-container grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
                     <article ref={contentRef} className="space-y-8">
-                        {bio ? (
+                        {!isRichTextEmpty(bioHtml) && (
                             <div className="rounded-3xl border border-neutral-200 bg-surface-soft p-8 shadow-sm">
                                 <h2 className="text-lg font-semibold text-neutral-900">{isZh ? '個人簡介' : 'Biography'}</h2>
-                                <p className="mt-4 whitespace-pre-line text-neutral-700">{bio}</p>
-                            </div>
-                        ) : null}
-
-                        {expertiseList.length > 0 && (
-                            <div className="rounded-3xl border border-neutral-200 bg-surface-soft p-8 shadow-sm">
-                                <h2 className="text-lg font-semibold text-neutral-900">{isZh ? '研究專長' : 'Expertise'}</h2>
-                                <div className="mt-4 flex flex-wrap gap-2">
-                                    {expertiseList.map((item, index) => (
-                                        <span key={`tag-${index}`} className="rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
-                                            {item}
-                                        </span>
-                                    ))}
-                                </div>
+                                <div
+                                    className="mt-4 space-y-3 text-neutral-700 [&>p]:m-0 [&>p]:leading-relaxed [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-6 [&_a]:text-primary [&_a]:underline"
+                                    dangerouslySetInnerHTML={{ __html: bioHtml }}
+                                />
                             </div>
                         )}
 
-                        {educationList.length > 0 && (
+                        {!isRichTextEmpty(expertiseHtml) && (
+                            <div className="rounded-3xl border border-neutral-200 bg-surface-soft p-8 shadow-sm">
+                                <h2 className="text-lg font-semibold text-neutral-900">{isZh ? '研究專長' : 'Expertise'}</h2>
+                                <div
+                                    className="mt-4 space-y-3 text-neutral-700 [&>p]:m-0 [&>p]:leading-relaxed [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-6 [&_a]:text-primary [&_a]:underline"
+                                    dangerouslySetInnerHTML={{ __html: expertiseHtml }}
+                                />
+                            </div>
+                        )}
+
+                        {!isRichTextEmpty(educationHtml) && (
                             <div className="rounded-3xl border border-neutral-200 bg-surface-soft p-8 shadow-sm">
                                 <h2 className="text-lg font-semibold text-neutral-900">{isZh ? '學歷' : 'Education'}</h2>
-                                <ul className="mt-4 space-y-2 text-neutral-700">
-                                    {educationList.map((item, index) => (
-                                        <li key={`edu-${index}`} className="flex items-start gap-2">
-                                            <GraduationCap className="mt-1 size-4 text-primary" />
-                                            <span>{item}</span>
-                                        </li>
-                                    ))}
-                                </ul>
+                                <div
+                                    className="mt-4 space-y-3 text-neutral-700 [&>p]:m-0 [&>p]:leading-relaxed [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-6 [&_a]:text-primary [&_a]:underline"
+                                    dangerouslySetInnerHTML={{ __html: educationHtml }}
+                                />
                             </div>
                         )}
 
