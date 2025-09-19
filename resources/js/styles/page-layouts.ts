@@ -101,6 +101,7 @@ function makeHero(
 }
 
 const brandPalette = palettes.brand;
+const dashboardPalette = palettes.dashboard;
 const midnightPalette = palettes.midnight;
 const warmPalette = palettes.warm;
 const slatePalette = palettes.slate;
@@ -222,7 +223,7 @@ export const pageLayouts: Record<PageKey, PageLayoutPreset> = {
         name: 'Admin dashboard',
         description:
             'Admin control center with immersive hero, metric summary grid, quick actions matrix, and timeline-based updates replacing repetitive cards.',
-        palette: midnightPalette,
+        palette: dashboardPalette,
         hero: makeHero(heroVariants.immersive, {
             title: 'Operations hero',
             description:
@@ -230,8 +231,9 @@ export const pageLayouts: Record<PageKey, PageLayoutPreset> = {
             primary: cn(heroVariants.immersive.primary ?? '', 'gap-5 md:gap-6'),
             surfaces: {
                 base: cn(
-                    heroVariants.immersive.surfaces?.base ?? '',
-                    'relative overflow-hidden after:absolute after:inset-0 after:bg-[radial-gradient(circle_at_top,rgba(144,162,255,0.35),transparent_55%)]',
+                    'relative overflow-hidden',
+                    'bg-gradient-to-br from-[#151f54]/95 via-[#1f2a6d]/88 to-[#0b102f]/92',
+                    'after:absolute after:inset-0 after:content-[""] after:bg-[radial-gradient(circle_at_top_right,rgba(255,180,1,0.28),transparent_60%)] after:mix-blend-screen',
                 ),
             },
             notes: ['Hero includes breadcrumbs via App layout header, keep text concise and use accent chips for KPIs.'],
@@ -241,11 +243,16 @@ export const pageLayouts: Record<PageKey, PageLayoutPreset> = {
                 title: 'KPI metric grid',
                 description:
                     'Adaptive four-column metric grid with accent chips and minimal borders. Uses negative top margin to overlap hero for depth.',
+                section: cn(
+                    sectionVariants.metrics.section,
+                    'relative isolate bg-[radial-gradient(circle_at_top,#151f54_0%,#0f153f_65%,#0b102f_100%)] text-white/80',
+                ),
+                container: cn(sectionVariants.metrics.container, 'relative'),
                 wrapper: cn(sectionVariants.metrics.wrapper, '-mt-20 md:-mt-24'),
                 surfaces: {
                     card: cn(
                         surfaceTokens.card,
-                        'bg-white/85 px-6 py-6 text-neutral-900 shadow-[0_40px_120px_-70px_rgba(6,12,39,0.55)] ring-1 ring-white/50 dark:bg-white/10',
+                        'bg-white/92 px-6 py-6 text-[#151f54] shadow-[0_38px_120px_-70px_rgba(21,31,84,0.58)] ring-1 ring-white/35',
                     ),
                 },
             }),
@@ -253,28 +260,36 @@ export const pageLayouts: Record<PageKey, PageLayoutPreset> = {
                 title: 'Administrative quick actions',
                 description:
                     'Responsive matrix of navigation tiles with icon badges and directional affordance. Uses equal height tiles for consistency.',
+                section: cn(sectionVariants.standardWide.section, 'bg-[#101b4f] text-white'),
+                container: cn(sectionVariants.standardWide.container, 'space-y-6'),
                 wrapper: 'grid gap-6 md:grid-cols-2 xl:grid-cols-3',
                 surfaces: {
                     action: cn(
-                        'glass-tile glass-spotlight glimmer-border group relative flex h-full flex-col justify-between gap-6 px-6 py-6 text-white transition duration-300 hover:-translate-y-1.5',
+                        'glass-tile glass-spotlight group relative flex h-full flex-col justify-between gap-6 px-6 py-6 text-white transition duration-300 hover:-translate-y-1.5',
+                        'border border-white/15 shadow-[0_48px_140px_-70px_rgba(13,19,63,0.78)]',
                     ),
-                    badge: 'glass-chip bg-white/15 px-3 py-1 text-xs uppercase tracking-[0.3em] text-white/85',
+                    badge: 'glass-chip border-white/25 bg-white/10 px-3 py-1 text-xs uppercase tracking-[0.3em] text-white/80',
                 },
             }),
             activity: makeSection(sectionVariants.denseList, {
                 title: 'Recent activity & workflows',
                 description:
                     'Two-column layout: left uses timeline list for bulletins, right employs checklist-style panels for tasks. Replaces identical card rows.',
+                section: cn(
+                    sectionVariants.denseList.section,
+                    'bg-gradient-to-br from-[#0f153f] via-[#111b4f] to-[#182a73] text-white/85',
+                ),
+                container: cn(sectionVariants.denseList.container, 'space-y-8'),
                 wrapper: 'grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]',
-                primary: cn(surfaceTokens.cardMuted, 'px-6 py-6'),
-                secondary: cn(surfaceTokens.cardMuted, 'px-6 py-6'),
+                primary: cn(surfaceTokens.cardMuted, 'px-6 py-6 backdrop-blur-lg text-white/90'),
+                secondary: cn(surfaceTokens.cardMuted, 'px-6 py-6 backdrop-blur-lg text-white/90'),
                 surfaces: {
                     timeline: cn(surfaceTokens.timeline),
-                    timelineItem: cn(surfaceTokens.timelineItem, 'before:bg-[#90a2ff]'),
+                    timelineItem: cn(surfaceTokens.timelineItem, 'before:bg-[#ffb401] after:bg-white/12'),
                     taskRow:
-                        'glass-tile flex items-center justify-between rounded-2xl border-white/20 bg-white/5 px-5 py-3 text-white/90 backdrop-blur-sm',
+                        'glass-tile flex items-center justify-between rounded-2xl border-[#ffb401]/25 bg-[#151f54]/35 px-5 py-3 text-white/85 backdrop-blur-md',
                 },
-                notes: ['Keep timeline entries short; ensure icons align with midnight theme.'],
+                notes: ['Keep timeline entries short; ensure icons align with the refreshed brand palette.'],
             }),
         },
     },
