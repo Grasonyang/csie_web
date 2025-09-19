@@ -38,7 +38,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                     {({ processing, errors }) => (
                         <>
                             <div className="grid gap-2">
-                                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                                <Label htmlFor="email" className="text-sm font-medium text-slate-700">
                                     {isZh ? "電子郵件" : "Email"}
                                 </Label>
                                 <Input
@@ -48,14 +48,14 @@ export default function ForgotPassword({ status }: { status?: string }) {
                                     autoComplete="off"
                                     autoFocus
                                     placeholder="請輸入您的電子郵件"
-                                    className="bg-white text-gray-900 border-gray-300 placeholder:text-gray-500 focus:border-[#151f54] focus:ring-[#151f54] focus:ring-1"
+                                    className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:ring-blue-600 focus:ring-1"
                                 />
                                 <InputError message={errors.email} />
                             </div>
 
                             <div className="my-6 flex items-center justify-start">
                                 <Button
-                                    className="w-full bg-[#151f54] hover:bg-[#1e2968] text-white"
+                                    className="w-full bg-blue-600 text-white hover:bg-blue-700"
                                     disabled={processing}
                                     data-test="email-password-reset-link-button"
                                 >
@@ -67,12 +67,9 @@ export default function ForgotPassword({ status }: { status?: string }) {
                     )}
                 </Form>
 
-                <div className="space-x-1 text-center text-sm text-gray-600">
+                <div className="space-x-1 text-center text-sm text-slate-600">
                     <span>{isZh ? "或者，" : "Or,"}</span>
-                    <TextLink
-                        href={login()}
-                        className="text-[#151f54] hover:text-[#ffb401] font-medium"
-                    >
+                    <TextLink href={login()} className="font-medium text-blue-700 hover:text-blue-800">
                         {isZh ? "返回登入頁面" : "return to login"}
                     </TextLink>
                 </div>

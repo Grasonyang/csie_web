@@ -43,7 +43,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                     <>
                         <div className="grid gap-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                                <Label htmlFor="email" className="text-sm font-medium text-slate-700">
                                     {isZh ? "電子郵件" : "Email"}
                                 </Label>
                                 <Input
@@ -55,20 +55,20 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     tabIndex={1}
                                     autoComplete="email"
                                     placeholder={isZh ? "請輸入電子郵件" : "Enter your email"}
-                                    className="bg-white text-gray-900 border-gray-300 placeholder:text-gray-500 focus:border-[#151f54] focus:ring-[#151f54] focus:ring-1"
+                                    className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:ring-blue-600 focus:ring-1"
                                 />
                                 <InputError message={errors.email} />
                             </div>
 
                             <div className="grid gap-2">
                                 <div className="flex items-center justify-between">
-                                    <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                                    <Label htmlFor="password" className="text-sm font-medium text-slate-700">
                                         {isZh ? "密碼" : "Password"}
                                     </Label>
                                     {canResetPassword && (
                                         <TextLink
                                             href={request()}
-                                            className="text-sm text-[#151f54] hover:text-[#ffb401]"
+                                            className="text-sm text-blue-700 hover:text-blue-800"
                                             tabIndex={5}
                                         >
                                             {isZh ? "忘記密碼？" : "Forgot password?"}
@@ -83,7 +83,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     tabIndex={2}
                                     autoComplete="current-password"
                                     placeholder={isZh ? "請輸入密碼" : "Enter your password"}
-                                    className="bg-white text-gray-900 border-gray-300 placeholder:text-gray-500 focus:border-[#151f54] focus:ring-[#151f54] focus:ring-1"
+                                    className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:ring-blue-600 focus:ring-1"
                                 />
                                 <InputError message={errors.password} />
                             </div>
@@ -93,16 +93,16 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     id="remember"
                                     name="remember"
                                     tabIndex={3}
-                                    className="data-[state=checked]:bg-[#151f54] data-[state=checked]:border-[#151f54]"
+                                    className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600"
                                 />
-                                <Label htmlFor="remember" className="text-sm text-gray-700">
+                                <Label htmlFor="remember" className="text-sm text-slate-700">
                                     {isZh ? "記住我" : "Remember me"}
                                 </Label>
                             </div>
 
                             <Button
                                 type="submit"
-                                className="mt-4 w-full bg-[#151f54] hover:bg-[#1e2968] text-white"
+                                className="mt-4 w-full bg-blue-600 text-white hover:bg-blue-700"
                                 tabIndex={4}
                                 disabled={processing}
                                 data-test="login-button"
@@ -112,12 +112,12 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             </Button>
                         </div>
 
-                        <div className="text-center text-sm text-gray-600">
+                        <div className="text-center text-sm text-slate-600">
                             {isZh ? "還沒有帳號？" : "Don't have an account?"}{' '}
                             <TextLink
                                 href={register()}
                                 tabIndex={6}
-                                className="text-[#151f54] hover:text-[#ffb401] font-medium"
+                                className="font-medium text-blue-700 hover:text-blue-800"
                             >
                                 {isZh ? "註冊新帳號" : "Sign up"}
                             </TextLink>

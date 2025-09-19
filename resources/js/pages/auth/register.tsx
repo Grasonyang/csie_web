@@ -35,7 +35,7 @@ export default function Register() {
                     <>
                         <div className="grid gap-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="name" className="text-sm font-medium text-gray-700">
+                                <Label htmlFor="name" className="text-sm font-medium text-slate-700">
                                     {isZh ? "姓名" : "Name"}
                                 </Label>
                                 <Input
@@ -47,13 +47,13 @@ export default function Register() {
                                     autoComplete="name"
                                     name="name"
                                     placeholder={isZh ? "請輸入您的姓名" : "Enter your name"}
-                                    className="bg-white text-gray-900 border-gray-300 placeholder:text-gray-500 focus:border-[#151f54] focus:ring-[#151f54] focus:ring-1"
+                                    className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:ring-blue-600 focus:ring-1"
                                 />
                                 <InputError message={errors.name} className="mt-2" />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                                <Label htmlFor="email" className="text-sm font-medium text-slate-700">
                                     {isZh ? "電子郵件" : "Email"}
                                 </Label>
                                 <Input
@@ -64,13 +64,13 @@ export default function Register() {
                                     autoComplete="email"
                                     name="email"
                                     placeholder={isZh ? "請輸入電子郵件" : "Enter your email"}
-                                    className="bg-white text-gray-900 border-gray-300 placeholder:text-gray-500 focus:border-[#151f54] focus:ring-[#151f54] focus:ring-1"
+                                    className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:ring-blue-600 focus:ring-1"
                                 />
                                 <InputError message={errors.email} />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                                <Label htmlFor="password" className="text-sm font-medium text-slate-700">
                                     {isZh ? "密碼" : "Password"}
                                 </Label>
                                 <Input
@@ -81,13 +81,13 @@ export default function Register() {
                                     autoComplete="new-password"
                                     name="password"
                                     placeholder={isZh ? "請輸入密碼" : "Enter your password"}
-                                    className="bg-white text-gray-900 border-gray-300 placeholder:text-gray-500 focus:border-[#151f54] focus:ring-[#151f54] focus:ring-1"
+                                    className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:ring-blue-600 focus:ring-1"
                                 />
                                 <InputError message={errors.password} />
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password_confirmation" className="text-sm font-medium text-gray-700">
+                                <Label htmlFor="password_confirmation" className="text-sm font-medium text-slate-700">
                                     {isZh ? "確認密碼" : "Confirm Password"}
                                 </Label>
                                 <Input
@@ -98,14 +98,14 @@ export default function Register() {
                                     autoComplete="new-password"
                                     name="password_confirmation"
                                     placeholder={isZh ? "請再次輸入密碼" : "Confirm your password"}
-                                    className="bg-white text-gray-900 border-gray-300 placeholder:text-gray-500 focus:border-[#151f54] focus:ring-[#151f54] focus:ring-1"
+                                    className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:ring-blue-600 focus:ring-1"
                                 />
                                 <InputError message={errors.password_confirmation} />
                             </div>
 
                             <Button
                                 type="submit"
-                                className="mt-4 w-full bg-[#151f54] hover:bg-[#1e2968] text-white"
+                                className="mt-4 w-full bg-blue-600 text-white hover:bg-blue-700"
                                 tabIndex={5}
                                 data-test="register-user-button"
                             >
@@ -114,12 +114,12 @@ export default function Register() {
                             </Button>
                         </div>
 
-                        <div className="text-center text-sm text-gray-600">
+                        <div className="text-center text-sm text-slate-600">
                             {isZh ? "已經有帳號了？" : "Already have an account?"}{' '}
                             <TextLink
                                 href={login()}
                                 tabIndex={6}
-                                className="text-[#151f54] hover:text-[#ffb401] font-medium"
+                                className="font-medium text-blue-700 hover:text-blue-800"
                             >
                                 {isZh ? "立即登入" : "Sign in"}
                             </TextLink>
