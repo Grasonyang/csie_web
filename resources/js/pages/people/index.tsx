@@ -5,6 +5,7 @@ import type { SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import { ArrowRight, Mail, MapPin, Phone, Search, Users } from 'lucide-react';
+import { isRichTextEmpty, richTextToPlainText } from '@/lib/rich-text';
 
 interface LocaleRecord {
     ['zh-TW']?: string | null;
@@ -51,7 +52,9 @@ function pickLocale(locale: string, value?: LocaleRecord, fallback = ''): string
 }
 
 function toTags(text: string, limit = 3): string[] {
-    return text
+    const plainText = richTextToPlainText(text);
+
+    return plainText
         .split(/[,\n\r]+/)
         .map((item) => item.trim())
         .filter(Boolean)
@@ -257,9 +260,23 @@ export default function PeopleIndex({ people, filters, statistics }: PeopleIndex
                                                 </span>
                                             )}
                                         </div>
-                                        <p className="text-sm text-neutral-600 md:text-base">
-                                            {pickLocale(isZh ? 'zh-TW' : 'en', primaryPerson.expertise, '')}
-                                        </p>
+                                        {(() => {
+                                            const expertiseHtml = pickLocale(
+                                                isZh ? 'zh-TW' : 'en',
+                                                primaryPerson.expertise,
+                                                ''
+                                            );
+                                            if (isRichTextEmpty(expertiseHtml)) {
+                                                return null;
+                                            }
+
+                                            return (
+                                                <div
+                                                    className="text-sm text-neutral-600 md:text-base [&>p]:m-0 [&>p]:leading-relaxed [&_ul]:my-2 [&_ul]:list-disc [&_ol]:my-2 [&_ol]:list-decimal [&_li]:ml-5 [&_a]:text-primary [&_a]:underline"
+                                                    dangerouslySetInnerHTML={{ __html: expertiseHtml }}
+                                                />
+                                            );
+                                        })()}
                                         {(primaryPerson.labs ?? []).length > 0 && (
                                             <div className="mt-auto flex flex-wrap items-center gap-2 text-xs text-primary">
                                                 <Users className="size-4" />
