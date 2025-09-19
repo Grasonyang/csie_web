@@ -1,5 +1,32 @@
 import { cn } from '@/lib/utils';
 
+export const brandTokens = {
+    primary: {
+        hex: '#151f54',
+        text: 'text-[#151f54]',
+        bg: 'bg-[#151f54]',
+        gradient: 'bg-gradient-to-br from-[#151f54] via-[#1f2a6d] to-[#27337d]',
+        aura: 'bg-[rgba(21,31,84,0.2)]',
+        shadow: 'shadow-[0_40px_120px_-70px_rgba(21,31,84,0.6)]',
+    },
+    secondary: {
+        hex: '#ffb401',
+        text: 'text-[#ffb401]',
+        bg: 'bg-[#ffb401]',
+        gradient: 'bg-gradient-to-br from-[#402400] via-[#8a6300] to-[#ffb401]',
+        aura: 'bg-[rgba(255,180,1,0.24)]',
+        shadow: 'shadow-[0_40px_120px_-70px_rgba(255,180,1,0.5)]',
+    },
+    accent: {
+        hex: '#fff809',
+        text: 'text-[#fff809]',
+        bg: 'bg-[#fff809]',
+        gradient: 'bg-gradient-to-br from-[#7a6b00] via-[#c0a900] to-[#fff809]',
+        aura: 'bg-[rgba(255,248,9,0.26)]',
+        shadow: 'shadow-[0_40px_120px_-70px_rgba(255,248,9,0.45)]',
+    },
+} as const;
+
 export interface PaletteTokens {
     background: string;
     backgroundMuted: string;
@@ -15,20 +42,51 @@ export interface PaletteTokens {
     focusRing: string;
 }
 
+export interface DashboardStatPalette {
+    icon: string;
+    surface: string;
+    chip: string;
+    trend: string;
+    aura: string;
+    hover: string;
+}
+
+export interface DashboardActionPalette {
+    surface: string;
+    icon: string;
+    body: string;
+    arrow: string;
+    hover: string;
+}
+
 export const palettes: Record<string, PaletteTokens> = {
     brand: {
-        background: 'bg-[var(--surface-base)]',
-        backgroundMuted: 'bg-[var(--surface-muted)]',
+        background: 'bg-[#f4f6ff]',
+        backgroundMuted: 'bg-[#eef1ff]',
         surface: 'bg-white',
-        surfaceAlt: 'bg-surface-soft',
-        surfaceInverted: 'bg-[#060d29] text-white',
-        textPrimary: 'text-neutral-900',
-        textMuted: 'text-neutral-600',
-        textAccent: 'text-primary',
-        surfaceAccent: 'bg-primary text-primary-foreground',
-        surfaceAccentContrast: 'bg-primary/10 text-primary',
-        border: 'border border-neutral-200/70',
-        focusRing: 'focus-visible:ring-primary/40 focus-visible:outline-none focus-visible:ring-2',
+        surfaceAlt: 'bg-[#f8f9ff]',
+        surfaceInverted: 'bg-[#151f54] text-white',
+        textPrimary: 'text-[#151f54]',
+        textMuted: 'text-slate-600',
+        textAccent: 'text-[#ffb401]',
+        surfaceAccent: 'bg-[#ffb401] text-[#151f54]',
+        surfaceAccentContrast: 'bg-[#ffb401]/10 text-[#151f54]',
+        border: 'border border-[#d5dcf8]',
+        focusRing: 'focus-visible:ring-[#ffb401]/45 focus-visible:outline-none focus-visible:ring-2',
+    },
+    dashboard: {
+        background: 'bg-[#0f153f]',
+        backgroundMuted: 'bg-[#111b4f]',
+        surface: 'bg-white/12 text-white',
+        surfaceAlt: 'bg-[#151f54]/70 text-white',
+        surfaceInverted: 'bg-white text-[#151f54]',
+        textPrimary: 'text-white',
+        textMuted: 'text-white/70',
+        textAccent: 'text-[#ffb401]',
+        surfaceAccent: 'bg-[#ffb401] text-[#151f54]',
+        surfaceAccentContrast: 'bg-[#ffb401]/12 text-[#ffb401]',
+        border: 'border border-white/18',
+        focusRing: 'focus-visible:ring-[#ffb401]/40 focus-visible:outline-none focus-visible:ring-2',
     },
     midnight: {
         background: 'bg-[#050b2a]',
@@ -73,6 +131,65 @@ export const palettes: Record<string, PaletteTokens> = {
         focusRing: 'focus-visible:ring-slate-400/70 focus-visible:outline-none focus-visible:ring-2',
     },
 };
+
+export const dashboardTones: Record<string, { stat: DashboardStatPalette; action: DashboardActionPalette }> = {
+    primary: {
+        stat: {
+            icon: 'bg-gradient-to-br from-[#151f54] via-[#1f2a6d] to-[#27337d] text-white shadow-[0_22px_60px_-28px_rgba(21,31,84,0.65)]',
+            surface: 'bg-gradient-to-br from-white/96 via-white/76 to-[#151f54]/14 text-[#151f54]',
+            chip: 'border-[#151f54]/30 bg-[#151f54]/12',
+            trend: 'text-[#ffb401]',
+            aura: 'bg-[rgba(21,31,84,0.18)]',
+            hover: 'hover:shadow-[0_36px_110px_-62px_rgba(21,31,84,0.62)]',
+        },
+        action: {
+            surface:
+                'bg-gradient-to-br from-[#151f54]/96 via-[#1f2a6d]/92 to-[#0f153f]/88 text-white shadow-[0_48px_140px_-70px_rgba(13,19,63,0.78)]',
+            icon: 'bg-white/12 text-white shadow-lg',
+            body: 'text-white/75',
+            arrow: 'text-[#ffb401]/75',
+            hover: 'hover:shadow-[0_52px_150px_-70px_rgba(13,19,63,0.85)]',
+        },
+    },
+    secondary: {
+        stat: {
+            icon: 'bg-gradient-to-br from-[#8a6300] via-[#c68900] to-[#ffb401] text-white shadow-[0_22px_60px_-28px_rgba(255,180,1,0.55)]',
+            surface: 'bg-gradient-to-br from-white/95 via-white/74 to-[#ffb401]/18 text-[#3d2a00]',
+            chip: 'border-[#ffb401]/30 bg-[#ffb401]/18',
+            trend: 'text-[#8a6300]',
+            aura: 'bg-[rgba(255,180,1,0.24)]',
+            hover: 'hover:shadow-[0_36px_110px_-62px_rgba(255,180,1,0.48)]',
+        },
+        action: {
+            surface:
+                'bg-gradient-to-br from-[#402400]/94 via-[#8a6300]/88 to-[#ffb401]/78 text-white shadow-[0_48px_140px_-70px_rgba(82,48,0,0.7)]',
+            icon: 'bg-white/12 text-white shadow-lg',
+            body: 'text-[#fff4cc]',
+            arrow: 'text-white/80',
+            hover: 'hover:shadow-[0_52px_150px_-70px_rgba(64,36,0,0.82)]',
+        },
+    },
+    accent: {
+        stat: {
+            icon: 'bg-gradient-to-br from-[#7a6b00] via-[#c0a900] to-[#fff809] text-white shadow-[0_22px_60px_-28px_rgba(255,248,9,0.45)]',
+            surface: 'bg-gradient-to-br from-white/95 via-white/74 to-[#fff809]/18 text-[#3d3100]',
+            chip: 'border-[#fff809]/25 bg-[#fff809]/20',
+            trend: 'text-[#151f54]',
+            aura: 'bg-[rgba(255,248,9,0.26)]',
+            hover: 'hover:shadow-[0_36px_110px_-62px_rgba(255,248,9,0.45)]',
+        },
+        action: {
+            surface:
+                'bg-gradient-to-br from-[#151f54]/92 via-[#3d3600]/86 to-[#fff809]/76 text-white shadow-[0_48px_140px_-70px_rgba(21,31,84,0.72)]',
+            icon: 'bg-white/14 text-white shadow-lg',
+            body: 'text-white/80',
+            arrow: 'text-white/75',
+            hover: 'hover:shadow-[0_52px_150px_-70px_rgba(21,31,84,0.8)]',
+        },
+    },
+};
+
+export type DashboardTone = keyof typeof dashboardTones;
 
 export interface SectionStyle {
     section: string;

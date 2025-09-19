@@ -3,6 +3,7 @@ import { GlassChip, GlassPanel, GlassTile } from '@/components/glass';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getPageLayout } from '@/styles/page-layouts';
+import { dashboardTones, type DashboardTone } from '@/styles/layout-system';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
@@ -30,16 +31,16 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-type StatTone = 'indigo' | 'emerald' | 'violet' | 'amber';
+type StatTone = DashboardTone;
 
-type QuickTone = 'indigo' | 'emerald' | 'violet' | 'amber';
+type QuickTone = DashboardTone;
 
 function StatCard({
     title,
     value,
     icon: Icon,
     trend,
-    tone = 'indigo',
+    tone = 'primary',
     className,
 }: {
     title: string;
@@ -49,53 +50,38 @@ function StatCard({
     tone?: StatTone;
     className?: string;
 }) {
-    const palette: Record<StatTone, { icon: string; surface: string; chip: string; trend: string; aura: string }> = {
-        indigo: {
-            icon: 'bg-gradient-to-br from-[#1d3bb8] to-[#3f66ff] shadow-[0_18px_55px_-28px_rgba(29,59,184,0.65)]',
-            surface: 'bg-gradient-to-br from-white/90 via-white/70 to-[#1d3bb8]/14',
-            chip: 'bg-[#1d3bb8]/14 text-[#1d3bb8]',
-            trend: 'text-emerald-500',
-            aura: 'bg-[#1d3bb8]/18',
-        },
-        emerald: {
-            icon: 'bg-gradient-to-br from-emerald-500 to-emerald-400 shadow-[0_18px_55px_-28px_rgba(16,185,129,0.5)]',
-            surface: 'bg-gradient-to-br from-white/90 via-white/70 to-emerald-100/40',
-            chip: 'bg-emerald-500/15 text-emerald-600',
-            trend: 'text-emerald-600',
-            aura: 'bg-emerald-400/24',
-        },
-        violet: {
-            icon: 'bg-gradient-to-br from-violet-500 to-fuchsia-500 shadow-[0_18px_55px_-28px_rgba(139,92,246,0.5)]',
-            surface: 'bg-gradient-to-br from-white/90 via-white/68 to-violet-100/35',
-            chip: 'bg-violet-500/15 text-violet-600',
-            trend: 'text-violet-600',
-            aura: 'bg-violet-500/22',
-        },
-        amber: {
-            icon: 'bg-gradient-to-br from-amber-500 to-orange-400 shadow-[0_18px_55px_-28px_rgba(245,158,11,0.45)]',
-            surface: 'bg-gradient-to-br from-white/90 via-white/70 to-amber-100/30',
-            chip: 'bg-amber-400/20 text-amber-600',
-            trend: 'text-amber-600',
-            aura: 'bg-amber-400/28',
-        },
-    };
+    const tonePalette = dashboardTones[tone].stat;
     return (
         <GlassPanel
             as="article"
             shimmer
             float="slow"
-            className={cn('relative overflow-hidden px-6 py-6', palette[tone].surface, className)}
+            className={cn(
+                'relative overflow-hidden px-6 py-6 transition-shadow duration-300',
+                tonePalette.surface,
+                tonePalette.hover,
+                className,
+            )}
         >
             <span
-                className={cn('pointer-events-none absolute -right-12 -top-16 h-40 w-40 rounded-full blur-[120px]', palette[tone].aura)}
+                className={cn(
+                    'pointer-events-none absolute -right-12 -top-16 h-40 w-40 rounded-full blur-[120px]',
+                    tonePalette.aura,
+                )}
                 aria-hidden
             />
             <div className="flex items-start justify-between gap-4">
                 <div className="space-y-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.32em] text-neutral-500/75">{title}</p>
-                    <p className="text-4xl font-semibold text-slate-900 md:text-5xl">{value}</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[#151f54]/65">{title}</p>
+                    <p className="text-4xl font-semibold text-[#151f54] md:text-5xl">{value}</p>
                     {trend && (
-                        <GlassChip className={cn('inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold text-neutral-700', palette[tone].chip)}>
+                        <GlassChip
+                            className={cn(
+                                'inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold',
+                                tonePalette.chip,
+                                tonePalette.trend,
+                            )}
+                        >
                             <TrendingUp className="size-3" />
                             {trend}
                         </GlassChip>
@@ -103,8 +89,8 @@ function StatCard({
                 </div>
                 <span
                     className={cn(
-                        'glass-ring inline-flex items-center justify-center rounded-2xl p-3 text-white shadow-lg',
-                        palette[tone].icon,
+                        'glass-ring inline-flex items-center justify-center rounded-2xl p-3',
+                        tonePalette.icon,
                     )}
                 >
                     <Icon className="size-5" />
@@ -119,7 +105,7 @@ function QuickActionCard({
     description,
     href,
     icon: Icon,
-    tone = 'indigo',
+    tone = 'primary',
     className,
 }: {
     title: string;
@@ -129,38 +115,7 @@ function QuickActionCard({
     tone?: QuickTone;
     className?: string;
 }) {
-    const palette: Record<QuickTone, { surface: string; icon: string; body: string; arrow: string }> = {
-        indigo: {
-            surface:
-                'bg-gradient-to-br from-[#0e1a47]/92 via-[#192b6d]/88 to-[#233884]/78 text-white shadow-[0_42px_120px_-60px_rgba(6,12,39,0.75)]',
-            icon: 'bg-white/12 text-white shadow-lg',
-            body: 'text-slate-100/85',
-            arrow: 'text-white/75',
-        },
-        emerald: {
-            surface:
-                'bg-gradient-to-br from-[#06392c]/90 via-[#0e5d45]/85 to-[#128965]/78 text-white shadow-[0_42px_120px_-60px_rgba(6,95,70,0.65)]',
-            icon: 'bg-white/12 text-white shadow-lg',
-            body: 'text-emerald-100/85',
-            arrow: 'text-white/75',
-        },
-        violet: {
-            surface:
-                'bg-gradient-to-br from-[#2a1559]/92 via-[#452097]/86 to-[#6b31d0]/78 text-white shadow-[0_42px_120px_-60px_rgba(76,29,149,0.68)]',
-            icon: 'bg-white/14 text-white shadow-lg',
-            body: 'text-violet-100/85',
-            arrow: 'text-white/75',
-        },
-        amber: {
-            surface:
-                'bg-gradient-to-br from-[#5a2c05]/92 via-[#8c4b09]/84 to-[#f29b0b]/76 text-white shadow-[0_42px_120px_-60px_rgba(217,119,6,0.6)]',
-            icon: 'bg-white/14 text-white shadow-lg',
-            body: 'text-amber-100/85',
-            arrow: 'text-white/80',
-        },
-    };
-
-    const paletteItem = palette[tone];
+    const tonePalette = dashboardTones[tone].action;
 
     return (
         <GlassTile
@@ -172,25 +127,26 @@ function QuickActionCard({
             href={href}
             prefetch
             className={cn(
-                'group relative flex h-full min-h-[208px] flex-col justify-between gap-6 overflow-hidden px-6 py-6 text-white focus:outline-none transition-all duration-300 hover:-translate-y-1.5',
-                paletteItem.surface,
+                'group relative flex h-full min-h-[208px] flex-col justify-between gap-6 overflow-hidden px-6 py-6 focus:outline-none transition-all duration-300 hover:-translate-y-1.5',
+                tonePalette.surface,
+                tonePalette.hover,
                 className,
             )}
         >
             <div className="flex items-start justify-between">
-                <span className={cn('glass-ring inline-flex items-center rounded-xl p-3', paletteItem.icon)}>
+                <span className={cn('glass-ring inline-flex items-center rounded-xl p-3', tonePalette.icon)}>
                     <Icon className="size-5" />
                 </span>
                 <ChevronRight
                     className={cn(
                         'size-5 transition-transform duration-300 group-hover:translate-x-1.5',
-                        paletteItem.arrow,
+                        tonePalette.arrow,
                     )}
                 />
             </div>
             <div className="space-y-3">
                 <h3 className="text-lg font-semibold tracking-tight text-white">{title}</h3>
-                <p className={cn('text-sm leading-relaxed', paletteItem.body)}>{description}</p>
+                <p className={cn('text-sm leading-relaxed', tonePalette.body)}>{description}</p>
             </div>
         </GlassTile>
     );
@@ -284,42 +240,42 @@ export default function Dashboard() {
             description: isZh ? '新增公告、新聞或活動資訊' : 'Publish announcements, news, or events',
             href: '/admin/posts/create',
             icon: Megaphone,
-            tone: 'indigo' as QuickTone,
+            tone: 'primary' as QuickTone,
         },
         {
             title: isZh ? '管理師資' : 'Manage Faculty',
             description: isZh ? '新增或編輯教師與行政人員資料' : 'Maintain faculty and staff records',
             href: '/admin/staff',
             icon: UserCheck,
-            tone: 'emerald' as QuickTone,
+            tone: 'secondary' as QuickTone,
         },
         {
             title: isZh ? '實驗室設定' : 'Lab Settings',
             description: isZh ? '更新實驗室資訊與成員' : 'Update lab profiles and members',
             href: '/admin/labs',
             icon: Beaker,
-            tone: 'violet' as QuickTone,
+            tone: 'accent' as QuickTone,
         },
         {
             title: isZh ? '課程管理' : 'Course Management',
             description: isZh ? '設定課程資訊與學分' : 'Manage course catalog and credits',
             href: '/admin/courses',
             icon: BookOpen,
-            tone: 'amber' as QuickTone,
+            tone: 'primary' as QuickTone,
         },
         {
             title: isZh ? '學程規劃' : 'Program Planning',
             description: isZh ? '維護學位學程與模組' : 'Maintain program blueprints',
             href: '/admin/programs',
             icon: GraduationCap,
-            tone: 'indigo' as QuickTone,
+            tone: 'secondary' as QuickTone,
         },
         {
             title: isZh ? '使用者管理' : 'User Management',
             description: isZh ? '調整權限與審核新帳號' : 'Adjust permissions and review new users',
             href: '/admin/users',
             icon: Users,
-            tone: 'emerald' as QuickTone,
+            tone: 'accent' as QuickTone,
         },
     ];
 
@@ -336,25 +292,28 @@ export default function Dashboard() {
             icon: Mail,
             label: isZh ? '新聯絡訊息' : 'New contact messages',
             count: 3,
-            surface: 'bg-gradient-to-br from-[#eef2ff] via-white to-[#f8faff] border-indigo-200/70 text-indigo-700 shadow-indigo-100/80',
-            chip: 'bg-indigo-100 text-indigo-700',
-            iconColor: 'text-indigo-500',
+            surface:
+                'bg-gradient-to-br from-[#151f54]/80 via-[#1f2a6d]/65 to-[#0f153f]/70 border-[#151f54]/45 text-white/85 shadow-[0_28px_90px_-58px_rgba(21,31,84,0.52)]',
+            chip: 'bg-[#ffb401]/25 text-[#151f54]',
+            iconColor: 'text-[#ffb401]',
         },
         {
             icon: Users,
             label: isZh ? '待審核使用者' : 'Pending approvals',
             count: 1,
-            surface: 'bg-gradient-to-br from-[#fff8eb] via-white to-white border-amber-200/70 text-amber-700 shadow-amber-100/80',
-            chip: 'bg-amber-100 text-amber-700',
-            iconColor: 'text-amber-500',
+            surface:
+                'bg-gradient-to-br from-[#2b1a00]/80 via-[#8a6300]/65 to-[#ffb401]/58 border-[#ffb401]/45 text-white/90 shadow-[0_28px_90px_-58px_rgba(82,48,0,0.55)]',
+            chip: 'bg-[#ffb401]/25 text-[#2b1a00]',
+            iconColor: 'text-[#ffb401]',
         },
         {
             icon: ShieldCheck,
             label: isZh ? '權限調整請求' : 'Permission requests',
             count: 2,
-            surface: 'bg-gradient-to-br from-[#ecfeff] via-white to-white border-cyan-200/70 text-cyan-700 shadow-cyan-100/80',
-            chip: 'bg-cyan-100 text-cyan-700',
-            iconColor: 'text-cyan-600',
+            surface:
+                'bg-gradient-to-br from-[#151f54]/78 via-[#3d3600]/62 to-[#fff809]/58 border-[#fff809]/35 text-white/90 shadow-[0_28px_90px_-58px_rgba(21,31,84,0.5)]',
+            chip: 'bg-[#fff809]/30 text-[#151f54]',
+            iconColor: 'text-[#fff809]',
         },
     ];
 
@@ -363,17 +322,19 @@ export default function Dashboard() {
             icon: Calendar,
             label: isZh ? '系務會議' : 'Faculty council',
             time: isZh ? '明日下午 14:00' : 'Tomorrow • 2:00 PM',
-            surface: 'bg-gradient-to-br from-white via-[#eef2ff] to-white border-indigo-200/60 text-indigo-700',
-            subtle: 'text-indigo-500/80',
-            iconColor: 'text-indigo-500',
+            surface:
+                'bg-gradient-to-br from-[#151f54]/85 via-[#1f2a6d]/70 to-[#0f153f]/65 border-[#151f54]/45 text-white/90',
+            subtle: 'text-white/65',
+            iconColor: 'text-[#ffb401]',
         },
         {
             icon: Clock,
             label: isZh ? '課程公告排程' : 'Course bulletin release',
             time: isZh ? '週五上午 09:00' : 'Friday • 9:00 AM',
-            surface: 'bg-gradient-to-br from-white via-[#fff7ed] to-white border-amber-200/60 text-amber-700',
-            subtle: 'text-amber-500/80',
-            iconColor: 'text-amber-500',
+            surface:
+                'bg-gradient-to-br from-[#2b1a00]/80 via-[#8a6300]/60 to-[#ffb401]/55 border-[#ffb401]/40 text-white/90',
+            subtle: 'text-white/65',
+            iconColor: 'text-[#fff809]',
         },
     ];
 
@@ -431,27 +392,27 @@ export default function Dashboard() {
                         value="48"
                         icon={Megaphone}
                         trend={isZh ? '本月 +12%' : '+12% this month'}
-                        tone="indigo"
+                        tone="primary"
                     />
                     <StatCard
                         title={isZh ? '師資人數' : 'Faculty members'}
                         value="25"
                         icon={UserCheck}
                         trend={isZh ? '年度新增 3 名' : '+3 new this year'}
-                        tone="emerald"
+                        tone="secondary"
                     />
                     <StatCard
                         title={isZh ? '實驗室數' : 'Laboratories'}
                         value="12"
                         icon={Beaker}
-                        tone="violet"
+                        tone="accent"
                     />
                     <StatCard
                         title={isZh ? '開設課程' : 'Courses offered'}
                         value="156"
                         icon={BookOpen}
                         trend={isZh ? '本學期 +8 門' : '+8 this semester'}
-                        tone="amber"
+                        tone="primary"
                     />
                 </div>
             </section>
@@ -460,10 +421,10 @@ export default function Dashboard() {
                 <div className={cn(quickActionsLayout.container, 'space-y-6 w-full')}>
                     <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                         <div>
-                            <h2 className="text-xl font-semibold text-neutral-900 md:text-2xl">
+                            <h2 className="text-xl font-semibold text-white md:text-2xl">
                                 {isZh ? '快速操作' : 'Quick actions'}
                             </h2>
-                            <p className="text-sm text-neutral-500">
+                            <p className="text-sm text-white/70">
                                 {isZh
                                     ? '常用管理任務整理於此，協助您迅速完成日常工作。'
                                     : 'Access the most common management tasks without digging through menus.'}
@@ -471,10 +432,10 @@ export default function Dashboard() {
                         </div>
                         <Link
                             href="/admin"
-                            className="inline-flex items-center gap-2 rounded-full border border-primary/20 px-4 py-2 text-sm font-medium text-primary transition hover:border-primary/40"
+                            className="inline-flex items-center gap-2 rounded-full border border-[#ffb401]/45 px-4 py-2 text-sm font-medium text-[#ffb401] transition hover:bg-[#ffb401]/20 hover:text-[#151f54]"
                         >
                             {isZh ? '檢視完整控制台' : 'Open full control center'}
-                            <ChevronRight className="size-4" />
+                            <ChevronRight className="size-4 text-current" />
                         </Link>
                     </div>
                     <div
@@ -495,19 +456,19 @@ export default function Dashboard() {
                     <div className={cn(activityLayout.primary)}>
                         <div className="flex items-center justify-between">
                             <div>
-                                <h3 className="text-lg font-semibold text-neutral-900 md:text-xl">
+                                <h3 className="text-lg font-semibold text-white md:text-xl">
                                     {isZh ? '最新公告摘要' : 'Recent bulletin highlights'}
                                 </h3>
-                                <p className="text-sm text-neutral-500">
+                                <p className="text-sm text-white/70">
                                     {isZh ? '檢視最新置頂與近期公告' : 'Stay synced with the latest published updates.'}
                                 </p>
                             </div>
                             <Link
                                 href="/admin/posts"
-                                className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary hover:bg-primary/15"
+                                className="inline-flex items-center gap-2 rounded-full bg-[#ffb401]/15 px-3 py-1 text-sm font-medium text-[#ffb401] transition hover:bg-[#ffb401]/25 hover:text-[#151f54]"
                             >
                                 {isZh ? '查看全部' : 'View all'}
-                                <ChevronRight className="size-4" />
+                                <ChevronRight className="size-4 text-current" />
                             </Link>
                         </div>
                         <ol className={cn(activityLayout.surfaces?.timeline, 'space-y-6')}>
@@ -516,11 +477,11 @@ export default function Dashboard() {
                                     <div className="flex flex-col gap-2">
                                         <Link
                                             href={`/admin/posts/${item.id}`}
-                                            className="text-base font-semibold text-neutral-900 transition hover:text-primary"
+                                            className="text-base font-semibold text-white transition hover:text-[#ffb401]"
                                         >
                                             {item.title}
                                         </Link>
-                                        <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+                                        <div className="flex flex-wrap items-center gap-2 text-xs text-white/70">
                                             <span className="inline-flex items-center gap-1">
                                                 <Clock className="size-3" />
                                                 {item.time}
@@ -542,32 +503,32 @@ export default function Dashboard() {
 
                     <aside className={cn(activityLayout.secondary)}>
                         <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-neutral-900">
+                            <h3 className="text-lg font-semibold text-white">
                                 {isZh ? '待處理事項' : 'Pending tasks'}
                             </h3>
-                        <div className="space-y-3">
-                            {taskSummary.map((task) => (
-                                <GlassTile
-                                    key={task.label}
-                                    shimmer
-                                    className={cn(
-                                        'flex items-center justify-between gap-3 px-4 py-3 text-sm font-medium text-white/90',
-                                        task.surface,
-                                    )}
-                                >
-                                    <span className="flex items-center gap-2">
-                                        <task.icon className={cn('size-4', task.iconColor)} />
-                                        {task.label}
-                                    </span>
-                                    <GlassChip className={cn('px-3 py-1 text-xs font-semibold text-white', task.chip)}>
-                                        {task.count}
-                                    </GlassChip>
-                                </GlassTile>
-                            ))}
-                        </div>
+                            <div className="space-y-3">
+                                {taskSummary.map((task) => (
+                                    <GlassTile
+                                        key={task.label}
+                                        shimmer
+                                        className={cn(
+                                            'flex items-center justify-between gap-3 px-4 py-3 text-sm font-medium text-white/90',
+                                            task.surface,
+                                        )}
+                                    >
+                                        <span className="flex items-center gap-2">
+                                            <task.icon className={cn('size-4', task.iconColor)} />
+                                            {task.label}
+                                        </span>
+                                        <GlassChip className={cn('px-3 py-1 text-xs font-semibold text-white', task.chip)}>
+                                            {task.count}
+                                        </GlassChip>
+                                    </GlassTile>
+                                ))}
+                            </div>
                         </div>
                         <div className="space-y-4">
-                            <h3 className="text-lg font-semibold text-neutral-900">
+                            <h3 className="text-lg font-semibold text-white">
                                 {isZh ? '即將到來' : 'Upcoming schedule'}
                             </h3>
                             <div className="space-y-3">
