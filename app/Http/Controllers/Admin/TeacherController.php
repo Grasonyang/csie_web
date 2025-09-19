@@ -13,16 +13,13 @@ class TeacherController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $teachers = Teacher::with(['user', 'labs'])
-            ->orderBy('sort_order')
-            ->orderBy('name')
-            ->paginate(20);
-
-        return Inertia::render('admin/teachers/index', [
-            'teachers' => $teachers,
-        ]);
+        // 導向新的統一列表頁，維持查詢參數（例如分頁或語系）
+        return redirect()->route('admin.staff.index', array_merge(
+            $request->query(),
+            ['tab' => 'teachers']
+        ));
     }
 
     /**
