@@ -86,39 +86,37 @@ export default function EditPost({ post, categories }: EditPostProps) {
         <AppLayout>
             <Head title={isZh ? '編輯公告' : 'Edit Post'} />
 
-            <div className="min-h-screen bg-gray-50">
-                <div className="mx-auto max-w-4xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
-                    <div className="flex items-center gap-4">
-                        <Link href={PostController.index().url}>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                            >
-                                <ArrowLeft className="h-4 w-4" />
-                            </Button>
-                        </Link>
-                        <div>
-                            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-                                {isZh ? '編輯公告' : 'Edit Post'}
-                            </h1>
-                            <p className="mt-2 text-gray-600">
-                                {isZh ? '調整公告內容與顯示設定' : 'Update the announcement details.'}
-                            </p>
-                        </div>
+            <div className="mx-auto max-w-4xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+                <div className="flex items-center gap-4">
+                    <Link href={PostController.index().url}>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                        >
+                            <ArrowLeft className="h-4 w-4" />
+                        </Button>
+                    </Link>
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+                            {isZh ? '編輯公告' : 'Edit Post'}
+                        </h1>
+                        <p className="mt-2 text-gray-600">
+                            {isZh ? '調整公告內容與顯示設定' : 'Update the announcement details.'}
+                        </p>
                     </div>
-
-                    <PostForm
-                        categories={categories}
-                        cancelUrl={PostController.index().url}
-                        mode="edit"
-                        initialValues={initialValues}
-                        initialPreviewHtml={initialPreviewHtml}
-                        statusOptions={statusOptions}
-                        existingAttachments={post.attachments ?? []}
-                        onSubmit={handleSubmit}
-                    />
                 </div>
+
+                <PostForm
+                    categories={categories}
+                    cancelUrl={PostController.index().url}
+                    mode="edit"
+                    initialValues={initialValues}
+                    initialPreviewHtml={initialPreviewHtml}
+                    statusOptions={statusOptions}
+                    existingAttachments={post.attachments ?? []}
+                    onSubmit={handleSubmit}
+                />
             </div>
         </AppLayout>
     );

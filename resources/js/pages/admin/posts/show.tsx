@@ -111,209 +111,207 @@ export default function ShowPost({ post }: ShowPostProps) {
         <AppLayout>
             <Head title={isZh ? '公告詳情' : 'Post Detail'} />
 
-            <div className="min-h-screen bg-gray-50">
-                <div className="mx-auto max-w-5xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
-                    <div className="flex items-center gap-4">
-                        <Link href={PostController.index().url}>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                            >
-                                <ArrowLeft className="h-4 w-4" />
-                            </Button>
-                        </Link>
-                        <div>
-                            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-                                {isZh ? post.title : post.title_en || post.title}
-                            </h1>
-                            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-600">
-                                <span className="inline-flex items-center gap-1">
-                                    <Calendar className="h-4 w-4" />
-                                    {isZh ? '發布時間' : 'Published at'}: {formatDateTime(String(post.publish_at ?? ''), locale)}
-                                </span>
-                                <span className="inline-flex items-center gap-1">
-                                    <User className="h-4 w-4" />
-                                    {post.creator?.name ?? (isZh ? '系統' : 'System')}
-                                </span>
-                                <span>{statusBadge}</span>
-                                {post.pinned && (
-                                    <Badge variant="default" className="bg-amber-500 hover:bg-amber-600">
-                                        {isZh ? '置頂' : 'Pinned'}
-                                    </Badge>
-                                )}
-                            </div>
+            <div className="mx-auto max-w-5xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+                <div className="flex items-center gap-4">
+                    <Link href={PostController.index().url}>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                        >
+                            <ArrowLeft className="h-4 w-4" />
+                        </Button>
+                    </Link>
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+                            {isZh ? post.title : post.title_en || post.title}
+                        </h1>
+                        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                            <span className="inline-flex items-center gap-1">
+                                <Calendar className="h-4 w-4" />
+                                {isZh ? '發布時間' : 'Published at'}: {formatDateTime(String(post.publish_at ?? ''), locale)}
+                            </span>
+                            <span className="inline-flex items-center gap-1">
+                                <User className="h-4 w-4" />
+                                {post.creator?.name ?? (isZh ? '系統' : 'System')}
+                            </span>
+                            <span>{statusBadge}</span>
+                            {post.pinned && (
+                                <Badge variant="default" className="bg-amber-500 hover:bg-amber-600">
+                                    {isZh ? '置頂' : 'Pinned'}
+                                </Badge>
+                            )}
                         </div>
                     </div>
+                </div>
 
-                    <Card className="border-gray-200 bg-white shadow-sm">
-                        <CardHeader className="border-b border-gray-100 bg-gray-50/50">
-                            <CardTitle className="flex items-center gap-2 text-gray-900">
-                                <Clock className="h-5 w-5 text-blue-600" />
-                                {isZh ? '基本資訊' : 'Basic Information'}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="grid gap-6 p-8 md:grid-cols-2">
-                            <div>
-                                <p className="text-sm font-medium text-gray-500">{isZh ? '分類' : 'Category'}</p>
-                                <p className="mt-1 text-base text-gray-900">
-                                    {isZh ? post.category?.name : post.category?.name_en}
-                                </p>
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-gray-500">{isZh ? '英文標題' : 'English Title'}</p>
-                                <p className="mt-1 text-base text-gray-900">{post.title_en || '—'}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-gray-500">{isZh ? '來源類型' : 'Source Type'}</p>
-                                <p className="mt-1 text-base text-gray-900">
-                                    {post.source_type === 'link'
-                                        ? isZh
-                                            ? '外部連結'
-                                            : 'Link'
-                                        : isZh
-                                            ? '手動輸入'
-                                            : 'Manual'}
-                                </p>
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-gray-500">{isZh ? '來源網址' : 'Source URL'}</p>
-                                {post.source_url ? (
+                <Card className="border-gray-200 bg-white shadow-sm">
+                    <CardHeader className="border-b border-gray-100 bg-gray-50/50">
+                        <CardTitle className="flex items-center gap-2 text-gray-900">
+                            <Clock className="h-5 w-5 text-blue-600" />
+                            {isZh ? '基本資訊' : 'Basic Information'}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid gap-6 p-8 md:grid-cols-2">
+                        <div>
+                            <p className="text-sm font-medium text-gray-500">{isZh ? '分類' : 'Category'}</p>
+                            <p className="mt-1 text-base text-gray-900">
+                                {isZh ? post.category?.name : post.category?.name_en}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-500">{isZh ? '英文標題' : 'English Title'}</p>
+                            <p className="mt-1 text-base text-gray-900">{post.title_en || '—'}</p>
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-500">{isZh ? '來源類型' : 'Source Type'}</p>
+                            <p className="mt-1 text-base text-gray-900">
+                                {post.source_type === 'link'
+                                    ? isZh
+                                        ? '外部連結'
+                                        : 'Link'
+                                    : isZh
+                                        ? '手動輸入'
+                                        : 'Manual'}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-500">{isZh ? '來源網址' : 'Source URL'}</p>
+                            {post.source_url ? (
+                                <a
+                                    href={post.source_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="mt-1 inline-flex items-center gap-1 text-blue-600 hover:underline"
+                                >
+                                    <LinkIcon className="h-4 w-4" />
+                                    {post.source_url}
+                                </a>
+                            ) : (
+                                <p className="mt-1 text-base text-gray-900">—</p>
+                            )}
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-500">{isZh ? '建立時間' : 'Created at'}</p>
+                            <p className="mt-1 text-base text-gray-900">
+                                {formatDateTime(String(post.created_at ?? ''), locale)}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-500">{isZh ? '最後更新' : 'Last Updated'}</p>
+                            <p className="mt-1 text-base text-gray-900">
+                                {formatDateTime(String(post.updated_at ?? ''), locale)}
+                            </p>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-gray-200 bg-white shadow-sm">
+                    <CardHeader className="border-b border-gray-100 bg-gray-50/50">
+                        <CardTitle className="flex items-center gap-2 text-gray-900">
+                            <ExternalLink className="h-5 w-5 text-blue-600" />
+                            {isZh ? '公告內容' : 'Post Content'}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6 p-8">
+                        {hasRemoteContent ? (
+                            <div className="space-y-4">
+                                {post.source_url && (
                                     <a
                                         href={post.source_url}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="mt-1 inline-flex items-center gap-1 text-blue-600 hover:underline"
+                                        className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline"
                                     >
                                         <LinkIcon className="h-4 w-4" />
-                                        {post.source_url}
+                                        {isZh ? '前往來源' : 'Open Source'}
                                     </a>
-                                ) : (
-                                    <p className="mt-1 text-base text-gray-900">—</p>
                                 )}
+                                <p className="text-sm text-gray-500">{isZh ? '系統不再儲存外部 HTML，請按「前往來源」查看原始內容。' : 'External HTML is no longer stored. Click "Open Source" to view the original.'}</p>
                             </div>
-                            <div>
-                                <p className="text-sm font-medium text-gray-500">{isZh ? '建立時間' : 'Created at'}</p>
-                                <p className="mt-1 text-base text-gray-900">
-                                    {formatDateTime(String(post.created_at ?? ''), locale)}
-                                </p>
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-gray-500">{isZh ? '最後更新' : 'Last Updated'}</p>
-                                <p className="mt-1 text-base text-gray-900">
-                                    {formatDateTime(String(post.updated_at ?? ''), locale)}
-                                </p>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="border-gray-200 bg-white shadow-sm">
-                        <CardHeader className="border-b border-gray-100 bg-gray-50/50">
-                            <CardTitle className="flex items-center gap-2 text-gray-900">
-                                <ExternalLink className="h-5 w-5 text-blue-600" />
-                                {isZh ? '公告內容' : 'Post Content'}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-6 p-8">
-                            {hasRemoteContent ? (
-                                <div className="space-y-4">
-                                    {post.source_url && (
-                                        <a
-                                            href={post.source_url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline"
-                                        >
-                                            <LinkIcon className="h-4 w-4" />
-                                            {isZh ? '前往來源' : 'Open Source'}
-                                        </a>
+                        ) : (
+                            <div className="space-y-6">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-500">{isZh ? '中文內容' : 'Chinese Content'}</p>
+                                    {hasZhContent ? (
+                                        <div className="mt-2 whitespace-pre-line rounded-lg border border-gray-200 bg-gray-50 p-4 text-gray-800">
+                                            {post.content}
+                                        </div>
+                                    ) : (
+                                        <p className="mt-2 text-sm text-gray-500">
+                                            {isZh ? '尚未填寫中文內容。' : 'No Chinese content provided.'}
+                                        </p>
                                     )}
-                                    <p className="text-sm text-gray-500">{isZh ? '系統不再儲存外部 HTML，請按「前往來源」查看原始內容。' : 'External HTML is no longer stored. Click "Open Source" to view the original.'}</p>
                                 </div>
-                            ) : (
-                                <div className="space-y-6">
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-500">{isZh ? '中文內容' : 'Chinese Content'}</p>
-                                        {hasZhContent ? (
-                                            <div className="mt-2 whitespace-pre-line rounded-lg border border-gray-200 bg-gray-50 p-4 text-gray-800">
-                                                {post.content}
-                                            </div>
-                                        ) : (
-                                            <p className="mt-2 text-sm text-gray-500">
-                                                {isZh ? '尚未填寫中文內容。' : 'No Chinese content provided.'}
-                                            </p>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-500">{isZh ? '英文內容' : 'English Content'}</p>
-                                        {hasEnContent ? (
-                                            <div className="mt-2 whitespace-pre-line rounded-lg border border-gray-200 bg-gray-50 p-4 text-gray-800">
-                                                {post.content_en}
-                                            </div>
-                                        ) : (
-                                            <p className="mt-2 text-sm text-gray-500">
-                                                {isZh ? '尚未填寫英文內容。' : 'No English content provided.'}
-                                            </p>
-                                        )}
-                                    </div>
+                                <div>
+                                    <p className="text-sm font-medium text-gray-500">{isZh ? '英文內容' : 'English Content'}</p>
+                                    {hasEnContent ? (
+                                        <div className="mt-2 whitespace-pre-line rounded-lg border border-gray-200 bg-gray-50 p-4 text-gray-800">
+                                            {post.content_en}
+                                        </div>
+                                    ) : (
+                                        <p className="mt-2 text-sm text-gray-500">
+                                            {isZh ? '尚未填寫英文內容。' : 'No English content provided.'}
+                                        </p>
+                                    )}
                                 </div>
-                            )}
-                        </CardContent>
-                    </Card>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
 
-                    <Card className="border-gray-200 bg-white shadow-sm">
-                        <CardHeader className="border-b border-gray-100 bg-gray-50/50">
-                            <CardTitle className="flex items-center gap-2 text-gray-900">
-                                <Paperclip className="h-5 w-5 text-blue-600" />
-                                {isZh ? '附件' : 'Attachments'}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4 p-8">
-                            {post.attachments && post.attachments.length > 0 ? (
-                                <div className="space-y-3">
-                                    {post.attachments.map((attachment) => (
-                                        <div
-                                            key={attachment.id}
-                                            className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4 sm:flex-row sm:items-center sm:justify-between"
-                                        >
-                                            <div className="space-y-1">
-                                                <p className="text-sm font-medium text-gray-900">
-                                                    {attachment.title || `${isZh ? '附件' : 'Attachment'} #${attachment.id}`}
-                                                </p>
-                                                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                                                    {attachment.mime_type && <Badge variant="outline">{attachment.mime_type}</Badge>}
-                                                    <span>{formatFileSize(attachment.file_size)}</span>
-                                                </div>
-                                            </div>
-                                            <div className="flex flex-wrap items-center gap-2">
-                                                <a
-                                                    href={buildAttachmentViewUrl(attachment)}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="inline-flex items-center gap-2 rounded-md border border-gray-300 px-3 py-1 text-sm text-gray-700 transition hover:border-gray-400 hover:bg-white"
-                                                >
-                                                    <ExternalLink className="h-4 w-4" />
-                                                    {isZh ? '檢視' : 'View'}
-                                                </a>
-                                                <a
-                                                    href={buildAttachmentDownloadUrl(attachment)}
-                                                    className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-3 py-1 text-sm text-white transition hover:bg-blue-700"
-                                                >
-                                                    <Download className="h-4 w-4" />
-                                                    {isZh ? '下載' : 'Download'}
-                                                </a>
+                <Card className="border-gray-200 bg-white shadow-sm">
+                    <CardHeader className="border-b border-gray-100 bg-gray-50/50">
+                        <CardTitle className="flex items-center gap-2 text-gray-900">
+                            <Paperclip className="h-5 w-5 text-blue-600" />
+                            {isZh ? '附件' : 'Attachments'}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4 p-8">
+                        {post.attachments && post.attachments.length > 0 ? (
+                            <div className="space-y-3">
+                                {post.attachments.map((attachment) => (
+                                    <div
+                                        key={attachment.id}
+                                        className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4 sm:flex-row sm:items-center sm:justify-between"
+                                    >
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-medium text-gray-900">
+                                                {attachment.title || `${isZh ? '附件' : 'Attachment'} #${attachment.id}`}
+                                            </p>
+                                            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                                                {attachment.mime_type && <Badge variant="outline">{attachment.mime_type}</Badge>}
+                                                <span>{formatFileSize(attachment.file_size)}</span>
                                             </div>
                                         </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="text-sm text-gray-500">
-                                    {isZh ? '此公告目前沒有附件。' : 'No attachments have been uploaded for this post.'}
-                                </p>
-                            )}
-                        </CardContent>
-                    </Card>
-                </div>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <a
+                                                href={buildAttachmentViewUrl(attachment)}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-2 rounded-md border border-gray-300 px-3 py-1 text-sm text-gray-700 transition hover:border-gray-400 hover:bg-white"
+                                            >
+                                                <ExternalLink className="h-4 w-4" />
+                                                {isZh ? '檢視' : 'View'}
+                                            </a>
+                                            <a
+                                                href={buildAttachmentDownloadUrl(attachment)}
+                                                className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-3 py-1 text-sm text-white transition hover:bg-blue-700"
+                                            >
+                                                <Download className="h-4 w-4" />
+                                                {isZh ? '下載' : 'Download'}
+                                            </a>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-sm text-gray-500">
+                                {isZh ? '此公告目前沒有附件。' : 'No attachments have been uploaded for this post.'}
+                            </p>
+                        )}
+                    </CardContent>
+                </Card>
             </div>
         </AppLayout>
     );
