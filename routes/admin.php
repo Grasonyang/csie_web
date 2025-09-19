@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\PostController as AdminPostController;
 use App\Http\Controllers\Admin\PostCategoryController as AdminPostCategoryController;
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\ProgramController as AdminProgramController;
+use App\Http\Controllers\Admin\AcademicController as AdminAcademicController;
 use App\Http\Controllers\Admin\ProjectController as AdminProjectController;
 use App\Http\Controllers\Admin\PublicationController as AdminPublicationController;
 use App\Http\Controllers\Admin\ContactMessageController as AdminContactMessageController;
@@ -53,6 +54,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::resource('publications', AdminPublicationController::class);
 
     // 課程修業管理
+    Route::get('academics', [AdminAcademicController::class, 'index'])->name('academics.index');
     Route::resource('programs', AdminProgramController::class);
     Route::resource('courses', AdminCourseController::class);
 
