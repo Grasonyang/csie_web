@@ -24,7 +24,8 @@ class PostController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Post::with(['category', 'creator']);
+        $query = Post::with(['category', 'creator'])
+            ->withCount('attachments');
 
         $search = trim((string) $request->input('search'));
         if ($search !== '') {

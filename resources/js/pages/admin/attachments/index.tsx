@@ -61,6 +61,7 @@ interface AttachmentsIndexProps {
         search?: string;
         type?: string;
         attachable_type?: string;
+        attachable_id?: string | number;
         trashed?: string;
         per_page?: number;
     };
@@ -73,6 +74,7 @@ type FilterState = {
     search: string;
     type: string;
     attachable_type: string;
+    attachable_id: string;
     trashed: string;
     per_page: string;
 };
@@ -142,6 +144,7 @@ export default function AttachmentsIndex({
         search: filters.search ?? '',
         type: filters.type ?? '',
         attachable_type: filters.attachable_type ?? '',
+        attachable_id: filters.attachable_id ? String(filters.attachable_id) : '',
         trashed: filters.trashed ?? '',
         per_page: initialPerPage,
     });
@@ -151,10 +154,19 @@ export default function AttachmentsIndex({
             search: filters.search ?? '',
             type: filters.type ?? '',
             attachable_type: filters.attachable_type ?? '',
+            attachable_id: filters.attachable_id ? String(filters.attachable_id) : '',
             trashed: filters.trashed ?? '',
             per_page: String(filters.per_page ?? paginationMeta.per_page ?? DEFAULT_PAGINATION_META.per_page),
         });
-    }, [filters.search, filters.type, filters.attachable_type, filters.trashed, filters.per_page, paginationMeta.per_page]);
+    }, [
+        filters.search,
+        filters.type,
+        filters.attachable_type,
+        filters.attachable_id,
+        filters.trashed,
+        filters.per_page,
+        paginationMeta.per_page,
+    ]);
 
     const handleFilterChange = (key: keyof FilterState, value: string) => {
         setFilterState((prev) => ({
@@ -195,6 +207,7 @@ export default function AttachmentsIndex({
             search: '',
             type: '',
             attachable_type: '',
+            attachable_id: '',
             trashed: '',
             per_page: String(paginationMeta.per_page ?? DEFAULT_PAGINATION_META.per_page),
         };
@@ -206,8 +219,8 @@ export default function AttachmentsIndex({
     };
 
     const hasActiveFilters = useMemo(() => {
-        const { search, type, attachable_type, trashed } = filterState;
-        return [search, type, attachable_type, trashed].some((value) => value !== '');
+        const { search, type, attachable_type, attachable_id, trashed } = filterState;
+        return [search, type, attachable_type, attachable_id, trashed].some((value) => value !== '');
     }, [filterState]);
 
     const parseNumber = (value: unknown, fallback: number) => {
@@ -252,6 +265,54 @@ export default function AttachmentsIndex({
         const meta = TYPE_INFO[type];
         return isZh ? meta.zh : meta.en;
     };
+
+    const describeFilterAttachableType = (type: string) => {
+        if (type === '') {
+            return '';
+        }
+
+        if (type.includes('Post')) {
+            const base = isZh ? '公告' : 'Post';
+            return `${base} (${type})`;
+        }
+
+        const segment = type.split('\\').pop();
+        if (!segment) {
+            return type;
+        }
+
+        if (segment === type) {
+            return segment;
+        }
+
+        return `${segment} (${type})`;
+    };
+
+    const sourceInfoParts: string[] = [];
+    const filterTypeLabel = describeFilterAttachableType(filterState.attachable_type);
+    if (filterTypeLabel !== '') {
+        sourceInfoParts.push(filterTypeLabel);
+    }
+    if (filterState.attachable_id !== '') {
+        sourceInfoParts.push(`#${filterState.attachable_id}`);
+    }
+
+    const hasSourceFilter = sourceInfoParts.length > 0;
+    const sourceDisplay = sourceInfoParts.join(' · ');
+    const emptyStateTitle = hasSourceFilter
+        ? isZh
+            ? '找不到對應的附件'
+            : 'No related attachments'
+        : isZh
+            ? '尚無附件'
+            : 'No attachments';
+    const emptyStateDescription = hasSourceFilter
+        ? isZh
+            ? `來源 ${sourceDisplay} 暫無附件紀錄，請確認來源資料是否已建立附件。`
+            : `No attachments were found for source ${sourceDisplay}. Please verify the record or try again later.`
+        : isZh
+            ? '目前查無符合條件的附件'
+            : 'No attachments match the current filters.';
 
     const formatAttachableLabel = (attachment: Attachment) => {
         if (!attachment.attachable_type) {
@@ -398,6 +459,21 @@ export default function AttachmentsIndex({
                                 </div>
 
                                 <div>
+                                    <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="attachment-source-id">
+                                        {isZh ? '來源 ID' : 'Source ID'}
+                                    </label>
+                                    <Input
+                                        id="attachment-source-id"
+                                        type="number"
+                                        inputMode="numeric"
+                                        min={0}
+                                        placeholder={isZh ? '輸入來源資料 ID' : 'Enter source record ID'}
+                                        value={filterState.attachable_id}
+                                        onChange={(event) => handleFilterChange('attachable_id', event.target.value)}
+                                    />
+                                </div>
+
+                                <div>
                                     <label className="mb-2 block text-sm font-medium text-gray-700" htmlFor="attachment-trashed">
                                         {isZh ? '刪除範圍' : 'Trashed filter'}
                                     </label>
@@ -478,9 +554,7 @@ export default function AttachmentsIndex({
                                     </Button>
                                     <span className="flex-1 select-none rounded-md border border-gray-200 bg-gray-50 px-3 py-1 text-center text-sm font-medium text-gray-900 sm:min-w-[14rem] sm:text-left">
                                         {attachmentsData.length === 0
-                                            ? isZh
-                                                ? '目前查無符合條件的附件'
-                                                : 'No attachments match the current filters'
+                                            ? emptyStateDescription
                                             : isZh
                                                 ? `顯示第 ${paginationRangeStart} - ${paginationRangeEnd} 筆，共 ${paginationMeta.total} 筆`
                                                 : `Showing ${paginationRangeStart}-${paginationRangeEnd} of ${paginationMeta.total}`}
@@ -511,12 +585,8 @@ export default function AttachmentsIndex({
                             {attachmentsData.length === 0 ? (
                                 <div className="py-12 text-center">
                                     <FileText className="mx-auto h-12 w-12 text-gray-400" />
-                                    <h3 className="mt-2 text-sm font-semibold text-gray-900">
-                                        {isZh ? '尚無附件資料' : 'No attachments yet'}
-                                    </h3>
-                                    <p className="mt-1 text-sm text-gray-500">
-                                        {isZh ? '當前台建立附件後即可在此管理' : 'Newly uploaded assets will appear here for management'}
-                                    </p>
+                                    <h3 className="mt-2 text-sm font-semibold text-gray-900">{emptyStateTitle}</h3>
+                                    <p className="mt-1 text-sm text-gray-500">{emptyStateDescription}</p>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
@@ -524,6 +594,9 @@ export default function AttachmentsIndex({
                                         const typeMeta = TYPE_INFO[attachment.type];
                                         const TypeIcon = typeMeta.icon;
                                         const isDeleted = Boolean(attachment.deleted_at);
+                                        const matchesSourceFilter =
+                                            filterState.attachable_id !== '' &&
+                                            String(attachment.attachable_id ?? '') === filterState.attachable_id;
 
                                         return (
                                             <div
@@ -542,6 +615,17 @@ export default function AttachmentsIndex({
                                                             </Badge>
                                                             <Badge variant="outline">#{attachment.id}</Badge>
                                                             <Badge variant="outline">{formatAttachableLabel(attachment)}</Badge>
+                                                            <Badge
+                                                                variant="outline"
+                                                                className={cn(
+                                                                    'flex items-center gap-1',
+                                                                    matchesSourceFilter &&
+                                                                        'border-amber-300 bg-amber-50 text-amber-700'
+                                                                )}
+                                                            >
+                                                                {isZh ? '來源 ID' : 'Source ID'}：
+                                                                {attachment.attachable_id ?? '—'}
+                                                            </Badge>
                                                         </div>
 
                                                         <div className="space-y-1">
