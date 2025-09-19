@@ -23,6 +23,10 @@ interface StaffIndexProps {
 export default function StaffIndex({ initialTab, staff, teachers }: StaffIndexProps) {
     const { auth, locale } = usePage<SharedData>().props;
     const isZh = locale === 'zh-TW';
+    const role = auth.user.role;
+    const isTeacher = role === 'teacher';
+    const canCreate = role === 'admin';
+    const userId = auth.user.id;
     const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
 
     useEffect(() => {
@@ -58,7 +62,23 @@ export default function StaffIndex({ initialTab, staff, teachers }: StaffIndexPr
         }
     };
 
-    const canCreate = auth.user.role === 'admin';
+    const filteredTeachers = useMemo<TeacherListProps['teachers']>(() => {
+        if (!isTeacher) {
+            return teachers;
+        }
+
+        const ownTeachers = teachers.data.filter((teacher) => teacher.user?.id === userId);
+
+        return {
+            ...teachers,
+            data: ownTeachers,
+            meta: {
+                ...teachers.meta,
+                total: ownTeachers.length,
+            },
+            links: [],
+        };
+    }, [teachers, isTeacher, userId]);
 
     return (
         <AppLayout>
@@ -83,7 +103,7 @@ export default function StaffIndex({ initialTab, staff, teachers }: StaffIndexPr
                         </div>
                     </div>
 
-                    {auth.user.role === 'teacher' && (
+                    {isTeacher && (
                         <div className="rounded-md border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800">
                             {isZh
                                 ? '您僅能編輯自己的師資資料，其他紀錄維持唯讀。'
@@ -135,7 +155,7 @@ export default function StaffIndex({ initialTab, staff, teachers }: StaffIndexPr
                     </div>
 
                     {activeTab === 'teachers' ? (
-                        <TeacherList teachers={teachers} />
+                        <TeacherList teachers={filteredTeachers} />
                     ) : (
                         <StaffList staff={staff.active} trashed={staff.trashed} />
                     )}

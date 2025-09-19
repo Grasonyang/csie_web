@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { getPageLayout } from '@/styles/page-layouts';
 import { dashboardTones, type DashboardTone } from '@/styles/layout-system';
 import { dashboard } from '@/routes';
-import { type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     Megaphone,
@@ -23,6 +23,7 @@ import {
     Inbox,
     ShieldCheck,
 } from 'lucide-react';
+import { useMemo } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -196,8 +197,8 @@ function DashboardHeroActions({ actions }: { actions?: HeroAction[] }) {
 
 
 export default function Dashboard() {
-    const page = usePage<any>();
-    const { locale } = page.props;
+    const { auth, locale } = usePage<SharedData>().props;
+    const role: SharedData['auth']['user']['role'] = auth?.user?.role ?? 'user';
     const isZh = locale?.toLowerCase() === 'zh-tw';
 
     const layout = getPageLayout('dashboard');
@@ -234,50 +235,71 @@ export default function Dashboard() {
         },
     ];
 
-    const quickActions = [
-        {
-            title: isZh ? '發布公告' : 'Create Post',
-            description: isZh ? '新增公告、新聞或活動資訊' : 'Publish announcements, news, or events',
-            href: '/admin/posts/create',
-            icon: Megaphone,
-            tone: 'primary' as QuickTone,
-        },
-        {
-            title: isZh ? '管理師資' : 'Manage Faculty',
-            description: isZh ? '新增或編輯教師與行政人員資料' : 'Maintain faculty and staff records',
-            href: '/admin/staff',
-            icon: UserCheck,
-            tone: 'secondary' as QuickTone,
-        },
-        {
-            title: isZh ? '實驗室設定' : 'Lab Settings',
-            description: isZh ? '更新實驗室資訊與成員' : 'Update lab profiles and members',
-            href: '/admin/labs',
-            icon: Beaker,
-            tone: 'accent' as QuickTone,
-        },
-        {
-            title: isZh ? '課程管理' : 'Course Management',
-            description: isZh ? '設定課程資訊與學分' : 'Manage course catalog and credits',
-            href: '/admin/courses',
-            icon: BookOpen,
-            tone: 'primary' as QuickTone,
-        },
-        {
-            title: isZh ? '學程規劃' : 'Program Planning',
-            description: isZh ? '維護學位學程與模組' : 'Maintain program blueprints',
-            href: '/admin/programs',
-            icon: GraduationCap,
-            tone: 'secondary' as QuickTone,
-        },
-        {
-            title: isZh ? '使用者管理' : 'User Management',
-            description: isZh ? '調整權限與審核新帳號' : 'Adjust permissions and review new users',
-            href: '/admin/users',
-            icon: Users,
-            tone: 'accent' as QuickTone,
-        },
-    ];
+    type UserRole = SharedData['auth']['user']['role'];
+
+    type QuickActionConfig = {
+        title: string;
+        description: string;
+        href: string;
+        icon: React.ComponentType<any>;
+        tone: QuickTone;
+        roles?: UserRole[];
+    };
+
+    const quickActions = useMemo(() => {
+        const configs: QuickActionConfig[] = [
+            {
+                title: isZh ? '發布公告' : 'Create Post',
+                description: isZh ? '新增公告、新聞或活動資訊' : 'Publish announcements, news, or events',
+                href: '/admin/posts/create',
+                icon: Megaphone,
+                tone: 'primary',
+                roles: ['admin'],
+            },
+            {
+                title: isZh ? '管理師資' : 'Manage Faculty',
+                description: isZh ? '新增或編輯教師與行政人員資料' : 'Maintain faculty and staff records',
+                href: '/admin/staff',
+                icon: UserCheck,
+                tone: 'secondary',
+                roles: ['admin', 'teacher'],
+            },
+            {
+                title: isZh ? '實驗室設定' : 'Lab Settings',
+                description: isZh ? '更新實驗室資訊與成員' : 'Update lab profiles and members',
+                href: '/admin/labs',
+                icon: Beaker,
+                tone: 'accent',
+                roles: ['admin'],
+            },
+            {
+                title: isZh ? '課程管理' : 'Course Management',
+                description: isZh ? '設定課程資訊與學分' : 'Manage course catalog and credits',
+                href: '/admin/courses',
+                icon: BookOpen,
+                tone: 'primary',
+                roles: ['admin'],
+            },
+            {
+                title: isZh ? '學程規劃' : 'Program Planning',
+                description: isZh ? '維護學位學程與模組' : 'Maintain program blueprints',
+                href: '/admin/programs',
+                icon: GraduationCap,
+                tone: 'secondary',
+                roles: ['admin'],
+            },
+            {
+                title: isZh ? '使用者管理' : 'User Management',
+                description: isZh ? '調整權限與審核新帳號' : 'Adjust permissions and review new users',
+                href: '/admin/users',
+                icon: Users,
+                tone: 'accent',
+                roles: ['admin'],
+            },
+        ];
+
+        return configs.filter((action) => !action.roles || action.roles.includes(role));
+    }, [isZh, role]);
 
     const recentBulletins = [1, 2, 3, 4].map((item) => ({
         id: item,

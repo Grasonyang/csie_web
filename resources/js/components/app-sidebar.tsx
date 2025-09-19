@@ -3,7 +3,7 @@ import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
-import { type NavItem } from '@/types';
+import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import {
     LayoutGrid,
@@ -16,16 +16,19 @@ import {
     Mail,
     Settings,
     Folder,
-    HelpCircle
+    HelpCircle,
 } from 'lucide-react';
 import AppLogo from './app-logo';
 
 export function AppSidebar() {
-    const page = usePage<any>();
-    const { locale } = page.props;
+    const { auth, locale } = usePage<SharedData>().props;
     const isZh = locale?.toLowerCase() === 'zh-tw';
+    const role = auth.user.role;
 
-    const localizedMainNavItems: NavItem[] = [
+    type UserRole = SharedData['auth']['user']['role'];
+    type RoleAwareNavItem = NavItem & { roles?: UserRole[] };
+
+    const localizedMainNavItems: RoleAwareNavItem[] = [
         {
             title: 'Dashboard',
             href: dashboard(),
@@ -40,6 +43,7 @@ export function AppSidebar() {
             title: isZh ? '師資與職員' : 'Faculty & Staff',
             href: '/admin/staff',
             icon: UserCheck,
+            roles: ['admin', 'teacher'],
         },
         {
             title: isZh ? '實驗室管理' : 'Laboratories',
@@ -86,6 +90,8 @@ export function AppSidebar() {
         },
     ];
 
+    const mainNavItems = localizedMainNavItems.filter((item) => !item.roles || item.roles.includes(role));
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -101,7 +107,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={localizedMainNavItems} />
+                <NavMain items={mainNavItems} />
             </SidebarContent>
 
             <SidebarFooter>
