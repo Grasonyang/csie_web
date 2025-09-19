@@ -30,6 +30,10 @@ class AttachmentController extends Controller
             $query->where('attachable_type', $attachableType);
         }
 
+        if ($request->filled('attachable_id')) {
+            $query->where('attachable_id', (int) $request->input('attachable_id'));
+        }
+
         $trashed = $request->input('trashed');
         if ($trashed === 'with') {
             $query->withTrashed();
@@ -54,7 +58,7 @@ class AttachmentController extends Controller
 
         return Inertia::render('admin/attachments/index', [
             'attachments' => $attachments,
-            'filters' => $request->only(['search', 'type', 'attachable_type', 'trashed', 'per_page']),
+            'filters' => $request->only(['search', 'type', 'attachable_type', 'attachable_id', 'trashed', 'per_page']),
             'typeOptions' => ['image', 'document', 'link'],
             'attachableTypeOptions' => $attachableTypes,
             'perPageOptions' => [10, 20, 50],

@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
+import AttachmentController from '@/actions/App/Http/Controllers/Admin/AttachmentController';
 import PostController from '@/actions/App/Http/Controllers/Admin/PostController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,7 @@ import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
 import { type SharedData } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { Calendar, ChevronLeft, ChevronRight, Edit, Eye, Pin, Trash2, User } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Edit, Eye, Paperclip, Pin, Trash2, User } from 'lucide-react';
 
 interface PostCategory {
     id: number;
@@ -33,6 +34,7 @@ interface Post {
     status: 'draft' | 'published' | 'archived';
     publish_at: string | null;
     pinned: boolean;
+    attachments_count: number;
     category: PostCategory;
     creator: User;
     created_at: string;
@@ -88,6 +90,8 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
 
     // 使用 Inertia 的 useForm 來處理刪除請求
     const { delete: destroy } = useForm();
+
+    const attachmentsIndexUrl = AttachmentController.index().url;
 
     // 添加安全檢查
     const postsData = posts?.data || [];
@@ -206,6 +210,15 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
         }
 
         return query;
+    };
+
+    const buildAttachmentLink = (postId: number) => {
+        const params = new URLSearchParams({
+            attachable_type: 'App\\Models\\Post',
+            attachable_id: String(postId),
+        });
+
+        return `${attachmentsIndexUrl}?${params.toString()}`;
     };
 
     const isPrevDisabled = currentPage <= 1;
@@ -468,11 +481,18 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    {postsData.map((post) => (
-                                        <div
-                                            key={post.id}
-                                            className="rounded-lg border border-gray-200 bg-white p-5 transition-shadow hover:shadow-md md:p-6"
-                                        >
+                                    {postsData.map((post) => {
+                                        const attachmentsLink = buildAttachmentLink(post.id);
+                                        const hasAttachments = post.attachments_count > 0;
+                                        const attachmentsCountLabel = isZh
+                                            ? `${post.attachments_count} 筆附件`
+                                            : `${post.attachments_count} attachment${post.attachments_count === 1 ? '' : 's'}`;
+
+                                        return (
+                                            <div
+                                                key={post.id}
+                                                className="rounded-lg border border-gray-200 bg-white p-5 transition-shadow hover:shadow-md md:p-6"
+                                            >
                                             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                                                 <div className="min-w-0 flex-1 space-y-3">
                                                     <div className="flex flex-wrap items-start gap-2">
@@ -520,10 +540,43 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
                                                         )}
                                                     </div>
 
-                                                    <div className="text-sm text-gray-600">
+                                                    <div className="space-y-2 text-sm text-gray-600">
                                                         <span className="inline-flex break-all rounded-md bg-gray-100 px-2 py-1 font-mono text-xs">
                                                             {post.slug}
                                                         </span>
+                                                        <div className="flex flex-wrap items-center gap-2 text-gray-600">
+                                                            <span
+                                                                className={cn(
+                                                                    'inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium',
+                                                                    hasAttachments
+                                                                        ? 'border-amber-300 bg-amber-50 text-amber-700'
+                                                                        : 'border-dashed border-gray-300 bg-gray-50 text-gray-500'
+                                                                )}
+                                                            >
+                                                                <Paperclip className="h-3.5 w-3.5" />
+                                                                {attachmentsCountLabel}
+                                                            </span>
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <Link href={attachmentsLink} preserveScroll>
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            className="text-indigo-600 hover:text-indigo-800"
+                                                                            aria-label={isZh ? '管理附件' : 'Manage attachments'}
+                                                                        >
+                                                                            <Paperclip className="mr-1 h-4 w-4" />
+                                                                            <span className="hidden sm:inline">
+                                                                                {isZh ? '管理附件' : 'Manage attachments'}
+                                                                            </span>
+                                                                        </Button>
+                                                                    </Link>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    {isZh ? '檢視此公告的附件列表' : 'View attachments for this post'}
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        </div>
                                                     </div>
                                                 </div>
 
@@ -576,7 +629,8 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
                                                 </div>
                                             </div>
                                         </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             )}
                         </CardContent>
