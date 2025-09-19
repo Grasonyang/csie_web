@@ -1,5 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { GlassChip, GlassPanel, GlassTile } from '@/components/glass';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getPageLayout } from '@/styles/page-layouts';
 import { dashboard } from '@/routes';
@@ -196,6 +197,48 @@ function QuickActionCard({
 }
 
 
+type HeroActionVariant = 'primary' | 'secondary';
+
+type HeroAction = {
+    label: string;
+    href: string;
+    icon: React.ComponentType<any>;
+    variant?: HeroActionVariant;
+};
+
+function DashboardHeroActions({ actions }: { actions?: HeroAction[] }) {
+    if (!actions?.length) {
+        return null;
+    }
+
+    return (
+        <div className="flex flex-col gap-3 md:flex-none md:items-end md:self-start">
+            <div className="flex flex-col gap-2 md:flex-row md:flex-wrap md:justify-end">
+                {actions.map(({ href, label, icon: Icon, variant = 'primary' }) => (
+                    <Button
+                        asChild
+                        key={href}
+                        size="lg"
+                        variant={variant === 'primary' ? 'default' : 'secondary'}
+                        className={cn(
+                            'group shadow-lg transition hover:-translate-y-0.5 md:min-w-[200px]',
+                            variant === 'secondary'
+                                ? 'border border-white/20 bg-primary/15 text-white hover:bg-primary/25'
+                                : 'text-primary-foreground',
+                        )}
+                    >
+                        <Link href={href} prefetch className="inline-flex items-center gap-2">
+                            <Icon className="size-4 transition-transform group-hover:scale-110" />
+                            {label}
+                        </Link>
+                    </Button>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+
 export default function Dashboard() {
     const page = usePage<any>();
     const { locale } = page.props;
@@ -217,6 +260,21 @@ export default function Dashboard() {
             label: isZh ? '待處理事項' : 'Pending reviews',
             value: '6',
             trend: isZh ? '本週需處理' : 'due this week',
+        },
+    ];
+
+    const heroActions: HeroAction[] = [
+        {
+            label: isZh ? '快速發布公告' : 'Compose bulletin',
+            href: '/admin/posts/create',
+            icon: Megaphone,
+            variant: 'primary',
+        },
+        {
+            label: isZh ? '查看收件匣' : 'Review inbox',
+            href: '/admin/contact-messages',
+            icon: Inbox,
+            variant: 'secondary',
         },
     ];
 
@@ -326,54 +384,41 @@ export default function Dashboard() {
             <section className={heroLayout.section}>
                 <div className={cn(heroLayout.container, heroLayout.wrapper)}>
                     <div className={cn(heroLayout.surfaces?.base, heroLayout.primary)}>
-                        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-                <div className="space-y-4">
-                    <span className="inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-white/70">
-                        NCUE CSIE
-                    </span>
-                    <div className="space-y-2">
-                        <h1 className="text-3xl font-semibold text-white md:text-4xl">
-                                        {isZh ? '系統管理後台總覽' : 'Administrative control center'}
-                                    </h1>
-                                    <p className="max-w-xl text-white/75">
-                                        {isZh
-                                            ? '快速掌握公告、師資、實驗室與課程等核心指標，從這裡展開每日的營運管理。'
-                                            : 'Stay on top of announcements, faculty, labs, and courses—all the operational essentials in one place.'}
-                                    </p>
-                        </div>
-                        <div className="flex flex-wrap gap-3">
-                            {kpiSummary.map((item) => (
-                                <GlassTile
-                                    key={item.label}
-                                    shimmer
-                                    float="slow"
-                                    className="min-w-[160px] px-4 py-3 text-sm text-white/85 backdrop-blur-sm"
-                                >
-                                    <p className="text-xs font-semibold uppercase tracking-[0.35em] text-white/60">
-                                        {item.label}
-                                    </p>
-                                    <p className="text-xl font-semibold text-white">{item.value}</p>
-                                    <span className="text-xs text-white/75">{item.trend}</span>
-                                </GlassTile>
-                            ))}
-                        </div>
-                    </div>
-                            <div className="flex flex-col gap-3 text-sm text-white/80">
-                                <Link
-                                    href="/admin/posts/create"
-                                    className="glass-chip inline-flex items-center gap-2 bg-white/15 px-5 py-2 text-sm font-semibold text-white transition hover:bg-white/25"
-                                >
-                                    <Megaphone className="size-4" />
-                                    {isZh ? '快速發布公告' : 'Compose bulletin'}
-                                </Link>
-                                <Link
-                                    href="/admin/contact-messages"
-                                    className="glass-chip inline-flex items-center gap-2 bg-white/10 px-5 py-2 text-sm font-semibold text-white/85 transition hover:bg-white/18"
-                                >
-                                    <Inbox className="size-4" />
-                                    {isZh ? '查看收件匣' : 'Review inbox'}
-                                </Link>
+                        <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+                            <div className="flex flex-1 flex-col gap-6">
+                                <div className="space-y-4">
+                                    <span className="inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-white/70">
+                                        NCUE CSIE
+                                    </span>
+                                    <div className="space-y-2">
+                                        <h1 className="text-3xl font-semibold text-white md:text-4xl">
+                                            {isZh ? '系統管理後台總覽' : 'Administrative control center'}
+                                        </h1>
+                                        <p className="max-w-xl text-white/75">
+                                            {isZh
+                                                ? '快速掌握公告、師資、實驗室與課程等核心指標，從這裡展開每日的營運管理。'
+                                                : 'Stay on top of announcements, faculty, labs, and courses—all the operational essentials in one place.'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="grid w-full gap-3 sm:grid-cols-2 sm:gap-4 md:max-w-2xl">
+                                    {kpiSummary.map((item) => (
+                                        <GlassTile
+                                            key={item.label}
+                                            shimmer
+                                            float="slow"
+                                            className="w-full px-5 py-4 text-sm text-white/85 backdrop-blur-sm"
+                                        >
+                                            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-white/60">
+                                                {item.label}
+                                            </p>
+                                            <p className="text-xl font-semibold text-white">{item.value}</p>
+                                            <span className="text-xs text-white/75">{item.trend}</span>
+                                        </GlassTile>
+                                    ))}
+                                </div>
                             </div>
+                            <DashboardHeroActions actions={heroActions} />
                         </div>
                     </div>
                 </div>
