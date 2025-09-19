@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import AdminPageHeader from '@/components/admin/admin-page-header';
 import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
 import { type SharedData } from '@/types';
@@ -273,26 +274,26 @@ export default function LabsIndex({ labs, teachers, filters = {}, perPageOptions
 
             <div className="min-h-screen">
                 <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-                                {isZh ? '實驗室管理' : 'Labs Management'}
-                            </h1>
-                            <p className="mt-1 text-gray-600">
-                                {isZh
-                                    ? '管理所有系上實驗室資料與顯示狀態'
-                                    : 'Manage department labs, visibility, and key contacts'}
-                            </p>
-                        </div>
-
-                        {auth.user?.role === 'admin' && (
-                            <Link href={LabController.create().url}>
-                                <Button className="bg-blue-600 text-white hover:bg-blue-700">
-                                    {isZh ? '新增實驗室' : 'Create Lab'}
-                                </Button>
-                            </Link>
-                        )}
-                    </div>
+                    <AdminPageHeader
+                        title={isZh ? '實驗室管理' : 'Labs Management'}
+                        description={
+                            isZh
+                                ? '管理所有系上實驗室資料與顯示狀態'
+                                : 'Manage department labs, visibility, and key contacts'
+                        }
+                        icon={FlaskConical}
+                        actions={
+                            auth.user?.role === 'admin'
+                                ? (
+                                      <Link href={LabController.create().url}>
+                                          <Button className="bg-[#ffb401] text-[#151f54] hover:bg-[#e6a000]">
+                                              {isZh ? '新增實驗室' : 'Create Lab'}
+                                          </Button>
+                                      </Link>
+                                  )
+                                : undefined
+                        }
+                    />
 
                     <Card className="bg-white shadow-sm">
                         <CardHeader className="border-b border-gray-200">

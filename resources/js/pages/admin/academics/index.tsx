@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import CourseController from '@/actions/App/Http/Controllers/Admin/CourseController';
 import ProgramController from '@/actions/App/Http/Controllers/Admin/ProgramController';
+import AdminPageHeader from '@/components/admin/admin-page-header';
 import CourseListPanel from '@/components/admin/academics/course-list-panel';
 import ProgramListPanel from '@/components/admin/academics/program-list-panel';
 import { Button } from '@/components/ui/button';
@@ -208,7 +209,7 @@ export default function AcademicsIndex({
         if (currentTab === 'courses') {
             return (
                 <Link href={CourseController.create().url}>
-                    <Button className="bg-blue-600 text-white hover:bg-blue-700">
+                    <Button className="bg-[#ffb401] text-[#151f54] hover:bg-[#e6a000]">
                         {isZh ? '新增課程' : 'Create Course'}
                     </Button>
                 </Link>
@@ -217,7 +218,7 @@ export default function AcademicsIndex({
 
         return (
             <Link href={ProgramController.create().url}>
-                <Button className="bg-blue-600 text-white hover:bg-blue-700">
+                <Button className="bg-[#ffb401] text-[#151f54] hover:bg-[#e6a000]">
                     {isZh ? '新增學程' : 'Create Program'}
                 </Button>
             </Link>
@@ -230,13 +231,12 @@ export default function AcademicsIndex({
 
             <div className="min-h-screen">
                 <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                            <h1 className="text-3xl font-bold tracking-tight text-gray-900">{pageTitle}</h1>
-                            <p className="mt-1 text-gray-600">{pageDescription}</p>
-                        </div>
-                        {actionButton()}
-                    </div>
+                    <AdminPageHeader
+                        title={pageTitle}
+                        description={pageDescription}
+                        icon={GraduationCap}
+                        actions={actionButton()}
+                    />
 
                     <div>
                         <div className="flex flex-wrap items-center gap-2 border-b border-gray-200">
