@@ -1,5 +1,6 @@
 import StaffController from '@/actions/App/Http/Controllers/Admin/StaffController';
 import * as TeacherController from '@/actions/App/Http/Controllers/Admin/TeacherController';
+import AdminPageHeader from '@/components/admin/admin-page-header';
 import StaffList, { type StaffListItem } from '@/components/admin/staff-list';
 import TeacherList, { type TeacherListProps } from '@/components/admin/teacher-list';
 import { Button } from '@/components/ui/button';
@@ -86,22 +87,37 @@ export default function StaffIndex({ initialTab, staff, teachers }: StaffIndexPr
 
             <div className="min-h-screen">
                 <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-                                {isZh ? '師資與職員管理' : 'Faculty & Staff Management'}
-                            </h1>
-                            <p className="mt-1 text-gray-600">
-                                {isZh
-                                    ? '集中維護教師與行政職員資料，並掌握公開狀態。'
-                                    : 'Keep faculty and staff information in one place with consistent visibility controls.'}
-                            </p>
-                        </div>
-
-                        <div className="hidden text-blue-600 sm:block">
-                            <Users className="h-10 w-10" />
-                        </div>
-                    </div>
+                    <AdminPageHeader
+                        title={isZh ? '師資與職員管理' : 'Faculty & Staff Management'}
+                        description={
+                            isZh
+                                ? '集中維護教師與行政職員資料，並掌握公開狀態。'
+                                : 'Keep faculty and staff information in one place with consistent visibility controls.'
+                        }
+                        icon={Users}
+                        actions={
+                            canCreate ? (
+                                <Link
+                                    href={
+                                        activeTab === 'teachers'
+                                            ? TeacherController.create().url
+                                            : StaffController.create().url
+                                    }
+                                >
+                                    <Button className="bg-[#ffb401] text-[#151f54] hover:bg-[#e6a000]">
+                                        {activeTab === 'teachers'
+                                            ? isZh
+                                                ? '新增教師'
+                                                : 'Add Teacher'
+                                            : isZh
+                                            ? '新增職員'
+                                            : 'Add Staff'}
+                                    </Button>
+                                </Link>
+                            )
+                            : undefined
+                        }
+                    />
 
                     {isTeacher && (
                         <div className="rounded-md border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800">

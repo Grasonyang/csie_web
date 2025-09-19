@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import UserController from '@/actions/App/Http/Controllers/Admin/UserController';
+import AdminPageHeader from '@/components/admin/admin-page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -268,26 +269,26 @@ export default function UsersIndex({ users, filters = {}, roleOptions, statusOpt
 
             <div className="min-h-screen">
                 <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                            <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-                                {isZh ? '使用者管理' : 'User Management'}
-                            </h1>
-                            <p className="mt-1 text-gray-600">
-                                {isZh
-                                    ? '管理後台使用者角色與帳號狀態'
-                                    : 'Manage admin portal user roles and account status'}
-                            </p>
-                        </div>
-
-                        {auth.user?.role === 'admin' && (
-                            <Link href={UserController.create().url}>
-                                <Button className="bg-blue-600 text-white hover:bg-blue-700">
-                                    {isZh ? '新增使用者' : 'Create User'}
-                                </Button>
-                            </Link>
-                        )}
-                    </div>
+                    <AdminPageHeader
+                        title={isZh ? '使用者管理' : 'User Management'}
+                        description={
+                            isZh
+                                ? '管理後台使用者角色與帳號狀態'
+                                : 'Manage admin portal user roles and account status'
+                        }
+                        icon={UserCircle2}
+                        actions={
+                            auth.user?.role === 'admin'
+                                ? (
+                                      <Link href={UserController.create().url}>
+                                          <Button className="bg-[#ffb401] text-[#151f54] hover:bg-[#e6a000]">
+                                              {isZh ? '新增使用者' : 'Create User'}
+                                          </Button>
+                                      </Link>
+                                  )
+                                : undefined
+                        }
+                    />
 
                     <Card className="bg-white shadow-sm">
                         <CardHeader className="border-b border-gray-200">
