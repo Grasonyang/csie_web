@@ -19,27 +19,100 @@ class StaffController extends Controller
     // 列出所有職員
     public function index(Request $request)
     {
-        $staff = Staff::orderBy('sort_order')->orderBy('name')->get();
+        $activeTab = $request->query('tab');
+        if (! in_array($activeTab, ['teachers', 'staff'], true)) {
+            $activeTab = 'teachers';
+        }
+
+        $staff = Staff::orderBy('sort_order')
+            ->orderBy('name')
+            ->get()
+            ->map(function (Staff $member) {
+                return [
+                    'id' => $member->id,
+                    'name' => $member->name,
+                    'name_en' => $member->name_en,
+                    'position' => $member->position,
+                    'position_en' => $member->position_en,
+                    'email' => $member->email,
+                    'phone' => $member->phone,
+                    'photo_url' => $member->photo_url,
+                    'bio' => $member->bio,
+                    'bio_en' => $member->bio_en,
+                    'sort_order' => $member->sort_order,
+                    'visible' => $member->visible,
+                ];
+            });
+
         $trashedStaff = Staff::onlyTrashed()
             ->orderByDesc('deleted_at')
             ->orderBy('name')
-            ->get();
+            ->get()
+            ->map(function (Staff $member) {
+                return [
+                    'id' => $member->id,
+                    'name' => $member->name,
+                    'name_en' => $member->name_en,
+                    'position' => $member->position,
+                    'position_en' => $member->position_en,
+                    'email' => $member->email,
+                    'phone' => $member->phone,
+                    'deleted_at' => $member->deleted_at,
+                ];
+            });
 
-        $teachers = Teacher::with('user:id,name,email')
+        $teachers = Teacher::with([
+                'user:id,name,email',
+                'labs:id,name,name_en',
+            ])
             ->orderBy('sort_order')
             ->orderBy('name')
-            ->get();
+            ->paginate(20);
 
-        $trashedTeachers = Teacher::onlyTrashed()
-            ->orderByDesc('deleted_at')
-            ->orderBy('name')
-            ->get();
+        $teachers->getCollection()->transform(function (Teacher $teacher) {
+            return [
+                'id' => $teacher->id,
+                'name' => $teacher->name,
+                'name_en' => $teacher->name_en,
+                'title' => $teacher->title,
+                'title_en' => $teacher->title_en,
+                'email' => $teacher->email,
+                'phone' => $teacher->phone,
+                'office' => $teacher->office,
+                'job_title' => $teacher->job_title,
+                'photo_url' => $teacher->photo_url,
+                'bio' => $teacher->bio,
+                'bio_en' => $teacher->bio_en,
+                'expertise' => $teacher->expertise,
+                'expertise_en' => $teacher->expertise_en,
+                'education' => $teacher->education,
+                'education_en' => $teacher->education_en,
+                'sort_order' => $teacher->sort_order,
+                'visible' => $teacher->visible,
+                'user' => $teacher->user ? [
+                    'id' => $teacher->user->id,
+                    'name' => $teacher->user->name,
+                    'email' => $teacher->user->email,
+                ] : null,
+                'labs' => $teacher->labs->map(function ($lab) {
+                    return [
+                        'id' => $lab->id,
+                        'name' => $lab->name,
+                        'name_en' => $lab->name_en,
+                    ];
+                })->all(),
+            ];
+        });
+
+        $teachers->withQueryString();
 
         return Inertia::render('admin/staff/index', [
-            'staff' => $staff,
-            'trashedStaff' => $trashedStaff,
+            'initialTab' => $activeTab,
+            'staff' => [
+                'active' => $staff,
+                'trashed' => $trashedStaff,
+            ],
             'teachers' => $teachers,
-            'trashedTeachers' => $trashedTeachers,
         ]);
     }
 

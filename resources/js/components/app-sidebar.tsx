@@ -38,7 +38,7 @@ export function AppSidebar() {
             icon: Megaphone,
         },
         {
-            title: isZh ? '師資管理' : 'Faculty',
+            title: isZh ? '師資與職員' : 'Faculty & Staff',
             href: '/admin/staff',
             icon: UserCheck,
         },

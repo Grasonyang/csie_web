@@ -1,266 +1,144 @@
 import StaffController from '@/actions/App/Http/Controllers/Admin/StaffController';
+import * as TeacherController from '@/actions/App/Http/Controllers/Admin/TeacherController';
+import StaffList, { type StaffListItem } from '@/components/admin/staff-list';
+import TeacherList, { type TeacherListProps } from '@/components/admin/teacher-list';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { ArrowRightLeft, BadgeInfo, Mail, Phone, RotateCcw, Trash2, Users } from 'lucide-react';
 import { type SharedData } from '@/types';
+import { Head, Link, usePage } from '@inertiajs/react';
+import { Users } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 
-interface StaffMember {
-    id: number;
-    name: string;
-    name_en?: string | null;
-    position?: string | null;
-    position_en?: string | null;
-    email?: string | null;
-    phone?: string | null;
-    extension?: string | null;
-    deleted_at?: string | null;
-}
+type TabKey = 'teachers' | 'staff';
 
 interface StaffIndexProps {
-    staff: StaffMember[];
-    trashedStaff?: StaffMember[];
+    initialTab: TabKey;
+    staff: {
+        active: StaffListItem[];
+        trashed: StaffListItem[];
+    };
+    teachers: TeacherListProps['teachers'];
 }
 
-export default function StaffIndex({ staff, trashedStaff = [] }: StaffIndexProps) {
+export default function StaffIndex({ initialTab, staff, teachers }: StaffIndexProps) {
     const { auth, locale } = usePage<SharedData>().props;
     const isZh = locale === 'zh-TW';
-    const { delete: destroy, patch } = useForm();
+    const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
 
-    const formatPosition = (member: StaffMember) => {
-        const primary = member.position ?? null;
-        const secondary = member.position_en ?? null;
-        if (isZh) {
-            return primary ?? secondary ?? (member.extension ? `${isZh ? '分機' : 'EXT'} ${member.extension}` : null);
-        }
-        return secondary ?? primary ?? (member.extension ? `Ext. ${member.extension}` : null);
-    };
+    useEffect(() => {
+        setActiveTab(initialTab);
+    }, [initialTab]);
 
-    const formatDeletedAt = (value?: string | null) => {
-        if (!value) return '';
-        return new Date(value).toLocaleString(isZh ? 'zh-TW' : 'en-US');
-    };
+    const tabCopy = useMemo(() => {
+        return {
+            teachers: {
+                label: isZh ? '師資' : 'Faculty',
+                description: isZh
+                    ? '管理教師資訊與公開狀態。'
+                    : 'Manage faculty profiles and visibility.',
+            },
+            staff: {
+                label: isZh ? '職員' : 'Staff',
+                description: isZh
+                    ? '管理行政與支援人員資訊。'
+                    : 'Maintain administrative and support staff records.',
+            },
+        } satisfies Record<TabKey, { label: string; description: string }>;
+    }, [isZh]);
 
-    const handleDelete = (member: StaffMember) => {
-        if (
-            confirm(
-                isZh
-                    ? `確定要將「${member.name}」移至刪除名單嗎？`
-                    : `Move "${member.name}" to trash?`
-            )
-        ) {
-            destroy(StaffController.destroy(member.id).url, {
-                preserveScroll: true,
-                preserveState: true,
-            });
-        }
-    };
-
-    const handleRestore = (member: StaffMember) => {
-        patch(StaffController.restore(member.id).url, {
-            preserveScroll: true,
-            preserveState: true,
-        });
-    };
-
-    const handleForceDelete = (member: StaffMember) => {
-        if (
-            confirm(
-                isZh
-                    ? `確定要永久刪除「${member.name}」？此動作無法復原。`
-                    : `Permanently remove "${member.name}"? This cannot be undone.`
-            )
-        ) {
-            destroy(StaffController.forceDelete(member.id).url, {
-                preserveScroll: true,
-                preserveState: true,
-            });
+    const handleTabChange = (tab: TabKey) => {
+        setActiveTab(tab);
+        if (typeof window !== 'undefined') {
+            const url = new URL(window.location.href);
+            url.searchParams.set('tab', tab);
+            if (tab === 'staff') {
+                url.searchParams.delete('page');
+            }
+            window.history.replaceState({}, '', `${url.pathname}${url.search}`);
         }
     };
+
+    const canCreate = auth.user.role === 'admin';
 
     return (
         <AppLayout>
-            <Head title={isZh ? '職員管理' : 'Faculty Management'} />
+            <Head title={isZh ? '師資與職員管理' : 'Faculty & Staff Management'} />
 
             <div className="min-h-screen">
-                <div className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-                                {isZh ? '職員管理' : 'Faculty Directory'}
+                                {isZh ? '師資與職員管理' : 'Faculty & Staff Management'}
                             </h1>
                             <p className="mt-1 text-gray-600">
                                 {isZh
-                                    ? '管理系所行政與支援人員資訊'
-                                    : 'Manage administrative and support staff details'}
+                                    ? '集中維護教師與行政職員資料，並掌握公開狀態。'
+                                    : 'Keep faculty and staff information in one place with consistent visibility controls.'}
                             </p>
                         </div>
 
-                        {auth.user.role === 'admin' && (
-                            <Link href={StaffController.create().url}>
-                                <Button className="bg-blue-600 text-white hover:bg-blue-700">
-                                    {isZh ? '新增職員' : 'Add staff'}
-                                </Button>
-                            </Link>
-                        )}
+                        <div className="hidden text-blue-600 sm:block">
+                            <Users className="h-10 w-10" />
+                        </div>
                     </div>
 
-                    <Card className="bg-white shadow-sm">
-                        <CardHeader className="border-b border-gray-200">
-                            <CardTitle className="flex items-center gap-2 text-gray-900">
-                                <Users className="h-5 w-5 text-blue-600" />
-                                {isZh ? '職員列表' : 'Staff List'}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                            {staff.length === 0 ? (
-                                <div className="py-12 text-center">
-                                    <Users className="mx-auto h-12 w-12 text-gray-300" />
-                                    <h3 className="mt-2 text-sm font-semibold text-gray-900">
-                                        {isZh ? '尚無職員資料' : 'No staff yet'}
-                                    </h3>
-                                    <p className="mt-1 text-sm text-gray-500">
-                                        {isZh ? '新增職員以建立名單' : 'Add your first staff member to populate this list'}
-                                    </p>
-                                </div>
-                            ) : (
-                                <ul className="divide-y divide-gray-200">
-                                    {staff.map((member) => {
-                                        const positionLabel = formatPosition(member);
-                                        return (
-                                            <li
-                                                key={member.id}
-                                                className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between"
-                                            >
-                                                <div className="space-y-1">
-                                                    <p className="text-base font-semibold text-gray-900">
-                                                        {member.name}
-                                                        {member.name_en && (
-                                                            <span className="ml-2 text-sm font-normal text-gray-500">
-                                                                ({member.name_en})
-                                                            </span>
-                                                        )}
-                                                    </p>
-                                                    <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
-                                                        {positionLabel && <span>{positionLabel}</span>}
-                                                        {member.email && (
-                                                            <a
-                                                                href={`mailto:${member.email}`}
-                                                                className="inline-flex items-center gap-1 text-blue-600 hover:underline"
-                                                            >
-                                                                <Mail className="h-4 w-4" />
-                                                                {member.email}
-                                                            </a>
-                                                        )}
-                                                        {member.phone && (
-                                                            <span className="inline-flex items-center gap-1">
-                                                                <Phone className="h-4 w-4 text-gray-400" />
-                                                                {member.phone}
-                                                            </span>
-                                                        )}
-                                                        {!positionLabel && !member.email && !member.phone && (
-                                                            <span className="inline-flex items-center gap-1 text-gray-400">
-                                                                <BadgeInfo className="h-4 w-4" />
-                                                                {isZh ? '尚未提供詳細資訊' : 'No additional details provided'}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </div>
+                    {auth.user.role === 'teacher' && (
+                        <div className="rounded-md border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800">
+                            {isZh
+                                ? '您僅能編輯自己的師資資料，其他紀錄維持唯讀。'
+                                : 'You can edit your own faculty profile while other records remain read-only.'}
+                        </div>
+                    )}
 
-                                                {auth.user.role === 'admin' && (
-                                                    <div className="flex items-center gap-2 sm:ml-4">
-                                                        <Link href={StaffController.edit(member.id).url}>
-                                                            <Button variant="outline" size="sm">
-                                                                {isZh ? '編輯' : 'Edit'}
-                                                            </Button>
-                                                        </Link>
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            className="text-red-600 hover:text-red-800"
-                                                            onClick={() => handleDelete(member)}
-                                                        >
-                                                            <Trash2 className="mr-1 h-4 w-4" />
-                                                            {isZh ? '刪除' : 'Remove'}
-                                                        </Button>
-                                                    </div>
-                                                )}
-                                            </li>
-                                        );
-                                    })}
-                                </ul>
+                    <div className="space-y-3 rounded-xl bg-white/60 p-4 shadow-sm ring-1 ring-gray-200 backdrop-blur">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="inline-flex items-center gap-2 rounded-lg bg-gray-100 p-1">
+                                {(Object.keys(tabCopy) as TabKey[]).map((key) => (
+                                    <button
+                                        key={key}
+                                        type="button"
+                                        onClick={() => handleTabChange(key)}
+                                        className={`rounded-md px-4 py-2 text-sm font-medium transition ${
+                                            activeTab === key
+                                                ? 'bg-white text-blue-700 shadow-sm'
+                                                : 'text-gray-600 hover:text-gray-900'
+                                        }`}
+                                    >
+                                        {tabCopy[key].label}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {canCreate && (
+                                <Link
+                                    href={
+                                        activeTab === 'teachers'
+                                            ? TeacherController.create().url
+                                            : StaffController.create().url
+                                    }
+                                >
+                                    <Button className="bg-blue-600 text-white hover:bg-blue-700">
+                                        {activeTab === 'teachers'
+                                            ? isZh
+                                                ? '新增教師'
+                                                : 'Add Teacher'
+                                            : isZh
+                                            ? '新增職員'
+                                            : 'Add Staff'}
+                                    </Button>
+                                </Link>
                             )}
-                        </CardContent>
-                    </Card>
+                        </div>
 
-                    <Card className="bg-white shadow-sm">
-                        <CardHeader className="border-b border-gray-200">
-                            <CardTitle className="flex items-center gap-2 text-gray-900">
-                                <Trash2 className="h-5 w-5 text-red-600" />
-                                {isZh ? '刪除名單' : 'Trash Bin'}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-6">
-                            {trashedStaff.length === 0 ? (
-                                <p className="text-sm text-gray-500">
-                                    {isZh
-                                        ? '目前沒有待復原或永久刪除的職員資料。'
-                                        : 'There are no archived staff members awaiting review.'}
-                                </p>
-                            ) : (
-                                <ul className="divide-y divide-gray-200">
-                                    {trashedStaff.map((member) => (
-                                        <li
-                                            key={member.id}
-                                            className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between"
-                                        >
-                                            <div className="space-y-1">
-                                                <p className="text-base font-semibold text-gray-900">
-                                                    {member.name}
-                                                    {member.name_en && (
-                                                        <span className="ml-2 text-sm font-normal text-gray-500">
-                                                            ({member.name_en})
-                                                        </span>
-                                                    )}
-                                                </p>
-                                                <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
-                                                    <span className="inline-flex items-center gap-1">
-                                                        <ArrowRightLeft className="h-4 w-4 text-gray-400" />
-                                                        {isZh ? '刪除於：' : 'Deleted at: '} {formatDeletedAt(member.deleted_at)}
-                                                    </span>
-                                                    {member.position && (
-                                                        <span>{formatPosition(member)}</span>
-                                                    )}
-                                                </div>
-                                            </div>
+                        <p className="text-sm text-gray-500">{tabCopy[activeTab].description}</p>
+                    </div>
 
-                                            <div className="flex items-center gap-2 sm:ml-4">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="text-blue-600 hover:text-blue-800"
-                                                    onClick={() => handleRestore(member)}
-                                                >
-                                                    <RotateCcw className="mr-1 h-4 w-4" />
-                                                    {isZh ? '復原' : 'Restore'}
-                                                </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="text-red-600 hover:text-red-800"
-                                                    onClick={() => handleForceDelete(member)}
-                                                >
-                                                    <Trash2 className="mr-1 h-4 w-4" />
-                                                    {isZh ? '永久刪除' : 'Delete permanently'}
-                                                </Button>
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                        </CardContent>
-                    </Card>
+                    {activeTab === 'teachers' ? (
+                        <TeacherList teachers={teachers} />
+                    ) : (
+                        <StaffList staff={staff.active} trashed={staff.trashed} />
+                    )}
                 </div>
             </div>
         </AppLayout>
