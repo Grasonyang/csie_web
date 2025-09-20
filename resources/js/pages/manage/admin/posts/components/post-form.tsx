@@ -9,7 +9,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import type { SharedData } from '@/types';
 import { Link, useForm, usePage } from '@inertiajs/react';
-import DOMPurify from 'dompurify';
 import { Calendar, Loader2, Link as LinkIcon, Paperclip, Plus, Trash2 } from 'lucide-react';
 import type { FormEventHandler } from 'react';
 import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
@@ -82,13 +81,13 @@ const emptyContent = {
 const getSubmitLabels = (isZh: boolean, mode: 'create' | 'edit') => {
     if (mode === 'create') {
         return {
-            idle: isZh ? '建立公告' : 'Create Post',
+            idle: isZh ? '建立公告' : 'Create bulletin',
             processing: isZh ? '建立中...' : 'Creating...'
         };
     }
 
     return {
-        idle: isZh ? '更新公告' : 'Update Post',
+        idle: isZh ? '更新公告' : 'Update bulletin',
         processing: isZh ? '更新中...' : 'Updating...'
     };
 };
@@ -104,7 +103,7 @@ export default function PostForm({
     onSubmit,
 }: PostFormProps) {
     const { locale } = usePage<SharedData>().props;
-    const isZh = locale === 'zh-TW';
+    const isZh = locale?.toLowerCase() === 'zh-tw';
 
     const form = useForm<PostFormValues>({
         title: {
@@ -764,14 +763,14 @@ export default function PostForm({
 
                 <div className="flex items-center justify-end space-x-4 rounded-lg border border-gray-200 bg-white p-6">
                     <Link href={cancelUrl}>
-                        <Button type="button" variant="secondary">
+                        <Button type="button" variant="secondary" className="rounded-full border border-[#151f54]/20">
                             {isZh ? '取消' : 'Cancel'}
                         </Button>
                     </Link>
                     <Button
                         type="submit"
                         disabled={processing}
-                        className="bg-blue-600 text-white transition-colors duration-200 shadow-sm hover:bg-blue-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50"
+                        className="rounded-full bg-[#151f54] px-6 text-white shadow-sm transition duration-200 hover:bg-[#1f2a6d] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {processing ? submitLabels.processing : submitLabels.idle}
                     </Button>

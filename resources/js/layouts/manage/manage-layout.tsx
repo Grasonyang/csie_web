@@ -39,7 +39,10 @@ export default function ManageLayout({
         <AppShell variant="sidebar">
             <Sidebar />
 
-            <AppContent variant="sidebar" className="relative overflow-x-hidden bg-neutral-50 text-neutral-900">
+            <AppContent
+                variant="sidebar"
+                className="relative overflow-x-hidden bg-[#f5f7fb] text-neutral-900"
+            >
                 <div className="flex min-h-svh flex-col">
                     <AppSidebarHeader breadcrumbs={breadcrumbs} />
 

@@ -205,7 +205,7 @@ export default function DashboardTemplate({
                                 {isZh ? '常用管理任務整理於此，協助您迅速完成日常工作。' : 'Access the most common management tasks without digging through menus.'}
                             </p>
                         </div>
-                        <Link href="/admin" className="inline-flex items-center gap-2 rounded-full border border-[#151f54]/20 bg-white px-4 py-2 text-sm font-medium text-[#151f54] transition hover:bg-[#eef1ff]">
+                        <Link href="/manage/admin/dashboard" className="inline-flex items-center gap-2 rounded-full border border-[#151f54]/20 bg-white px-4 py-2 text-sm font-medium text-[#151f54] transition hover:bg-[#eef1ff]">
                             {isZh ? '檢視完整控制台' : 'Open full control center'}
                             <ChevronRight className="size-4 text-current" />
                         </Link>
@@ -227,7 +227,7 @@ export default function DashboardTemplate({
                                 <h3 className="text-lg font-semibold text-[#151f54] md:text-xl">{isZh ? '最新公告摘要' : 'Recent bulletin highlights'}</h3>
                                 <p className="text-sm text-slate-600">{isZh ? '檢視最新置頂與近期公告' : 'Stay synced with the latest published updates.'}</p>
                             </div>
-                            <Link href="/admin/posts" className="inline-flex items-center gap-2 rounded-full border border-[#151f54]/20 bg-white px-3 py-1 text-sm font-medium text-[#151f54] transition hover:bg-[#eef1ff]">
+                            <Link href="/manage/admin/posts" className="inline-flex items-center gap-2 rounded-full border border-[#151f54]/20 bg-white px-3 py-1 text-sm font-medium text-[#151f54] transition hover:bg-[#eef1ff]">
                                 {isZh ? '查看全部' : 'View all'}
                                 <ChevronRight className="size-4 text-current" />
                             </Link>
