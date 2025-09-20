@@ -1,9 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 // 管理後台控制器
+use App\Http\Controllers\Manage\DashboardController;
+use App\Http\Controllers\Manage\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Manage\Admin\StaffController as AdminStaffController;
 use App\Http\Controllers\Manage\Admin\LabController as AdminLabController;
 use App\Http\Controllers\Manage\Admin\TeacherController as AdminTeacherController;
@@ -18,17 +19,14 @@ use App\Http\Controllers\Manage\Admin\PublicationController as AdminPublicationC
 use App\Http\Controllers\Manage\Admin\ContactMessageController as AdminContactMessageController;
 use App\Http\Controllers\Manage\Admin\AttachmentController as AdminAttachmentController;
 
-// Route::middleware(['auth', 'verified'])
-//     ->prefix('manage')
-Route::prefix('manage')->name('manage.')
+Route::middleware(['auth', 'verified'])
+    ->prefix('manage')->name('manage.')
     ->group(function () {
         Route::get('/', function () {
             return redirect()->route('manage.dashboard');
         });
 
-        Route::get('/dashboard', function () {
-            return Inertia::render('manage/dashboard');
-        })->name('dashboard');
+        Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
         Route::middleware('manage.role:admin')
             ->prefix('admin')
@@ -38,9 +36,7 @@ Route::prefix('manage')->name('manage.')
                     return redirect()->route('manage.admin.dashboard');
                 });
 
-                Route::get('/dashboard', function () {
-                    return Inertia::render('manage/admin/dashboard');
-                })->name('dashboard');
+                Route::get('/dashboard', AdminDashboardController::class)->name('dashboard');
 
                 // 使用者與系所成員管理
                 Route::resource('users', AdminUserController::class);
