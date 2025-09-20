@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Manage\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Post;
@@ -75,7 +75,7 @@ class PostController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return Inertia::render('admin/posts/index', [
+        return Inertia::render('manage/admin/posts/index', [
             'posts' => $posts,
             'categories' => PostCategory::all(),
             'filters' => [
@@ -94,7 +94,7 @@ class PostController extends Controller
      */
     public function create()
     {
-        return Inertia::render('admin/posts/create', [
+        return Inertia::render('manage/admin/posts/create', [
             'categories' => PostCategory::all(),
         ]);
     }
@@ -167,7 +167,7 @@ class PostController extends Controller
 
         $this->syncAttachments($post, $request);
 
-        return redirect()->route('admin.posts.index')
+        return redirect()->route('manage.admin.posts.index')
             ->with('success', '公告建立成功');
     }
 
@@ -178,7 +178,7 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        return Inertia::render('admin/posts/show', [
+        return Inertia::render('manage/admin/posts/show', [
             'post' => $post->load(['category', 'creator', 'attachments']),
         ]);
     }
@@ -188,7 +188,7 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        return Inertia::render('admin/posts/edit', [
+        return Inertia::render('manage/admin/posts/edit', [
             'post' => $post->load(['attachments']),
             'categories' => PostCategory::all(),
         ]);
@@ -263,7 +263,7 @@ class PostController extends Controller
 
         $this->syncAttachments($post, $request);
 
-        return redirect()->route('admin.posts.index')
+        return redirect()->route('manage.admin.posts.index')
             ->with('success', '公告更新成功');
     }
 
@@ -336,7 +336,7 @@ class PostController extends Controller
         // 執行刪除動作
         $post->delete();
 
-        return redirect()->route('admin.posts.index')
+        return redirect()->route('manage.admin.posts.index')
             ->with('success', '公告刪除成功');
     }
 }

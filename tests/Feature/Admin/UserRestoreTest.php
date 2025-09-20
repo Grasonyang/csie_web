@@ -35,7 +35,7 @@ class UserRestoreTest extends TestCase
         ]);
 
         // Admin should see both active and soft-deleted users
-        $response = $this->actingAs($admin)->get(route('admin.users.index'));
+        $response = $this->actingAs($admin)->get(route('manage.admin.users.index'));
 
         $response->assertStatus(200);
 
@@ -68,9 +68,9 @@ class UserRestoreTest extends TestCase
 
         // Admin restores the user
         $response = $this->actingAs($admin)
-            ->post(route('admin.users.restore', $deletedUser->id));
+            ->post(route('manage.admin.users.restore', $deletedUser->id));
 
-        $response->assertRedirect(route('admin.users.index'));
+        $response->assertRedirect(route('manage.admin.users.index'));
         $response->assertSessionHas('success');
 
         // Verify user is restored
@@ -118,7 +118,7 @@ class UserRestoreTest extends TestCase
 
         // Regular user tries to restore
         $response = $this->actingAs($user)
-            ->post(route('admin.users.restore', $deletedUser->id));
+            ->post(route('manage.admin.users.restore', $deletedUser->id));
 
         $response->assertStatus(403); // Forbidden
     }
@@ -135,7 +135,7 @@ class UserRestoreTest extends TestCase
 
         // Test that the route exists (even if it returns 404 initially)
         $response = $this->actingAs($admin)
-            ->post(route('admin.users.restore', $deletedUser->id));
+            ->post(route('manage.admin.users.restore', $deletedUser->id));
 
         // Should not be a route not found error
         $this->assertNotEquals(404, $response->getStatusCode(), 'Route admin.users.restore should exist');

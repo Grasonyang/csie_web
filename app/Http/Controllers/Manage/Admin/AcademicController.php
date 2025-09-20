@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Manage\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Course;
@@ -116,7 +116,7 @@ class AcademicController extends Controller
             }
         }
 
-        return Inertia::render('admin/academics/index', [
+        return Inertia::render('manage/admin/academics/index', [
             'courses' => $courses,
             'courseProgramOptions' => $programOptions,
             'courseFilters' => $courseFilters,

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Manage\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -67,7 +67,7 @@ class UserController extends Controller
             ['value' => 'suspended', 'label' => 'Suspended'],
         ];
 
-        return Inertia::render('admin/users/index', [
+        return Inertia::render('manage/admin/users/index', [
             'users' => $users,
             'filters' => [
                 'search' => $search,
@@ -86,7 +86,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        return Inertia::render('admin/users/create', [
+        return Inertia::render('manage/admin/users/create', [
             'roleOptions' => [
                 ['value' => 'admin', 'label' => 'Admin'],
                 ['value' => 'teacher', 'label' => 'Teacher'],
@@ -128,7 +128,7 @@ class UserController extends Controller
 
         User::create($payload);
 
-        return redirect()->route('admin.users.index')
+        return redirect()->route('manage.admin.users.index')
             ->with('success', '使用者建立成功');
     }
 
@@ -139,7 +139,7 @@ class UserController extends Controller
     {
         $user = User::withTrashed()->findOrFail($userId);
 
-        return Inertia::render('admin/users/edit', [
+        return Inertia::render('manage/admin/users/edit', [
             'user' => $user->only([
                 'id',
                 'name',
@@ -200,7 +200,7 @@ class UserController extends Controller
 
         $user->update($payload);
 
-        return redirect()->route('admin.users.index')
+        return redirect()->route('manage.admin.users.index')
             ->with('success', '使用者更新成功');
     }
 
@@ -217,7 +217,7 @@ class UserController extends Controller
 
         $user->delete();
 
-        return redirect()->route('admin.users.index')
+        return redirect()->route('manage.admin.users.index')
             ->with('success', '使用者已刪除');
     }
 
@@ -249,7 +249,7 @@ class UserController extends Controller
             ]
         );
 
-        return redirect()->route('admin.users.index')
+        return redirect()->route('manage.admin.users.index')
             ->with('success', '使用者已還原');
     }
 }

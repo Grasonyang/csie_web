@@ -55,6 +55,6 @@ class RegisteredUserController extends Controller
                 ->with('status', __('auth.verification_link_sent'));
         }
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended(route('manage.dashboard', absolute: false));
     }
 }

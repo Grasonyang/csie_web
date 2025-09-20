@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Manage\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Program;
@@ -14,7 +14,7 @@ class ProgramController extends Controller
      */
     public function index(Request $request)
     {
-        return redirect()->route('admin.academics.index', array_merge(
+        return redirect()->route('manage.admin.academics.index', array_merge(
             $request->query(),
             ['tab' => 'programs']
         ));
@@ -25,7 +25,7 @@ class ProgramController extends Controller
      */
     public function create()
     {
-        return Inertia::render('admin/programs/create');
+        return Inertia::render('manage/admin/programs/create');
     }
 
     /**
@@ -49,7 +49,7 @@ class ProgramController extends Controller
 
         Program::create($validated);
 
-        return redirect()->route('admin.academics.index', ['tab' => 'programs'])
+        return redirect()->route('manage.admin.academics.index', ['tab' => 'programs'])
             ->with('success', '學程建立成功');
     }
 
@@ -58,7 +58,7 @@ class ProgramController extends Controller
      */
     public function show(Program $program)
     {
-        return Inertia::render('admin/programs/show', [
+        return Inertia::render('manage/admin/programs/show', [
             'program' => $program->load(['courses']),
         ]);
     }
@@ -68,7 +68,7 @@ class ProgramController extends Controller
      */
     public function edit(Program $program)
     {
-        return Inertia::render('admin/programs/edit', [
+        return Inertia::render('manage/admin/programs/edit', [
             'program' => $program,
         ]);
     }
@@ -94,7 +94,7 @@ class ProgramController extends Controller
 
         $program->update($validated);
 
-        return redirect()->route('admin.academics.index', ['tab' => 'programs'])
+        return redirect()->route('manage.admin.academics.index', ['tab' => 'programs'])
             ->with('success', '學程更新成功');
     }
 
@@ -109,7 +109,7 @@ class ProgramController extends Controller
 
         $program->delete();
 
-        return redirect()->route('admin.academics.index', ['tab' => 'programs'])
+        return redirect()->route('manage.admin.academics.index', ['tab' => 'programs'])
             ->with('success', '學程刪除成功');
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Manage\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Staff;
@@ -106,7 +106,7 @@ class StaffController extends Controller
 
         $teachers->withQueryString();
 
-        return Inertia::render('admin/staff/index', [
+        return Inertia::render('manage/admin/staff/index', [
             'initialTab' => $activeTab,
             'staff' => [
                 'active' => $staff,
@@ -119,7 +119,7 @@ class StaffController extends Controller
     // 顯示新增職員表單
     public function create()
     {
-        return Inertia::render('admin/staff/create');
+        return Inertia::render('manage/admin/staff/create');
     }
 
     // 儲存新的職員
@@ -149,13 +149,13 @@ class StaffController extends Controller
 
         Staff::create($data);
 
-        return redirect()->route('admin.staff.index');
+        return redirect()->route('manage.admin.staff.index');
     }
 
     // 顯示編輯表單
     public function edit(Staff $staff)
     {
-        return Inertia::render('admin/staff/edit', [
+        return Inertia::render('manage/admin/staff/edit', [
             'staff' => $staff,
         ]);
     }
@@ -186,14 +186,14 @@ class StaffController extends Controller
 
         $staff->update($data);
 
-        return redirect()->route('admin.staff.index');
+        return redirect()->route('manage.admin.staff.index');
     }
 
     // 刪除職員
     public function destroy(Staff $staff)
     {
         $staff->delete();
-        return redirect()->route('admin.staff.index');
+        return redirect()->route('manage.admin.staff.index');
     }
 
     public function restore(int $staff)
@@ -203,7 +203,7 @@ class StaffController extends Controller
 
         $record->restore();
 
-        return redirect()->route('admin.staff.index')->with('success', '職員已復原');
+        return redirect()->route('manage.admin.staff.index')->with('success', '職員已復原');
     }
 
     public function forceDelete(int $staff)
@@ -213,6 +213,6 @@ class StaffController extends Controller
 
         $record->forceDelete();
 
-        return redirect()->route('admin.staff.index')->with('success', '職員已永久刪除');
+        return redirect()->route('manage.admin.staff.index')->with('success', '職員已永久刪除');
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Manage\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Project;
@@ -19,7 +19,7 @@ class ProjectController extends Controller
             ->orderBy('start_date', 'desc')
             ->paginate(20);
 
-        return Inertia::render('admin/projects/index', [
+        return Inertia::render('manage/admin/projects/index', [
             'projects' => $projects,
         ]);
     }
@@ -29,7 +29,7 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        return Inertia::render('admin/projects/create', [
+        return Inertia::render('manage/admin/projects/create', [
             'teachers' => Teacher::orderBy('name->zh-TW')->get(),
         ]);
     }
@@ -66,7 +66,7 @@ class ProjectController extends Controller
             $project->teachers()->attach($teacherIds);
         }
 
-        return redirect()->route('admin.projects.index')
+        return redirect()->route('manage.admin.projects.index')
             ->with('success', '研究計畫建立成功');
     }
 
@@ -75,7 +75,7 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
-        return Inertia::render('admin/projects/show', [
+        return Inertia::render('manage/admin/projects/show', [
             'project' => $project->load(['teachers']),
         ]);
     }
@@ -85,7 +85,7 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
-        return Inertia::render('admin/projects/edit', [
+        return Inertia::render('manage/admin/projects/edit', [
             'project' => $project->load(['teachers']),
             'teachers' => Teacher::orderBy('name->zh-TW')->get(),
         ]);
@@ -120,7 +120,7 @@ class ProjectController extends Controller
         $project->update($validated);
         $project->teachers()->sync($teacherIds);
 
-        return redirect()->route('admin.projects.index')
+        return redirect()->route('manage.admin.projects.index')
             ->with('success', '研究計畫更新成功');
     }
 
@@ -132,7 +132,7 @@ class ProjectController extends Controller
         $project->teachers()->detach();
         $project->delete();
 
-        return redirect()->route('admin.projects.index')
+        return redirect()->route('manage.admin.projects.index')
             ->with('success', '研究計畫刪除成功');
     }
 }

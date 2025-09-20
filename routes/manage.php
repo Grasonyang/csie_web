@@ -4,19 +4,19 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 // 管理後台控制器
-use App\Http\Controllers\Admin\StaffController as AdminStaffController;
-use App\Http\Controllers\Admin\LabController as AdminLabController;
-use App\Http\Controllers\Admin\TeacherController as AdminTeacherController;
-use App\Http\Controllers\Admin\UserController as AdminUserController;
-use App\Http\Controllers\Admin\PostController as AdminPostController;
-use App\Http\Controllers\Admin\PostCategoryController as AdminPostCategoryController;
-use App\Http\Controllers\Admin\CourseController as AdminCourseController;
-use App\Http\Controllers\Admin\ProgramController as AdminProgramController;
-use App\Http\Controllers\Admin\AcademicController as AdminAcademicController;
-use App\Http\Controllers\Admin\ProjectController as AdminProjectController;
-use App\Http\Controllers\Admin\PublicationController as AdminPublicationController;
-use App\Http\Controllers\Admin\ContactMessageController as AdminContactMessageController;
-use App\Http\Controllers\Admin\AttachmentController as AdminAttachmentController;
+use App\Http\Controllers\Manage\Admin\StaffController as AdminStaffController;
+use App\Http\Controllers\Manage\Admin\LabController as AdminLabController;
+use App\Http\Controllers\Manage\Admin\TeacherController as AdminTeacherController;
+use App\Http\Controllers\Manage\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Manage\Admin\PostController as AdminPostController;
+use App\Http\Controllers\Manage\Admin\PostCategoryController as AdminPostCategoryController;
+use App\Http\Controllers\Manage\Admin\CourseController as AdminCourseController;
+use App\Http\Controllers\Manage\Admin\ProgramController as AdminProgramController;
+use App\Http\Controllers\Manage\Admin\AcademicController as AdminAcademicController;
+use App\Http\Controllers\Manage\Admin\ProjectController as AdminProjectController;
+use App\Http\Controllers\Manage\Admin\PublicationController as AdminPublicationController;
+use App\Http\Controllers\Manage\Admin\ContactMessageController as AdminContactMessageController;
+use App\Http\Controllers\Manage\Admin\AttachmentController as AdminAttachmentController;
 
 Route::middleware(['auth', 'verified'])
     ->prefix('manage')
@@ -39,7 +39,7 @@ Route::middleware(['auth', 'verified'])
                 });
 
                 Route::get('/dashboard', function () {
-                    return Inertia::render('admin/dashboard');
+                    return Inertia::render('manage/admin/dashboard');
                 })->name('dashboard');
 
                 // 使用者與系所成員管理
