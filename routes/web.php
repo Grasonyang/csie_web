@@ -13,10 +13,6 @@ use App\Http\Controllers\LabController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\HomeController;
 
-// Admin Controllers
-use App\Http\Controllers\Admin\LabController as AdminLabController;
-use App\Http\Controllers\Admin\StaffController as AdminStaffController;
-
 Route::get('/', HomeController::class)->name('home');
 
 // Public Routes
@@ -64,6 +60,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Include additional route files
-require __DIR__.'/admin.php';
+require __DIR__.'/manage.php';
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
