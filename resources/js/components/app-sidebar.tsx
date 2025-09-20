@@ -18,54 +18,55 @@ import {
     HelpCircle,
 } from 'lucide-react';
 import AppLogo from './app-logo';
+import { useTranslator } from '@/hooks/use-translator';
 
 export function AppSidebar() {
     const { auth, locale } = usePage<SharedData>().props;
-    const isZh = locale?.toLowerCase() === 'zh-tw';
     const role = auth.user.role;
+    const { t } = useTranslator('manage');
 
     type UserRole = SharedData['auth']['user']['role'];
     type RoleAwareNavItem = NavItem & { roles?: UserRole[] };
 
     const localizedMainNavItems: RoleAwareNavItem[] = [
         {
-            title: 'Dashboard',
+            title: t('sidebar.admin.dashboard', 'Dashboard'),
             href: '/manage/admin/dashboard',
             icon: LayoutGrid,
         },
         {
-            title: isZh ? '公告管理' : 'Posts',
+            title: t('sidebar.admin.posts', 'Announcements'),
             href: '/manage/admin/posts',
             icon: Megaphone,
         },
         {
-            title: isZh ? '師資與職員' : 'Faculty & Staff',
+            title: t('sidebar.admin.staff', 'Faculty & Staff'),
             href: '/manage/admin/staff',
             icon: UserCheck,
             roles: ['admin', 'teacher'],
         },
         {
-            title: isZh ? '實驗室管理' : 'Laboratories',
+            title: t('sidebar.admin.labs', 'Laboratories'),
             href: '/manage/admin/labs',
             icon: Beaker,
         },
         {
-            title: isZh ? '課程與學程' : 'Courses & Programs',
+            title: t('sidebar.admin.academics', 'Courses & Programs'),
             href: '/manage/admin/academics',
             icon: GraduationCap,
         },
         {
-            title: isZh ? '使用者管理' : 'Users',
+            title: t('sidebar.admin.users', 'Users'),
             href: '/manage/admin/users',
             icon: Users,
         },
         {
-            title: isZh ? '聯絡訊息' : 'Messages',
+            title: t('sidebar.admin.messages', 'Messages'),
             href: '/manage/admin/contact-messages',
             icon: Mail,
         },
         {
-            title: isZh ? '附件管理' : 'Attachments',
+            title: t('sidebar.admin.attachments', 'Attachments'),
             href: '/manage/admin/attachments',
             icon: FileText,
         },
@@ -73,17 +74,17 @@ export function AppSidebar() {
 
     const localizedFooterNavItems: NavItem[] = [
         {
-            title: isZh ? '系統設定' : 'Settings',
+            title: t('sidebar.footer.settings', 'Settings'),
             href: '/settings/profile',
             icon: Settings,
         },
         {
-            title: isZh ? '說明文件' : 'Documentation',
+            title: t('sidebar.footer.docs', 'Documentation'),
             href: 'https://laravel.com/docs',
             icon: HelpCircle,
         },
         {
-            title: 'Repository',
+            title: t('sidebar.footer.repo', 'Repository'),
             href: 'https://github.com/Grasonyang/csie_web',
             icon: Folder,
         },

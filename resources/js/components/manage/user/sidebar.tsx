@@ -3,24 +3,24 @@ import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type NavItem, type SharedData } from '@/types';
-import { Link, usePage } from '@inertiajs/react';
+import { type NavItem } from '@/types';
+import { Link } from '@inertiajs/react';
 import { LayoutGrid, User, Palette, ShieldCheck, LifeBuoy } from 'lucide-react';
+import { useTranslator } from '@/hooks/use-translator';
 
 export default function UserSidebar() {
-    const { locale } = usePage<SharedData>().props;
-    const isZh = locale?.toLowerCase() === 'zh-tw';
+    const { t } = useTranslator('manage');
 
     const mainNavItems: NavItem[] = [
-        { title: isZh ? '會員首頁' : 'Member Home', href: '/manage/dashboard', icon: LayoutGrid },
-        { title: isZh ? '個人資料' : 'Profile', href: '/settings/profile', icon: User },
-        { title: isZh ? '外觀偏好' : 'Appearance', href: '/settings/appearance', icon: Palette },
-        { title: isZh ? '安全設定' : 'Security', href: '/settings/password', icon: ShieldCheck },
+        { title: t('sidebar.user.dashboard', 'Member Home'), href: '/manage/dashboard', icon: LayoutGrid },
+        { title: t('sidebar.user.profile', 'Profile'), href: '/settings/profile', icon: User },
+        { title: t('sidebar.user.appearance', 'Appearance'), href: '/settings/appearance', icon: Palette },
+        { title: t('sidebar.user.security', 'Security'), href: '/settings/password', icon: ShieldCheck },
     ];
 
     const footerNavItems: NavItem[] = [
         {
-            title: isZh ? '協助中心' : 'Support',
+            title: t('sidebar.user.support', 'Support'),
             href: 'mailto:csie@cc.ncue.edu.tw',
             icon: LifeBuoy,
         },
@@ -41,7 +41,7 @@ export default function UserSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} label={isZh ? '會員專區' : 'Member Area'} />
+                <NavMain items={mainNavItems} label={t('sidebar.user.nav_label', 'Member area')} />
             </SidebarContent>
 
             <SidebarFooter>

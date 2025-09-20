@@ -1,0 +1,318 @@
+<?php
+
+return [
+    'layout' => [
+        'breadcrumbs' => [
+            'dashboard' => 'Management',
+            'admin_dashboard' => 'System overview',
+            'posts' => 'Announcements',
+            'posts_create' => 'Create bulletin',
+            'posts_edit' => 'Edit bulletin',
+            'posts_show' => 'Bulletin detail',
+            'attachments' => 'Attachments',
+        ],
+        'footer' => 'CSIE Admin',
+    ],
+    'sidebar' => [
+        'admin' => [
+            'dashboard' => 'Dashboard',
+            'posts' => 'Announcements',
+            'staff' => 'Faculty & Staff',
+            'labs' => 'Laboratories',
+            'academics' => 'Courses & Programs',
+            'users' => 'Users',
+            'messages' => 'Messages',
+            'attachments' => 'Attachments',
+        ],
+        'teacher' => [
+            'dashboard' => 'Teaching Home',
+            'posts' => 'Announcements',
+            'labs' => 'Research',
+            'courses' => 'Courses & Activities',
+            'profile' => 'Profile Settings',
+            'guide' => 'Teaching Guide',
+            'nav_label' => 'Teaching',
+        ],
+        'user' => [
+            'dashboard' => 'Member Home',
+            'profile' => 'Profile',
+            'appearance' => 'Appearance',
+            'security' => 'Security',
+            'support' => 'Support',
+            'nav_label' => 'Member area',
+        ],
+        'footer' => [
+            'settings' => 'System settings',
+            'docs' => 'Documentation',
+            'repo' => 'Repository',
+        ],
+    ],
+    'dashboard' => [
+        'common' => [
+            'manage_center' => 'Manage Center',
+            'back_to_overview' => 'Back to overview',
+            'quick_actions' => 'Quick actions',
+        ],
+        'teacher' => [
+            'title' => 'Teaching workspace',
+            'description' => 'Access announcements, research updates, and course tools in one place.',
+            'actions' => [
+                'posts' => [
+                    'label' => 'Announcements',
+                    'description' => 'Publish and maintain department updates.',
+                ],
+                'labs' => [
+                    'label' => 'Research overview',
+                    'description' => 'Update lab profiles and research highlights.',
+                ],
+                'courses' => [
+                    'label' => 'Courses & events',
+                    'description' => 'Organise course details and timelines.',
+                ],
+                'profile' => [
+                    'label' => 'Profile settings',
+                    'description' => 'Update contact and public information.',
+                ],
+            ],
+        ],
+        'user' => [
+            'title' => 'Member dashboard',
+            'description' => 'Manage your profile, appearance preferences, and security in one view.',
+            'actions' => [
+                'profile' => [
+                    'label' => 'Update profile',
+                    'description' => 'Edit your personal and contact details.',
+                ],
+                'appearance' => [
+                    'label' => 'Appearance',
+                    'description' => 'Adjust theme and interface preferences.',
+                ],
+                'security' => [
+                    'label' => 'Security settings',
+                    'description' => 'Update your password and review login history.',
+                ],
+            ],
+        ],
+    ],
+    'posts' => [
+        'status' => [
+            'draft' => 'Draft',
+            'published' => 'Published',
+            'archived' => 'Archived',
+        ],
+        'source_type' => [
+            'manual' => 'Manual input',
+            'link' => 'External link',
+        ],
+        'index' => [
+            'badge' => 'Bulletin hub',
+            'title' => 'Manage announcements',
+            'description' => 'Control publication status, pin important updates, and keep attachments organised.',
+            'create' => 'Create bulletin',
+            'filters_title' => 'Filters',
+            'filters' => [
+                'keyword' => 'Keyword',
+                'keyword_placeholder' => 'Search by title',
+                'category' => 'Category',
+                'status' => 'Status',
+                'pinned' => 'Pinned',
+                'pinned_only' => 'Pinned only',
+                'pinned_exclude' => 'Exclude pinned',
+                'per_page' => 'Per page',
+                'all' => 'All',
+                'apply' => 'Apply',
+                'reset' => 'Reset',
+            ],
+            'table' => [
+                'title' => 'Announcement list',
+                'empty' => 'No announcements found with current filters.',
+                'columns' => [
+                    'title' => 'Title',
+                    'category' => 'Category',
+                    'status' => 'Status',
+                    'published_at' => 'Published at',
+                    'attachments' => 'Attachments',
+                    'actions' => 'Actions',
+                ],
+                'records_total' => ':total records in total',
+                'attachments_count' => ':count attachment:plural',
+                'manage_attachments' => 'Manage attachments',
+                'page' => 'Page :current of :last',
+            ],
+            'actions' => [
+                'view_label' => 'View details',
+                'view_aria' => 'View announcement',
+                'edit_label' => 'Edit this bulletin',
+                'edit_aria' => 'Edit announcement',
+                'delete_label' => 'Delete this bulletin',
+                'delete_aria' => 'Delete announcement',
+                'pinned_badge' => 'Pinned bulletin',
+            ],
+        ],
+        'form' => [
+            'sections' => [
+                'content' => [
+                    'title' => 'Announcement content',
+                    'description' => 'Provide multilingual content and select publication status.',
+                ],
+                'attachments' => [
+                    'title' => 'Attachment management',
+                    'description' => 'Upload files or add external links to be shown with the bulletin.',
+                ],
+            ],
+            'fields' => [
+                'category' => [
+                    'label' => 'Category',
+                    'placeholder' => 'Select category',
+                ],
+                'title_zh' => [
+                    'label' => 'Chinese title',
+                    'helper' => 'Display title for zh-TW visitors.',
+                ],
+                'title_en' => [
+                    'label' => 'English title',
+                    'helper' => 'Leave blank to mirror the Chinese title.',
+                ],
+                'sync_title' => 'Auto-sync English title',
+                'content_zh' => [
+                    'label' => 'Chinese content',
+                    'helper' => 'Supports HTML or Markdown snippets.',
+                ],
+                'content_en' => [
+                    'label' => 'English content',
+                    'helper' => 'Leave blank to reuse the Chinese content.',
+                ],
+                'sync_content' => 'Auto-sync English content',
+                'status' => [
+                    'label' => 'Status',
+                    'placeholder' => 'Select status',
+                ],
+                'pinned' => [
+                    'label' => 'Pin announcement',
+                ],
+                'publish_at' => [
+                    'label' => 'Publish at',
+                    'helper' => 'Optional schedule time (system timezone).',
+                ],
+                'source_type' => [
+                    'label' => 'Content source',
+                    'manual' => 'Manual input',
+                    'link' => 'External link',
+                ],
+                'source_url' => [
+                    'label' => 'Source URL',
+                    'placeholder' => 'https://example.com/post',
+                ],
+            ],
+            'attachments' => [
+                'upload_button' => 'Upload files',
+                'add_link' => 'Add link',
+                'link_title_placeholder' => 'Link title',
+                'link_url_placeholder' => 'https://example.com',
+                'existing_title' => 'Existing attachments',
+                'remove' => 'Remove',
+                'empty' => 'No attachments added yet.',
+                'pending_files' => 'Pending files (:count)',
+            ],
+            'preview' => [
+                'title' => 'Source preview',
+                'reload' => 'Reload preview',
+                'not_embeddable' => 'Preview cannot be embedded. Open the source in a new tab instead.',
+                'invalid' => 'Unable to load the source content. Confirm the URL is accessible.',
+            ],
+            'actions' => [
+                'cancel' => 'Cancel',
+                'submit_create' => 'Create bulletin',
+                'submit_create_processing' => 'Creating…',
+                'submit_update' => 'Update bulletin',
+                'submit_update_processing' => 'Updating…',
+            ],
+        ],
+        'show' => [
+            'title' => 'Bulletin detail',
+            'overview' => 'Overview',
+            'category' => 'Category',
+            'english_title' => 'English title',
+            'source_type' => 'Source type',
+            'source_url' => 'Source URL',
+            'content' => 'Chinese content',
+            'content_en' => 'English content',
+            'attachments' => 'Attachments',
+            'attachment_manager' => 'Open attachment manager',
+            'status' => 'Status',
+            'pinned_badge' => 'Pinned',
+            'published_at' => 'Published',
+            'not_set' => 'Not set',
+            'no_content' => 'No content provided for this language.',
+            'link_notice' => 'This bulletin references an external source.',
+        ],
+    ],
+    'attachments' => [
+        'type' => [
+            'image' => 'Image',
+            'document' => 'Document',
+            'link' => 'Link',
+        ],
+        'index' => [
+            'title' => 'Attachment management',
+            'description' => 'Review and curate files and links referenced across the site.',
+            'back_to_posts' => 'Back to posts',
+            'filters_title' => 'Filters',
+            'filters' => [
+                'search' => 'Search attachments',
+                'search_placeholder' => 'Title, file name, or mime type',
+                'type' => 'Type',
+                'all_types' => 'All types',
+                'attachable' => 'Attachable',
+                'all_sources' => 'All sources',
+                'source_id' => 'Source ID',
+                'source_id_placeholder' => 'Enter source record ID',
+                'trashed' => 'Trashed filter',
+                'active_only' => 'Active only',
+                'include_deleted' => 'Include deleted',
+                'deleted_only' => 'Only deleted',
+                'per_page' => 'Per page',
+                'apply' => 'Apply',
+                'reset' => 'Reset',
+            ],
+            'table' => [
+                'title' => 'Attachment list',
+                'columns' => [
+                    'attachment' => 'Attachment',
+                    'source' => 'Source',
+                    'size' => 'Size',
+                    'updated_at' => 'Updated at',
+                    'actions' => 'Actions',
+                ],
+                'records_total' => ':total records in total',
+                'empty' => 'No attachments match the current filters.',
+                'meta' => [
+                    'type' => 'Type',
+                ],
+                'page' => 'Page :current of :last',
+            ],
+            'status' => [
+                'unassigned' => 'Unassigned',
+                'post' => 'Post · :title',
+                'generic_with_identifier' => ':type · :identifier',
+                'generic_without_identifier' => ':type #:id',
+            ],
+            'actions' => [
+                'visit_external' => 'Open external link',
+                'download' => 'Download attachment',
+                'restore' => 'Restore attachment',
+                'force_delete' => 'Permanently delete',
+                'delete' => 'Delete attachment',
+            ],
+            'dialogs' => [
+                'delete_confirm' => 'Delete attachment ":name"?',
+                'force_delete_confirm' => 'Permanently delete this attachment? This action cannot be undone.',
+            ],
+            'pagination' => [
+                'summary' => 'Page :current of :last',
+                'previous' => 'Previous',
+                'next' => 'Next',
+            ],
+        ],
+    ],
+];

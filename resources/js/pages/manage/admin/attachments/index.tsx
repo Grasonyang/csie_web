@@ -1,6 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { type ComponentType } from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,8 +7,7 @@ import { Select } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import ManageLayout from '@/layouts/manage/manage-layout';
 import { cn } from '@/lib/utils';
-import { type SharedData } from '@/types';
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import {
     ArrowDownToLine,
     FileText,
@@ -18,6 +16,7 @@ import {
     RotateCcw,
     Trash2,
 } from 'lucide-react';
+import { useTranslator } from '@/hooks/use-translator';
 
 interface AttachmentRecord {
     id: number;
@@ -81,10 +80,10 @@ const DEFAULT_PAGINATION_META: PaginationMeta = {
     total: 0,
 };
 
-const TYPE_META: Record<AttachmentRecord['type'], { zh: string; en: string; icon: ComponentType<{ className?: string }> }> = {
-    image: { zh: '圖片', en: 'Image', icon: ImageIcon },
-    document: { zh: '文件', en: 'Document', icon: FileText },
-    link: { zh: '連結', en: 'Link', icon: LinkIcon },
+const TYPE_META: Record<AttachmentRecord['type'], { key: string; fallback: { zh: string; en: string }; icon: ComponentType<{ className?: string }> }> = {
+    image: { key: 'attachments.type.image', fallback: { zh: '圖片', en: 'Image' }, icon: ImageIcon },
+    document: { key: 'attachments.type.document', fallback: { zh: '文件', en: 'Document' }, icon: FileText },
+    link: { key: 'attachments.type.link', fallback: { zh: '連結', en: 'Link' }, icon: LinkIcon },
 };
 
 const formatBytes = (bytes: number | null) => {
@@ -113,8 +112,7 @@ export default function AttachmentsIndex({
     attachableTypeOptions = [],
     perPageOptions = [],
 }: AttachmentsIndexProps) {
-    const { locale } = usePage<SharedData>().props;
-    const isZh = locale?.toLowerCase() === 'zh-tw';
+    const { t, isZh, localeKey } = useTranslator('manage');
     const { delete: destroy, patch } = useForm();
 
     const attachmentsIndexUrl = '/manage/admin/attachments';
@@ -206,12 +204,12 @@ export default function AttachmentsIndex({
 
     const formatTypeLabel = (type: AttachmentRecord['type']) => {
         const meta = TYPE_META[type];
-        return isZh ? meta.zh : meta.en;
+        return t(meta.key, isZh ? meta.fallback.zh : meta.fallback.en);
     };
 
     const formatAttachableLabel = (attachment: AttachmentRecord) => {
         if (!attachment.attachable_type) {
-            return isZh ? '未關聯' : 'Unassigned';
+            return t('attachments.index.status.unassigned', isZh ? '未關聯' : 'Unassigned');
         }
 
         const baseType = attachment.attachable_type.split('\\').pop() ?? attachment.attachable_type;
@@ -220,20 +218,44 @@ export default function AttachmentsIndex({
 
         if (attachment.attachable_type.includes('Post')) {
             const title = attachment.attachable?.title ?? `#${attachment.attachable_id ?? '?'}`;
-            return `${isZh ? '公告' : 'Post'} · ${title}`;
+            return t('attachments.index.status.post', `${isZh ? '公告' : 'Post'} · ${title}`, { title });
         }
 
-        return identifier ? `${baseType} · ${identifier}` : `${baseType} #${attachment.attachable_id ?? '?'}`;
+        if (identifier) {
+            return t(
+                'attachments.index.status.generic_with_identifier',
+                `${baseType} · ${identifier}`,
+                {
+                    type: baseType,
+                    identifier,
+                },
+            );
+        }
+
+        return t(
+            'attachments.index.status.generic_without_identifier',
+            `${baseType} #${attachment.attachable_id ?? '?'}`,
+            {
+                type: baseType,
+                id: attachment.attachable_id ?? '?',
+            },
+        );
     };
 
-    const formatDateTime = (value: string) => new Date(value).toLocaleString(isZh ? 'zh-TW' : 'en-US');
+    const formatDateTime = (value: string) => new Date(value).toLocaleString(localeKey === 'zh-TW' ? 'zh-TW' : 'en-US');
 
     const handleSoftDelete = (attachment: AttachmentRecord) => {
+        const name = attachment.title ?? attachment.file_url ?? attachment.external_url ?? attachment.id;
+
         if (
             confirm(
-                isZh
-                    ? `確定要移除附件「${attachment.title ?? attachment.file_url ?? attachment.external_url ?? attachment.id}」嗎？`
-                    : `Delete attachment "${attachment.title ?? attachment.file_url ?? attachment.external_url ?? attachment.id}"?`
+                t(
+                    'attachments.index.dialogs.delete_confirm',
+                    isZh
+                        ? `確定要移除附件「${name}」嗎？`
+                        : `Delete attachment "${name}"?`,
+                    { name },
+                ),
             )
         ) {
             destroy(`${attachmentsIndexUrl}/${attachment.id}`, {
@@ -253,9 +275,12 @@ export default function AttachmentsIndex({
     const handleForceDelete = (attachment: AttachmentRecord) => {
         if (
             confirm(
-                isZh
-                    ? '確定要永久刪除此附件？此動作無法復原。'
-                    : 'Permanently delete this attachment? This action cannot be undone.'
+                t(
+                    'attachments.index.dialogs.force_delete_confirm',
+                    isZh
+                        ? '確定要永久刪除此附件？此動作無法復原。'
+                        : 'Permanently delete this attachment? This action cannot be undone.',
+                ),
             )
         ) {
             destroy(`${attachmentsIndexUrl}/${attachment.id}/force`, {
@@ -265,31 +290,48 @@ export default function AttachmentsIndex({
         }
     };
 
+    const resolvePaginationLabel = (label: string) => {
+        if (/previous/i.test(label)) {
+            const arrow = label.includes('«') ? '« ' : '';
+            return `${arrow}${t('attachments.index.pagination.previous', isZh ? '上一頁' : 'Previous')}`;
+        }
+
+        if (/next/i.test(label)) {
+            const arrow = label.includes('»') ? ' »' : '';
+            return `${t('attachments.index.pagination.next', isZh ? '下一頁' : 'Next')}${arrow}`;
+        }
+
+        return label;
+    };
+
     const breadcrumbs = [
-        { title: isZh ? '管理首頁' : 'Management', href: '/manage/dashboard' },
-        { title: isZh ? '附件管理' : 'Attachments', href: attachmentsIndexUrl },
+        { title: t('layout.breadcrumbs.dashboard', isZh ? '管理首頁' : 'Management'), href: '/manage/dashboard' },
+        { title: t('layout.breadcrumbs.attachments', isZh ? '附件管理' : 'Attachments'), href: attachmentsIndexUrl },
     ];
 
     return (
         <ManageLayout role="admin" breadcrumbs={breadcrumbs}>
-            <Head title={isZh ? '附件管理' : 'Attachment library'} />
+            <Head title={t('attachments.index.title', isZh ? '附件管理' : 'Attachment management')} />
 
             <section className="space-y-6 px-4 py-8 sm:px-6 lg:px-0">
                 <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
                     <CardContent className="flex flex-col gap-4 px-6 py-6 sm:flex-row sm:items-center sm:justify-between">
                         <div className="space-y-2">
                             <h1 className="text-3xl font-semibold text-[#151f54]">
-                                {isZh ? '附件管理' : 'Attachment management'}
+                                {t('attachments.index.title', isZh ? '附件管理' : 'Attachment management')}
                             </h1>
                             <p className="text-sm text-slate-600">
-                                {isZh
-                                    ? '檢視與維護公告、頁面所使用的檔案與連結資源。'
-                                    : 'Review and curate files and links referenced across the site.'}
+                                {t(
+                                    'attachments.index.description',
+                                    isZh
+                                        ? '檢視與維護公告、頁面所使用的檔案與連結資源。'
+                                        : 'Review and curate files and links referenced across the site.',
+                                )}
                             </p>
                         </div>
                         <Button asChild variant="outline" className="rounded-full border-[#151f54]/30">
                             <Link href="/manage/admin/posts">
-                                {isZh ? '回公告列表' : 'Back to posts'}
+                                {t('attachments.index.back_to_posts', isZh ? '回公告列表' : 'Back to posts')}
                             </Link>
                         </Button>
                     </CardContent>
@@ -298,7 +340,7 @@ export default function AttachmentsIndex({
                 <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
                     <CardHeader className="pb-4">
                         <CardTitle className="text-lg font-semibold text-[#151f54]">
-                            {isZh ? '篩選條件' : 'Filters'}
+                            {t('attachments.index.filters_title', isZh ? '篩選條件' : 'Filters')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -308,12 +350,15 @@ export default function AttachmentsIndex({
                         >
                             <div className="xl:col-span-2">
                                 <label className="mb-1 block text-sm font-medium text-neutral-700" htmlFor="attachment-search">
-                                    {isZh ? '搜尋附件' : 'Search attachments'}
+                                    {t('attachments.index.filters.search', isZh ? '搜尋附件' : 'Search attachments')}
                                 </label>
                                 <Input
                                     id="attachment-search"
                                     type="search"
-                                    placeholder={isZh ? '輸入標題、檔名或 MIME' : 'Title, file name, or mime type'}
+                                    placeholder={t(
+                                        'attachments.index.filters.search_placeholder',
+                                        isZh ? '輸入標題、檔名或 MIME' : 'Title, file name, or mime type',
+                                    )}
                                     value={filterState.search}
                                     onChange={(event) => handleFilterChange('search', event.target.value)}
                                 />
@@ -321,14 +366,14 @@ export default function AttachmentsIndex({
 
                             <div>
                                 <label className="mb-1 block text-sm font-medium text-neutral-700" htmlFor="attachment-type">
-                                    {isZh ? '附件類型' : 'Type'}
+                                    {t('attachments.index.filters.type', isZh ? '附件類型' : 'Type')}
                                 </label>
                                 <Select
                                     id="attachment-type"
                                     value={filterState.type}
                                     onChange={(event) => handleFilterChange('type', event.target.value)}
                                 >
-                                    <option value="">{isZh ? '全部類型' : 'All types'}</option>
+                                    <option value="">{t('attachments.index.filters.all_types', isZh ? '全部類型' : 'All types')}</option>
                                     {typeOptions.map((option) => (
                                         <option key={option} value={option}>
                                             {formatTypeLabel(option as AttachmentRecord['type'])}
@@ -339,14 +384,14 @@ export default function AttachmentsIndex({
 
                             <div>
                                 <label className="mb-1 block text-sm font-medium text-neutral-700" htmlFor="attachment-source-type">
-                                    {isZh ? '資料來源' : 'Attachable'}
+                                    {t('attachments.index.filters.attachable', isZh ? '資料來源' : 'Attachable')}
                                 </label>
                                 <Select
                                     id="attachment-source-type"
                                     value={filterState.attachable_type}
                                     onChange={(event) => handleFilterChange('attachable_type', event.target.value)}
                                 >
-                                    <option value="">{isZh ? '全部來源' : 'All sources'}</option>
+                                    <option value="">{t('attachments.index.filters.all_sources', isZh ? '全部來源' : 'All sources')}</option>
                                     {attachableTypeOptions.map((option) => (
                                         <option key={option} value={option}>
                                             {option}
@@ -357,13 +402,16 @@ export default function AttachmentsIndex({
 
                             <div>
                                 <label className="mb-1 block text-sm font-medium text-neutral-700" htmlFor="attachment-source-id">
-                                    {isZh ? '來源 ID' : 'Source ID'}
+                                    {t('attachments.index.filters.source_id', isZh ? '來源 ID' : 'Source ID')}
                                 </label>
                                 <Input
                                     id="attachment-source-id"
                                     type="number"
                                     min={0}
-                                    placeholder={isZh ? '輸入來源資料 ID' : 'Enter source record ID'}
+                                    placeholder={t(
+                                        'attachments.index.filters.source_id_placeholder',
+                                        isZh ? '輸入來源資料 ID' : 'Enter source record ID',
+                                    )}
                                     value={filterState.attachable_id}
                                     onChange={(event) => handleFilterChange('attachable_id', event.target.value)}
                                 />
@@ -371,22 +419,22 @@ export default function AttachmentsIndex({
 
                             <div>
                                 <label className="mb-1 block text-sm font-medium text-neutral-700" htmlFor="attachment-trashed">
-                                    {isZh ? '刪除範圍' : 'Trashed filter'}
+                                    {t('attachments.index.filters.trashed', isZh ? '刪除範圍' : 'Trashed filter')}
                                 </label>
                                 <Select
                                     id="attachment-trashed"
                                     value={filterState.trashed}
                                     onChange={(event) => handleFilterChange('trashed', event.target.value)}
                                 >
-                                    <option value="">{isZh ? '僅顯示現存' : 'Active only'}</option>
-                                    <option value="with">{isZh ? '含已刪除' : 'Include deleted'}</option>
-                                    <option value="only">{isZh ? '僅已刪除' : 'Only deleted'}</option>
+                                    <option value="">{t('attachments.index.filters.active_only', isZh ? '僅顯示現存' : 'Active only')}</option>
+                                    <option value="with">{t('attachments.index.filters.include_deleted', isZh ? '含已刪除' : 'Include deleted')}</option>
+                                    <option value="only">{t('attachments.index.filters.deleted_only', isZh ? '僅已刪除' : 'Only deleted')}</option>
                                 </Select>
                             </div>
 
                             <div>
                                 <label className="mb-1 block text-sm font-medium text-neutral-700" htmlFor="attachment-per-page">
-                                    {isZh ? '每頁數量' : 'Per page'}
+                                    {t('attachments.index.filters.per_page', isZh ? '每頁數量' : 'Per page')}
                                 </label>
                                 <Select
                                     id="attachment-per-page"
@@ -411,7 +459,7 @@ export default function AttachmentsIndex({
 
                             <div className="flex items-end gap-2 xl:col-span-6">
                                 <Button type="submit" className="w-full bg-[#151f54] text-white hover:bg-[#1f2a6d] sm:w-auto">
-                                    {isZh ? '套用' : 'Apply'}
+                                    {t('attachments.index.filters.apply', isZh ? '套用' : 'Apply')}
                                 </Button>
                                 <Button
                                     type="button"
@@ -420,7 +468,7 @@ export default function AttachmentsIndex({
                                     disabled={!hasActiveFilters}
                                     onClick={resetFilters}
                                 >
-                                    {isZh ? '重設' : 'Reset'}
+                                    {t('attachments.index.filters.reset', isZh ? '重設' : 'Reset')}
                                 </Button>
                             </div>
                         </form>
@@ -431,12 +479,16 @@ export default function AttachmentsIndex({
                     <CardHeader className="flex flex-col gap-2 pb-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <CardTitle className="text-lg font-semibold text-[#151f54]">
-                                {isZh ? '附件列表' : 'Attachment list'}
+                                {t('attachments.index.table.title', isZh ? '附件列表' : 'Attachment list')}
                             </CardTitle>
                             <p className="text-sm text-slate-500">
-                                {isZh
-                                    ? `共 ${paginationMeta.total} 筆資料`
-                                    : `${paginationMeta.total} records in total`}
+                                {t(
+                                    'attachments.index.table.records_total',
+                                    isZh
+                                        ? `共 ${paginationMeta.total} 筆資料`
+                                        : `${paginationMeta.total} records in total`,
+                                    { total: paginationMeta.total },
+                                )}
                             </p>
                         </div>
                     </CardHeader>
@@ -445,18 +497,36 @@ export default function AttachmentsIndex({
                             <table className="min-w-full divide-y divide-neutral-200 bg-white text-sm">
                                 <thead className="bg-neutral-50 text-left text-xs uppercase tracking-wide text-neutral-500">
                                     <tr>
-                                        <th className="px-6 py-3 font-medium">{isZh ? '附件資訊' : 'Attachment'}</th>
-                                        <th className="px-4 py-3 font-medium">{isZh ? '來源' : 'Source'}</th>
-                                        <th className="px-4 py-3 font-medium">{isZh ? '大小' : 'Size'}</th>
-                                        <th className="px-4 py-3 font-medium">{isZh ? '更新時間' : 'Updated at'}</th>
-                                        <th className="px-4 py-3 font-medium text-right">{isZh ? '操作' : 'Actions'}</th>
+                                        <th className="px-6 py-3 font-medium">
+                                            {t(
+                                                'attachments.index.table.columns.attachment',
+                                                isZh ? '附件資訊' : 'Attachment',
+                                            )}
+                                        </th>
+                                        <th className="px-4 py-3 font-medium">
+                                            {t('attachments.index.table.columns.source', isZh ? '來源' : 'Source')}
+                                        </th>
+                                        <th className="px-4 py-3 font-medium">
+                                            {t('attachments.index.table.columns.size', isZh ? '大小' : 'Size')}
+                                        </th>
+                                        <th className="px-4 py-3 font-medium">
+                                            {t('attachments.index.table.columns.updated_at', isZh ? '更新時間' : 'Updated at')}
+                                        </th>
+                                        <th className="px-4 py-3 font-medium text-right">
+                                            {t('attachments.index.table.columns.actions', isZh ? '操作' : 'Actions')}
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-neutral-100">
                                     {attachmentsData.length === 0 && (
                                         <tr>
                                             <td colSpan={5} className="px-6 py-12 text-center text-sm text-neutral-500">
-                                                {isZh ? '目前尚無符合條件的附件' : 'No attachments match the current filters.'}
+                                                {t(
+                                                    'attachments.index.table.empty',
+                                                    isZh
+                                                        ? '目前尚無符合條件的附件'
+                                                        : 'No attachments match the current filters.',
+                                                )}
                                             </td>
                                         </tr>
                                     )}
@@ -477,7 +547,8 @@ export default function AttachmentsIndex({
                                                                     {attachment.title ?? attachment.file_url ?? attachment.external_url ?? `#${attachment.id}`}
                                                                 </span>
                                                                 <span className="text-xs text-neutral-500">
-                                                                    {isZh ? '類型' : 'Type'} · {formatTypeLabel(attachment.type)}
+                                                                    {t('attachments.index.table.meta.type', isZh ? '類型' : 'Type')} ·{' '}
+                                                                    {formatTypeLabel(attachment.type)}
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -503,7 +574,12 @@ export default function AttachmentsIndex({
                                                                         <LinkIcon className="h-4 w-4" />
                                                                     </a>
                                                                 </TooltipTrigger>
-                                                                <TooltipContent>{isZh ? '開啟外部連結' : 'Open external link'}</TooltipContent>
+                                                                <TooltipContent>
+                                                                    {t(
+                                                                        'attachments.index.actions.visit_external',
+                                                                        isZh ? '開啟外部連結' : 'Open external link',
+                                                                    )}
+                                                                </TooltipContent>
                                                             </Tooltip>
                                                         )}
                                                         {attachment.file_url && (
@@ -516,7 +592,12 @@ export default function AttachmentsIndex({
                                                                         <ArrowDownToLine className="h-4 w-4" />
                                                                     </a>
                                                                 </TooltipTrigger>
-                                                                <TooltipContent>{isZh ? '下載附件' : 'Download attachment'}</TooltipContent>
+                                                                <TooltipContent>
+                                                                    {t(
+                                                                        'attachments.index.actions.download',
+                                                                        isZh ? '下載附件' : 'Download attachment',
+                                                                    )}
+                                                                </TooltipContent>
                                                             </Tooltip>
                                                         )}
                                                         {isDeleted ? (
@@ -531,7 +612,12 @@ export default function AttachmentsIndex({
                                                                             <RotateCcw className="h-4 w-4" />
                                                                         </button>
                                                                     </TooltipTrigger>
-                                                                    <TooltipContent>{isZh ? '還原附件' : 'Restore attachment'}</TooltipContent>
+                                                                    <TooltipContent>
+                                                                        {t(
+                                                                            'attachments.index.actions.restore',
+                                                                            isZh ? '還原附件' : 'Restore attachment',
+                                                                        )}
+                                                                    </TooltipContent>
                                                                 </Tooltip>
                                                                 <Tooltip>
                                                                     <TooltipTrigger asChild>
@@ -543,7 +629,12 @@ export default function AttachmentsIndex({
                                                                             <Trash2 className="h-4 w-4" />
                                                                         </button>
                                                                     </TooltipTrigger>
-                                                                    <TooltipContent>{isZh ? '永久刪除' : 'Permanently delete'}</TooltipContent>
+                                                                    <TooltipContent>
+                                                                        {t(
+                                                                            'attachments.index.actions.force_delete',
+                                                                            isZh ? '永久刪除' : 'Permanently delete',
+                                                                        )}
+                                                                    </TooltipContent>
                                                                 </Tooltip>
                                                             </>
                                                         ) : (
@@ -557,7 +648,12 @@ export default function AttachmentsIndex({
                                                                         <Trash2 className="h-4 w-4" />
                                                                     </button>
                                                                 </TooltipTrigger>
-                                                                <TooltipContent>{isZh ? '刪除附件' : 'Delete attachment'}</TooltipContent>
+                                                                <TooltipContent>
+                                                                    {t(
+                                                                        'attachments.index.actions.delete',
+                                                                        isZh ? '刪除附件' : 'Delete attachment',
+                                                                    )}
+                                                                </TooltipContent>
                                                             </Tooltip>
                                                         )}
                                                     </div>
@@ -572,18 +668,26 @@ export default function AttachmentsIndex({
                         {paginationLinks.length > 0 && (
                             <div className="flex items-center justify-between pt-2 text-sm text-neutral-500">
                                 <div>
-                                    {isZh
-                                        ? `第 ${paginationMeta.current_page} / ${paginationMeta.last_page} 頁`
-                                        : `Page ${paginationMeta.current_page} of ${paginationMeta.last_page}`}
+                                    {t(
+                                        'attachments.index.pagination.summary',
+                                        isZh
+                                            ? `第 ${paginationMeta.current_page} / ${paginationMeta.last_page} 頁`
+                                            : `Page ${paginationMeta.current_page} of ${paginationMeta.last_page}`,
+                                        {
+                                            current: paginationMeta.current_page,
+                                            last: paginationMeta.last_page,
+                                        },
+                                    )}
                                 </div>
                                 <div className="flex items-center gap-2">
                                     {paginationLinks.map((link, index) => {
-                                        const label = sanitizeLabel(link.label);
+                                        const rawLabel = sanitizeLabel(link.label);
+                                        const label = resolvePaginationLabel(rawLabel);
 
                                         if (!link.url) {
                                             return (
                                                 <span
-                                                    key={`${label}-${index}`}
+                                                    key={`${rawLabel}-${index}`}
                                                     className="inline-flex h-8 min-w-8 items-center justify-center rounded-md border border-neutral-200 px-2 text-sm text-neutral-400"
                                                 >
                                                     {label}
@@ -594,7 +698,7 @@ export default function AttachmentsIndex({
                                         return (
                                             <button
                                                 type="button"
-                                                key={`${label}-${index}`}
+                                                key={`${rawLabel}-${index}`}
                                                 onClick={() => {
                                                     router.visit(link.url as string, {
                                                         preserveState: true,
@@ -608,6 +712,7 @@ export default function AttachmentsIndex({
                                                         ? 'border-[#151f54]/20 bg-[#151f54] text-white'
                                                         : 'border-transparent bg-white text-neutral-600 hover:bg-[#f5f7ff]'
                                                 )}
+                                                aria-label={label}
                                             >
                                                 {label}
                                             </button>

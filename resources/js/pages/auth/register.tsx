@@ -2,6 +2,7 @@ import RegisteredUserController from '@/actions/App/Http/Controllers/Auth/Regist
 import { login } from '@/routes';
 import { Form, Head, usePage } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
+import { useTranslator } from '@/hooks/use-translator';
 
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
@@ -12,12 +13,9 @@ import AuthLayout from '@/layouts/auth-layout';
 
 export default function Register() {
     const page = usePage<any>();
-    const { locale, i18n } = page.props;
+    const { locale } = page.props;
     const isZh = locale?.toLowerCase() === 'zh-tw';
-
-    const t = (key: string, fallback?: string) => {
-        return key.split('.').reduce((acc: any, k: string) => (acc && acc[k] !== undefined ? acc[k] : undefined), i18n?.common) ?? fallback ?? key;
-    };
+    const { t } = useTranslator('common');
 
     return (
         <AuthLayout

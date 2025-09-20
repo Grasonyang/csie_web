@@ -1,6 +1,7 @@
 import { home } from '@/routes';
 import { Link, usePage } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
+import { useTranslator } from '@/hooks/use-translator';
 
 interface AuthLayoutProps {
     name?: string;
@@ -11,11 +12,7 @@ interface AuthLayoutProps {
 
 export default function AuthSimpleLayout({ children, title, description, noDecor = false }: PropsWithChildren<AuthLayoutProps>) {
     const page = usePage<any>();
-    const { locale, i18n } = page.props;
-
-    const t = (key: string, fallback?: string) => {
-        return key.split('.').reduce((acc: any, k: string) => (acc && acc[k] !== undefined ? acc[k] : undefined), i18n?.common) ?? fallback ?? key;
-    };
+    const { t } = useTranslator('common');
 
     return (
         <div className={"flex min-h-svh items-center justify-center px-6 py-10 md:px-12 " + (noDecor ? '' : 'bg-gradient-to-br from-slate-100 via-white to-slate-200')}>
