@@ -15,6 +15,11 @@ use App\Http\Controllers\HomeController;
 
 Route::get('/', HomeController::class)->name('home');
 
+// 已登入使用者造訪舊的 /dashboard 路徑時轉向至管理後台首頁
+Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
+    return redirect()->route('manage.dashboard');
+})->name('dashboard');
+
 // Public Routes
 Route::group(['as' => 'public.'], function () {
     // Labs
