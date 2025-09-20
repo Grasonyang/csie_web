@@ -8,8 +8,19 @@ import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
 import { register } from '@/routes';
 import { request } from '@/routes/password';
-import { Form, Head, usePage } from '@inertiajs/react';
+import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
+import { useTranslator } from '@/hooks/use-translator';
+import {
+    formButtonClass,
+    formCheckboxLabelClass,
+    formFieldInputClass,
+    formFieldLabelClass,
+    formHelperTextClass,
+    formLinkClass,
+    formSectionClass,
+    formStatusClass,
+} from './styles';
 
 interface LoginProps {
     status?: string;
@@ -17,35 +28,39 @@ interface LoginProps {
 }
 
 export default function Login({ status, canResetPassword }: LoginProps) {
-    const page = usePage<any>();
-    const { locale, i18n } = page.props;
-    const isZh = locale?.toLowerCase() === 'zh-tw';
+    const { t } = useTranslator('auth');
 
-    const t = (key: string, fallback?: string) => {
-        return key.split('.').reduce((acc: any, k: string) => (acc && acc[k] !== undefined ? acc[k] : undefined), i18n?.common) ?? fallback ?? key;
+    const copy = {
+        title: t('pages.login.title', '登入系統'),
+        description: t('pages.login.description', '請輸入您的帳號密碼以登入系統'),
+        emailLabel: t('fields.email.label', '電子郵件'),
+        emailPlaceholder: t('fields.email.placeholder', '請輸入電子郵件'),
+        passwordLabel: t('fields.password.label', '密碼'),
+        passwordPlaceholder: t('fields.password.placeholder', '請輸入密碼'),
+        rememberMe: t('actions.remember_me', '記住我'),
+        forgotPassword: t('pages.login.forgot_password', '忘記密碼？'),
+        submit: t('pages.login.submit', '登入'),
+        registerPrompt: t('pages.login.register_prompt', '還沒有帳號？'),
+        registerLink: t('pages.login.register_link', '註冊新帳號'),
     };
 
     return (
-        <AuthLayout
-            noDecor={true}
-            title={isZh ? "登入系統" : "Login"}
-            description={isZh ? "請輸入您的帳號密碼以登入系統" : "Enter your credentials to access the system"}
-        >
-            <Head title={isZh ? "登入" : "Login"} />
+        <AuthLayout title={copy.title} description={copy.description}>
+            <Head title={copy.title} />
 
-            {status && (
-                <div className="mb-4 rounded-md bg-green-50 border border-green-200 p-3 text-center text-sm font-medium text-green-700">
-                    {status}
-                </div>
-            )}
+            {status && <div className={formStatusClass}>{status}</div>}
 
-            <Form {...AuthenticatedSessionController.store.form()} resetOnSuccess={['password']} className="flex flex-col gap-6">
+            <Form
+                {...AuthenticatedSessionController.store.form()}
+                resetOnSuccess={['password']}
+                className="space-y-8"
+            >
                 {({ processing, errors }) => (
-                    <>
-                        <div className="grid gap-4">
-                            <div className="grid gap-2">
-                                <Label htmlFor="email" className="text-sm font-medium text-slate-700">
-                                    {isZh ? "電子郵件" : "Email"}
+                    <div className="space-y-8">
+                        <div className={formSectionClass}>
+                            <div className="space-y-2">
+                                <Label htmlFor="email" className={formFieldLabelClass}>
+                                    {copy.emailLabel}
                                 </Label>
                                 <Input
                                     id="email"
@@ -53,26 +68,21 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     name="email"
                                     required
                                     autoFocus
-                                    tabIndex={1}
                                     autoComplete="email"
-                                    placeholder={isZh ? "請輸入電子郵件" : "Enter your email"}
-                                    className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:ring-blue-600 focus:ring-1"
+                                    placeholder={copy.emailPlaceholder}
+                                    className={formFieldInputClass}
                                 />
-                                <InputError message={errors.email} />
+                                <InputError message={errors.email} className="mt-1 text-sm font-medium text-red-600" />
                             </div>
 
-                            <div className="grid gap-2">
+                            <div className="space-y-2">
                                 <div className="flex items-center justify-between">
-                                    <Label htmlFor="password" className="text-sm font-medium text-slate-700">
-                                        {isZh ? "密碼" : "Password"}
+                                    <Label htmlFor="password" className={formFieldLabelClass}>
+                                        {copy.passwordLabel}
                                     </Label>
                                     {canResetPassword && (
-                                        <TextLink
-                                            href={request()}
-                                            className="text-sm text-blue-700 hover:text-blue-800"
-                                            tabIndex={5}
-                                        >
-                                            {isZh ? "忘記密碼？" : "Forgot password?"}
+                                        <TextLink href={request()} className={formLinkClass}>
+                                            {copy.forgotPassword}
                                         </TextLink>
                                     )}
                                 </div>
@@ -81,49 +91,43 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     type="password"
                                     name="password"
                                     required
-                                    tabIndex={2}
                                     autoComplete="current-password"
-                                    placeholder={isZh ? "請輸入密碼" : "Enter your password"}
-                                    className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:ring-blue-600 focus:ring-1"
+                                    placeholder={copy.passwordPlaceholder}
+                                    className={formFieldInputClass}
                                 />
-                                <InputError message={errors.password} />
+                                <InputError message={errors.password} className="mt-1 text-sm font-medium text-red-600" />
                             </div>
 
-                            <div className="flex items-center space-x-3">
+                            <div className="flex items-center gap-3">
                                 <Checkbox
                                     id="remember"
                                     name="remember"
-                                    tabIndex={3}
                                     className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600"
                                 />
-                                <Label htmlFor="remember" className="text-sm text-slate-700">
-                                    {isZh ? "記住我" : "Remember me"}
+                                <Label htmlFor="remember" className={formCheckboxLabelClass}>
+                                    {copy.rememberMe}
                                 </Label>
                             </div>
-
-                            <Button
-                                type="submit"
-                                className="mt-4 w-full bg-blue-600 text-white hover:bg-blue-700"
-                                tabIndex={4}
-                                disabled={processing}
-                                data-test="login-button"
-                            >
-                                {processing && <LoaderCircle className="h-4 w-4 animate-spin mr-2" />}
-                                {isZh ? "登入" : "Login"}
-                            </Button>
                         </div>
 
-                        <div className="text-center text-sm text-slate-600">
-                            {isZh ? "還沒有帳號？" : "Don't have an account?"}{' '}
-                            <TextLink
-                                href={register()}
-                                tabIndex={6}
-                                className="font-medium text-blue-700 hover:text-blue-800"
-                            >
-                                {isZh ? "註冊新帳號" : "Sign up"}
+                        <Button
+                            type="submit"
+                            size="lg"
+                            className={formButtonClass}
+                            disabled={processing}
+                            data-test="login-button"
+                        >
+                            {processing && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
+                            {copy.submit}
+                        </Button>
+
+                        <div className={formHelperTextClass + ' text-center'}>
+                            {copy.registerPrompt}{' '}
+                            <TextLink href={register()} className={formLinkClass}>
+                                {copy.registerLink}
                             </TextLink>
                         </div>
-                    </>
+                    </div>
                 )}
             </Form>
         </AuthLayout>

@@ -3,25 +3,25 @@ import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type NavItem, type SharedData } from '@/types';
-import { Link, usePage } from '@inertiajs/react';
+import { type NavItem } from '@/types';
+import { Link } from '@inertiajs/react';
 import { LayoutGrid, Megaphone, Beaker, NotebookPen, Settings, HelpCircle } from 'lucide-react';
+import { useTranslator } from '@/hooks/use-translator';
 
 export default function TeacherSidebar() {
-    const { locale } = usePage<SharedData>().props;
-    const isZh = locale?.toLowerCase() === 'zh-tw';
+    const { t } = useTranslator('manage');
 
     const mainNavItems: NavItem[] = [
-        { title: isZh ? '教職儀表板' : 'Teaching Home', href: '/manage/dashboard', icon: LayoutGrid },
-        { title: isZh ? '公告管理' : 'Announcements', href: '/manage/teacher/posts', icon: Megaphone },
-        { title: isZh ? '研究管理' : 'Research', href: '/manage/teacher/labs', icon: Beaker },
-        { title: isZh ? '課程與活動' : 'Courses & Activities', href: '/manage/teacher/courses', icon: NotebookPen },
-        { title: isZh ? '個人設定' : 'Profile Settings', href: '/settings/profile', icon: Settings },
+        { title: t('sidebar.teacher.dashboard', 'Teaching Home'), href: '/manage/dashboard', icon: LayoutGrid },
+        { title: t('sidebar.teacher.posts', 'Announcements'), href: '/manage/teacher/posts', icon: Megaphone },
+        { title: t('sidebar.teacher.labs', 'Research'), href: '/manage/teacher/labs', icon: Beaker },
+        { title: t('sidebar.teacher.courses', 'Courses & Activities'), href: '/manage/teacher/courses', icon: NotebookPen },
+        { title: t('sidebar.teacher.profile', 'Profile Settings'), href: '/settings/profile', icon: Settings },
     ];
 
     const footerNavItems: NavItem[] = [
         {
-            title: isZh ? '教學資源指南' : 'Teaching Guide',
+            title: t('sidebar.teacher.guide', 'Teaching Guide'),
             href: 'https://github.com/Grasonyang/csie_web',
             icon: HelpCircle,
         },
@@ -42,7 +42,7 @@ export default function TeacherSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} label={isZh ? '教學管理' : 'Teaching'} />
+                <NavMain items={mainNavItems} label={t('sidebar.teacher.nav_label', 'Teaching')} />
             </SidebarContent>
 
             <SidebarFooter>

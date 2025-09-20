@@ -4,38 +4,60 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
-import { Form, Head, usePage } from '@inertiajs/react';
+import { Form, Head } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
+import { useTranslator } from '@/hooks/use-translator';
+import {
+    formButtonClass,
+    formFieldInputClass,
+    formFieldLabelClass,
+    formSectionClass,
+} from './styles';
 
 export default function ConfirmPassword() {
-    const page = usePage<any>();
-    const { locale } = page.props;
-    const isZh = locale?.toLowerCase() === 'zh-tw';
+    const { t } = useTranslator('auth');
+
+    const copy = {
+        title: t('pages.confirm_password.title', '確認密碼'),
+        description: t('pages.confirm_password.description', '請重新輸入您的密碼以繼續'),
+        passwordLabel: t('fields.password.label', '密碼'),
+        passwordPlaceholder: t('fields.password.placeholder', '請輸入密碼'),
+        submit: t('pages.confirm_password.submit', '確認密碼'),
+    };
 
     return (
-        <AuthLayout
-            noDecor={true}
-            title={isZh ? "確認密碼" : "Confirm Password"}
-            description={isZh ? "請重新輸入您的密碼以繼續" : "Please re-enter your password to continue"}
-        >
-            <Head title={isZh ? "確認密碼" : "Confirm password"} />
+        <AuthLayout title={copy.title} description={copy.description}>
+            <Head title={copy.title} />
 
-            <Form {...ConfirmablePasswordController.store.form()} resetOnSuccess={['password']}>
+            <Form {...ConfirmablePasswordController.store.form()} resetOnSuccess={['password']} className="space-y-8">
                 {({ processing, errors }) => (
-                    <div className="space-y-6">
-                        <div className="grid gap-2">
-                            <Label htmlFor="password">Password</Label>
-                            <Input id="password" type="password" name="password" placeholder="Password" autoComplete="current-password" autoFocus />
-
-                            <InputError message={errors.password} />
+                    <div className={formSectionClass}>
+                        <div className="space-y-2">
+                            <Label htmlFor="password" className={formFieldLabelClass}>
+                                {copy.passwordLabel}
+                            </Label>
+                            <Input
+                                id="password"
+                                type="password"
+                                name="password"
+                                placeholder={copy.passwordPlaceholder}
+                                autoComplete="current-password"
+                                autoFocus
+                                className={formFieldInputClass}
+                            />
+                            <InputError message={errors.password} className="mt-1 text-sm font-medium text-red-600" />
                         </div>
 
-                        <div className="flex items-center">
-                            <Button className="w-full" disabled={processing} data-test="confirm-password-button">
-                                {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                                Confirm password
-                            </Button>
-                        </div>
+                        <Button
+                            type="submit"
+                            size="lg"
+                            className={formButtonClass}
+                            disabled={processing}
+                            data-test="confirm-password-button"
+                        >
+                            {processing && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
+                            {copy.submit}
+                        </Button>
                     </div>
                 )}
             </Form>

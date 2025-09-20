@@ -15,6 +15,7 @@ import {
     navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
 import { cn } from '@/lib/utils';
+import { useTranslator } from '@/hooks/use-translator';
 
 interface NavChild {
     key: string;
@@ -33,12 +34,8 @@ interface NavGroup {
 
 export default function PublicHeader() {
     const page = usePage<SharedData & { i18n: any; auth: any }>();
-    const { auth, i18n } = page.props;
-
-    const t = (key: string, fallback?: string) =>
-        key.split('.').reduce((acc: any, k: string) => (acc && acc[k] !== undefined ? acc[k] : undefined), i18n?.common) ??
-        fallback ??
-        key;
+    const { auth } = page.props;
+    const { t } = useTranslator('common');
 
     const navGroups: NavGroup[] = [
         {
