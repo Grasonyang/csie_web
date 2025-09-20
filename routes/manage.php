@@ -18,9 +18,9 @@ use App\Http\Controllers\Manage\Admin\PublicationController as AdminPublicationC
 use App\Http\Controllers\Manage\Admin\ContactMessageController as AdminContactMessageController;
 use App\Http\Controllers\Manage\Admin\AttachmentController as AdminAttachmentController;
 
-Route::middleware(['auth', 'verified'])
-    ->prefix('manage')
-    ->name('manage.')
+// Route::middleware(['auth', 'verified'])
+//     ->prefix('manage')
+Route::prefix('manage')->name('manage.')
     ->group(function () {
         Route::get('/', function () {
             return redirect()->route('manage.dashboard');

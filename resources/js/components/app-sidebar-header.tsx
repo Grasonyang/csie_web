@@ -1,20 +1,16 @@
-import { GlassTile } from '@/components/glass';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { type BreadcrumbItem as BreadcrumbItemType } from '@/types';
+import LanguageSwitcher from '@/components/language-switcher';
 
 export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: BreadcrumbItemType[] }) {
     return (
-        <GlassTile
-            as="header"
-            shimmer
-            spotlight
-            className="flex h-16 shrink-0 items-center gap-3 border border-white/10 px-6 pr-8 text-sidebar-foreground/90 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:px-6"
-        >
+        <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b border-neutral-200 bg-white px-4 pr-6 text-neutral-700 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:px-6">
             <div className="flex items-center gap-3">
-                <SidebarTrigger className="-ml-1 glass-chip bg-white/10 text-white hover:bg-white/20" />
+                <SidebarTrigger className="-ml-1 h-8 w-8 rounded-full border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50" />
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
             </div>
-        </GlassTile>
+            <LanguageSwitcher variant="light" />
+        </header>
     );
 }
