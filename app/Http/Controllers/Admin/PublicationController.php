@@ -9,6 +9,10 @@ use Inertia\Inertia;
 
 class PublicationController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Publication::class, 'publication');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -54,7 +58,23 @@ class PublicationController extends Controller
             'visible' => 'boolean',
         ]);
 
-        Publication::create($validated);
+        // Transform nested array data to flat fields
+        $publicationData = [
+            'title' => $validated['title']['zh-TW'] ?? '',
+            'title_en' => $validated['title']['en'] ?? $validated['title']['zh-TW'] ?? '',
+            'authors_text' => $validated['authors_text']['zh-TW'] ?? '',
+            'authors_text_en' => $validated['authors_text']['en'] ?? $validated['authors_text']['zh-TW'] ?? '',
+            'abstract' => $validated['abstract']['zh-TW'] ?? null,
+            'abstract_en' => $validated['abstract']['en'] ?? $validated['abstract']['zh-TW'] ?? null,
+            'year' => $validated['year'],
+            'type' => $validated['type'],
+            'venue' => $validated['venue'] ?? null,
+            'doi' => $validated['doi'] ?? null,
+            'url' => $validated['url'] ?? null,
+            'visible' => $validated['visible'] ?? true,
+        ];
+
+        Publication::create($publicationData);
 
         return redirect()->route('admin.publications.index')
             ->with('success', '論文建立成功');
@@ -103,7 +123,23 @@ class PublicationController extends Controller
             'visible' => 'boolean',
         ]);
 
-        $publication->update($validated);
+        // Transform nested array data to flat fields
+        $publicationData = [
+            'title' => $validated['title']['zh-TW'] ?? '',
+            'title_en' => $validated['title']['en'] ?? $validated['title']['zh-TW'] ?? '',
+            'authors_text' => $validated['authors_text']['zh-TW'] ?? '',
+            'authors_text_en' => $validated['authors_text']['en'] ?? $validated['authors_text']['zh-TW'] ?? '',
+            'abstract' => $validated['abstract']['zh-TW'] ?? null,
+            'abstract_en' => $validated['abstract']['en'] ?? $validated['abstract']['zh-TW'] ?? null,
+            'year' => $validated['year'],
+            'type' => $validated['type'],
+            'venue' => $validated['venue'] ?? null,
+            'doi' => $validated['doi'] ?? null,
+            'url' => $validated['url'] ?? null,
+            'visible' => $validated['visible'] ?? true,
+        ];
+
+        $publication->update($publicationData);
 
         return redirect()->route('admin.publications.index')
             ->with('success', '論文更新成功');

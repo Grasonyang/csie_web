@@ -94,6 +94,25 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
 
     const attachmentsIndexUrl = AttachmentController.index().url;
 
+    // Role-based permission helpers
+    const canCreatePosts = () => {
+        return auth.user && ['admin', 'teacher'].includes(auth.user.role);
+    };
+
+    const canEditPost = (post: Post) => {
+        if (!auth.user) return false;
+        if (auth.user.role === 'admin') return true;
+        if (auth.user.role === 'teacher' && post.creator.id === auth.user.id) return true;
+        return false;
+    };
+
+    const canDeletePost = (post: Post) => {
+        if (!auth.user) return false;
+        if (auth.user.role === 'admin') return true;
+        if (auth.user.role === 'teacher' && post.creator.id === auth.user.id) return true;
+        return false;
+    };
+
     // 添加安全檢查
     const postsData = posts?.data || [];
     // Laravel 預設分頁回應會將 current_page 等欄位平鋪在最外層，當 meta 缺席時需改用外層欄位作為備援
@@ -291,7 +310,7 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
                         description={isZh ? '管理系統公告與新聞' : 'Manage system announcements and news'}
                         icon={Calendar}
                         actions={
-                            auth.user ? (
+                            canCreatePosts() ? (
                                 <Link href={PostController.create().url}>
                                     <Button className="bg-[#ffb401] text-[#151f54] hover:bg-[#e6a000]">
                                         {isZh ? '新增公告' : 'Create Post'}
@@ -598,37 +617,41 @@ export default function PostsIndex({ posts, categories, filters = {}, perPageOpt
                                                         </TooltipTrigger>
                                                         <TooltipContent>{isZh ? '檢視公告' : 'View post'}</TooltipContent>
                                                     </Tooltip>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Link href={PostController.edit(post.id).url}>
+                                                    {canEditPost(post) && (
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Link href={PostController.edit(post.id).url}>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        className="text-green-600 hover:text-green-800"
+                                                                    >
+                                                                        <Edit className="h-4 w-4" />
+                                                                    </Button>
+                                                                </Link>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>{isZh ? '編輯公告' : 'Edit post'}</TooltipContent>
+                                                        </Tooltip>
+                                                    )}
+                                                    {canDeletePost(post) && (
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
                                                                 <Button
+                                                                    onClick={() => {
+                                                                        if (confirm(isZh ? '確定要刪除嗎？' : 'Are you sure you want to delete this post?')) {
+                                                                            destroy(PostController.destroy(post.id).url);
+                                                                        }
+                                                                    }}
                                                                     variant="ghost"
                                                                     size="sm"
-                                                                    className="text-green-600 hover:text-green-800"
+                                                                    className="text-red-600 hover:text-red-800"
                                                                 >
-                                                                    <Edit className="h-4 w-4" />
+                                                                    <Trash2 className="h-4 w-4" />
                                                                 </Button>
-                                                            </Link>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>{isZh ? '編輯公告' : 'Edit post'}</TooltipContent>
-                                                    </Tooltip>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Button
-                                                                onClick={() => {
-                                                                    if (confirm(isZh ? '確定要刪除嗎？' : 'Are you sure you want to delete this post?')) {
-                                                                        destroy(PostController.destroy(post.id).url);
-                                                                    }
-                                                                }}
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="text-red-600 hover:text-red-800"
-                                                            >
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>{isZh ? '刪除公告' : 'Delete post'}</TooltipContent>
-                                                    </Tooltip>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>{isZh ? '刪除公告' : 'Delete post'}</TooltipContent>
+                                                        </Tooltip>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>

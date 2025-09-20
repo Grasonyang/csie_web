@@ -15,8 +15,9 @@ export default function VerifyEmail({ status }: { status?: string }) {
 
     return (
         <AuthLayout
-            title={isZh ? "驗證電子郵件" : "Verify Email"}
-            description={isZh ? "請透過點擊我們剛才發送給您的電子郵件中的連結來驗證您的電子郵件地址。" : "Please verify your email address by clicking on the link we just emailed to you."}
+              noDecor={true}
+              title={isZh ? "驗證電子郵件" : "Verify Email"}
+              description={isZh ? "請透過點擊我們剛才發送給您的電子郵件中的連結來驗證您的電子郵件地址。" : "Please verify your email address by clicking on the link we just emailed to you."}
         >
             <Head title={isZh ? "電子郵件驗證" : "Email Verification"} />
 

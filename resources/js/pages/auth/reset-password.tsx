@@ -15,7 +15,7 @@ interface ResetPasswordProps {
 
 export default function ResetPassword({ token, email }: ResetPasswordProps) {
     return (
-        <AuthLayout title="Reset password" description="Please enter your new password below">
+    <AuthLayout noDecor={true} title="Reset password" description="Please enter your new password below">
             <Head title="Reset password" />
 
             <Form

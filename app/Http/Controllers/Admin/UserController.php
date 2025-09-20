@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -24,7 +25,7 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $query = User::query();
+        $query = User::withTrashed(); // Include soft-deleted users
 
         $search = trim((string) $request->input('search'));
         if ($search !== '') {
@@ -134,8 +135,10 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(User $user)
+    public function edit($userId)
     {
+        $user = User::withTrashed()->findOrFail($userId);
+
         return Inertia::render('admin/users/edit', [
             'user' => $user->only([
                 'id',
@@ -145,6 +148,7 @@ class UserController extends Controller
                 'status',
                 'locale',
                 'email_verified_at',
+                'deleted_at', // Include deleted_at for UI logic
             ]),
             'roleOptions' => [
                 ['value' => 'admin', 'label' => 'Admin'],
@@ -161,8 +165,10 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, $userId)
     {
+        $user = User::withTrashed()->findOrFail($userId);
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)->withoutTrashed()],
@@ -201,8 +207,10 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, User $user)
+    public function destroy(Request $request, $userId)
     {
+        $user = User::withTrashed()->findOrFail($userId);
+
         if ((int) $request->user()->id === (int) $user->id) {
             return back()->with('error', '不能刪除自己的帳號');
         }
@@ -211,5 +219,37 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.index')
             ->with('success', '使用者已刪除');
+    }
+
+    /**
+     * Restore the specified soft-deleted user.
+     */
+    public function restore(Request $request, $userId)
+    {
+        $user = User::withTrashed()->findOrFail($userId);
+
+        // Authorize the restore action
+        $this->authorize('restore', $user);
+
+        // Ensure only soft-deleted users can be restored
+        if (!$user->trashed()) {
+            return back()->with('error', '此使用者未被刪除');
+        }
+
+        $user->restore();
+
+        // Log the restore action using AuditLog
+        AuditLog::logAction(
+            action: 'restore_user',
+            target: $user,
+            actor: $request->user(),
+            metadata: [
+                'restored_user_email' => $user->email,
+                'restored_user_role' => $user->role,
+            ]
+        );
+
+        return redirect()->route('admin.users.index')
+            ->with('success', '使用者已還原');
     }
 }

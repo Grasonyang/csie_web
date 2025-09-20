@@ -21,6 +21,7 @@ export default function Register() {
 
     return (
         <AuthLayout
+            noDecor={true}
             title={isZh ? "註冊新帳號" : "Register"}
             description={isZh ? "請填寫以下資訊來建立您的帳號" : "Fill in the information below to create your account"}
         >

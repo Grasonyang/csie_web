@@ -41,6 +41,8 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
 
     // 使用者與系所成員管理
     Route::resource('users', AdminUserController::class);
+    Route::post('users/{user}/restore', [AdminUserController::class, 'restore'])
+        ->name('users.restore');
     Route::resource('staff', AdminStaffController::class);
     Route::patch('staff/{staff}/restore', [AdminStaffController::class, 'restore'])
         ->name('staff.restore');

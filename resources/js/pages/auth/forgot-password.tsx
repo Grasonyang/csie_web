@@ -22,8 +22,9 @@ export default function ForgotPassword({ status }: { status?: string }) {
 
     return (
         <AuthLayout
-            title={isZh ? "忘記密碼" : "Forgot Password"}
-            description={isZh ? "請輸入您的電子郵件，我們將寄送密碼重設連結給您" : "Enter your email address and we'll send you a password reset link"}
+            noDecor={true}
+            title={isZh ? "忘記密碼" : "Forgot password"}
+            description={isZh ? "輸入電子郵件以接收重設密碼信" : "Enter your email to receive password reset instructions"}
         >
             <Head title={isZh ? "忘記密碼" : "Forgot Password"} />
 

@@ -1,11 +1,12 @@
 import { cn } from '@/lib/utils';
 import { type LucideIcon } from 'lucide-react';
-import { Children, type ReactNode } from 'react';
+import { Children, isValidElement, type ElementType, type ReactNode } from 'react';
 
 interface AdminPageHeaderProps {
     title: ReactNode;
     description?: ReactNode;
-    icon?: LucideIcon | ReactNode;
+    // Accept either a component type (e.g. Lucide forwardRef component) or a ready element/node
+    icon?: LucideIcon | ElementType | ReactNode;
     actions?: ReactNode | ReactNode[];
     className?: string;
     contentClassName?: string;
@@ -20,16 +21,21 @@ export default function AdminPageHeader({
     contentClassName,
 }: AdminPageHeaderProps) {
     const iconContent = (() => {
-        if (!icon) {
-            return null;
+        if (!icon) return null;
+
+        // If a React element was provided, render it as-is
+        if (isValidElement(icon)) {
+            return icon;
         }
 
-        if (typeof icon === 'function') {
-            const IconComponent = icon as LucideIcon;
+        // If a component type (function, forwardRef, memo, etc.) was provided, render it
+        // Lucide icons are forwardRef components (objects with { $$typeof, render })
+        if (typeof icon === 'function' || typeof icon === 'object') {
+            const IconComponent = icon as ElementType;
             return <IconComponent className="h-8 w-8 sm:h-10 sm:w-10" />;
         }
 
-        return icon;
+        return null;
     })();
 
     const actionNodes = Children.toArray(actions);

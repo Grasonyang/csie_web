@@ -278,15 +278,13 @@ export default function UsersIndex({ users, filters = {}, roleOptions, statusOpt
                         }
                         icon={UserCircle2}
                         actions={
-                            auth.user?.role === 'admin'
-                                ? (
-                                      <Link href={UserController.create().url}>
-                                          <Button className="bg-[#ffb401] text-[#151f54] hover:bg-[#e6a000]">
-                                              {isZh ? '新增使用者' : 'Create User'}
-                                          </Button>
-                                      </Link>
-                                  )
-                                : undefined
+                            auth.user?.role === 'admin' ? (
+                                <Link href={UserController.create().url}>
+                                    <Button className="bg-[#ffb401] text-[#151f54] hover:bg-[#e6a000]">
+                                        {isZh ? '新增使用者' : 'Create User'}
+                                    </Button>
+                                </Link>
+                            ) : null
                         }
                     />
 

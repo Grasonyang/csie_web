@@ -27,6 +27,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
 
     return (
         <AuthLayout
+            noDecor={true}
             title={isZh ? "登入系統" : "Login"}
             description={isZh ? "請輸入您的帳號密碼以登入系統" : "Enter your credentials to access the system"}
         >

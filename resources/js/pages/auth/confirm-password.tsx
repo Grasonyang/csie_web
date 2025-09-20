@@ -4,16 +4,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, usePage } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 
 export default function ConfirmPassword() {
+    const page = usePage<any>();
+    const { locale } = page.props;
+    const isZh = locale?.toLowerCase() === 'zh-tw';
+
     return (
         <AuthLayout
-            title="Confirm your password"
-            description="This is a secure area of the application. Please confirm your password before continuing."
+            noDecor={true}
+            title={isZh ? "確認密碼" : "Confirm Password"}
+            description={isZh ? "請重新輸入您的密碼以繼續" : "Please re-enter your password to continue"}
         >
-            <Head title="Confirm password" />
+            <Head title={isZh ? "確認密碼" : "Confirm password"} />
 
             <Form {...ConfirmablePasswordController.store.form()} resetOnSuccess={['password']}>
                 {({ processing, errors }) => (

@@ -6,9 +6,10 @@ interface AuthLayoutProps {
     name?: string;
     title?: string;
     description?: string;
+    noDecor?: boolean;
 }
 
-export default function AuthSimpleLayout({ children, title, description }: PropsWithChildren<AuthLayoutProps>) {
+export default function AuthSimpleLayout({ children, title, description, noDecor = false }: PropsWithChildren<AuthLayoutProps>) {
     const page = usePage<any>();
     const { locale, i18n } = page.props;
 
@@ -17,8 +18,8 @@ export default function AuthSimpleLayout({ children, title, description }: Props
     };
 
     return (
-        <div className="flex min-h-svh items-center justify-center bg-gradient-to-br from-slate-100 via-white to-slate-200 px-6 py-10 md:px-12">
-            <div className="w-full max-w-md space-y-10 rounded-3xl border border-slate-200 bg-white/95 p-10 text-center shadow-xl">
+        <div className={"flex min-h-svh items-center justify-center px-6 py-10 md:px-12 " + (noDecor ? '' : 'bg-gradient-to-br from-slate-100 via-white to-slate-200')}>
+            <div className={"w-full max-w-md space-y-10 rounded-3xl border border-slate-200 bg-white/95 p-10 text-center shadow-xl " + (noDecor ? '' : '')}>
                 <Link href={home()} className="flex flex-col items-center gap-3 font-medium">
                     <div className="flex h-16 w-16 items-center justify-center rounded-full border border-slate-200 bg-white">
                         <img

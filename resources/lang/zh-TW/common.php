@@ -36,5 +36,15 @@ return [
         'en' => 'EN',
         'zh_tw' => '繁中',
     ],
+    'actions' => [
+        'restore' => '還原',
+        'save' => '儲存',
+        'cancel' => '取消',
+    ],
+    'settings' => [
+        'title' => '設定',
+        'profile' => '個人資料',
+        'language' => '語言',
+    ],
 ];
 
