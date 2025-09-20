@@ -12,7 +12,7 @@ export default function AppSidebarLayout({ children, breadcrumbs = [] }: PropsWi
             <AppSidebar />
             <AppContent
                 variant="sidebar"
-                className="relative overflow-x-hidden bg-[#f3f5ff] text-black"
+                className="relative overflow-x-hidden bg-white text-black"
             >
                 <div className="relative flex min-h-svh flex-col gap-6 pb-10">
                     <AppSidebarHeader breadcrumbs={breadcrumbs} />
