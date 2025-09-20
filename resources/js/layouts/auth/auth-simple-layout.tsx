@@ -90,11 +90,11 @@ export default function AuthSimpleLayout({
                             <div className="flex flex-col gap-8">
                                 <div className="flex items-start justify-between gap-6">
                                     <Link href={home()} className="flex items-center gap-4 text-left" aria-label={t('site.title_short', '資工系')}>
-                                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm">
+                                        <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm">
                                             <img
                                                 src="https://www.csie.ncue.edu.tw/csie/resources/images/ncue-csie-logo.png"
                                                 alt="NCUE CSIE Logo"
-                                                className="h-10 w-10 object-contain"
+                                                className="h-14 w-14 object-contain"
                                             />
                                         </div>
                                         <div className="space-y-1">
