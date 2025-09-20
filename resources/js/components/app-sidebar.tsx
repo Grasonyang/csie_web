@@ -2,7 +2,6 @@ import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import {
@@ -31,43 +30,43 @@ export function AppSidebar() {
     const localizedMainNavItems: RoleAwareNavItem[] = [
         {
             title: 'Dashboard',
-            href: dashboard(),
+            href: '/manage/admin/dashboard',
             icon: LayoutGrid,
         },
         {
             title: isZh ? '公告管理' : 'Posts',
-            href: '/admin/posts',
+            href: '/manage/admin/posts',
             icon: Megaphone,
         },
         {
             title: isZh ? '師資與職員' : 'Faculty & Staff',
-            href: '/admin/staff',
+            href: '/manage/admin/staff',
             icon: UserCheck,
             roles: ['admin', 'teacher'],
         },
         {
             title: isZh ? '實驗室管理' : 'Laboratories',
-            href: '/admin/labs',
+            href: '/manage/admin/labs',
             icon: Beaker,
         },
         {
             title: isZh ? '課程與學程' : 'Courses & Programs',
-            href: '/admin/academics',
+            href: '/manage/admin/academics',
             icon: GraduationCap,
         },
         {
             title: isZh ? '使用者管理' : 'Users',
-            href: '/admin/users',
+            href: '/manage/admin/users',
             icon: Users,
         },
         {
             title: isZh ? '聯絡訊息' : 'Messages',
-            href: '/admin/contact-messages',
+            href: '/manage/admin/contact-messages',
             icon: Mail,
         },
         {
             title: isZh ? '附件管理' : 'Attachments',
-            href: '/admin/attachments',
+            href: '/manage/admin/attachments',
             icon: FileText,
         },
     ];
@@ -75,7 +74,7 @@ export function AppSidebar() {
     const localizedFooterNavItems: NavItem[] = [
         {
             title: isZh ? '系統設定' : 'Settings',
-            href: '/admin/settings',
+            href: '/settings/profile',
             icon: Settings,
         },
         {
@@ -98,7 +97,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()} prefetch>
+                            <Link href="/manage/dashboard" prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

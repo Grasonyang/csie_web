@@ -33,8 +33,8 @@ export default function AdminDashboard() {
     ];
 
     const heroActions: HeroAction[] = [
-        { label: isZh ? '快速發布公告' : 'Compose bulletin', href: '/admin/posts/create', icon: Megaphone, variant: 'primary' },
-        { label: isZh ? '查看收件匣' : 'Review inbox', href: '/admin/contact-messages', icon: Inbox, variant: 'secondary' },
+        { label: isZh ? '快速發布公告' : 'Compose bulletin', href: '/manage/admin/posts/create', icon: Megaphone, variant: 'primary' },
+        { label: isZh ? '查看收件匣' : 'Review inbox', href: '/manage/admin/contact-messages', icon: Inbox, variant: 'secondary' },
     ];
 
     type UserRole = SharedData['auth']['user']['role'];
@@ -49,12 +49,12 @@ export default function AdminDashboard() {
 
     const quickActions = useMemo(() => {
         const configs: QuickActionConfig[] = [
-            { title: isZh ? '發布公告' : 'Create Post', description: isZh ? '新增公告、新聞或活動資訊' : 'Publish announcements, news, or events', href: '/admin/posts/create', icon: Megaphone, tone: 'primary', roles: ['admin'] },
-            { title: isZh ? '管理師資' : 'Manage Faculty', description: isZh ? '新增或編輯教師與行政人員資料' : 'Maintain faculty and staff records', href: '/admin/staff', icon: UserCheck, tone: 'secondary', roles: ['admin', 'teacher'] },
-            { title: isZh ? '實驗室設定' : 'Lab Settings', description: isZh ? '更新實驗室資訊與成員' : 'Update lab profiles and members', href: '/admin/labs', icon: Beaker, tone: 'accent', roles: ['admin'] },
-            { title: isZh ? '課程管理' : 'Course Management', description: isZh ? '設定課程資訊與學分' : 'Manage course catalog and credits', href: '/admin/courses', icon: BookOpen, tone: 'primary', roles: ['admin'] },
-            { title: isZh ? '學程規劃' : 'Program Planning', description: isZh ? '維護學位學程與模組' : 'Maintain program blueprints', href: '/admin/programs', icon: GraduationCap, tone: 'secondary', roles: ['admin'] },
-            { title: isZh ? '使用者管理' : 'User Management', description: isZh ? '調整權限與審核新帳號' : 'Adjust permissions and review new users', href: '/admin/users', icon: Users, tone: 'accent', roles: ['admin'] },
+            { title: isZh ? '發布公告' : 'Create Post', description: isZh ? '新增公告、新聞或活動資訊' : 'Publish announcements, news, or events', href: '/manage/admin/posts/create', icon: Megaphone, tone: 'primary', roles: ['admin'] },
+            { title: isZh ? '管理師資' : 'Manage Faculty', description: isZh ? '新增或編輯教師與行政人員資料' : 'Maintain faculty and staff records', href: '/manage/admin/staff', icon: UserCheck, tone: 'secondary', roles: ['admin', 'teacher'] },
+            { title: isZh ? '實驗室設定' : 'Lab Settings', description: isZh ? '更新實驗室資訊與成員' : 'Update lab profiles and members', href: '/manage/admin/labs', icon: Beaker, tone: 'accent', roles: ['admin'] },
+            { title: isZh ? '課程管理' : 'Course Management', description: isZh ? '設定課程資訊與學分' : 'Manage course catalog and credits', href: '/manage/admin/courses', icon: BookOpen, tone: 'primary', roles: ['admin'] },
+            { title: isZh ? '學程規劃' : 'Program Planning', description: isZh ? '維護學位學程與模組' : 'Maintain program blueprints', href: '/manage/admin/programs', icon: GraduationCap, tone: 'secondary', roles: ['admin'] },
+            { title: isZh ? '使用者管理' : 'User Management', description: isZh ? '調整權限與審核新帳號' : 'Adjust permissions and review new users', href: '/manage/admin/users', icon: Users, tone: 'accent', roles: ['admin'] },
         ];
         return configs.filter((action) => !action.roles || action.roles.includes(role));
     }, [isZh, role]);

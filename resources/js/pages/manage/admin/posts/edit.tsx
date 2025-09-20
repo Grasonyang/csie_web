@@ -1,6 +1,6 @@
-import PostController from '@/actions/App/Http/Controllers/Admin/PostController';
 import { Button } from '@/components/ui/button';
-import AppLayout from '@/layouts/app-layout';
+import { Card, CardContent } from '@/components/ui/card';
+import ManageLayout from '@/layouts/manage/manage-layout';
 import type { SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
@@ -43,7 +43,14 @@ const formatPublishAt = (value: string | null): string => {
 
 export default function EditPost({ post, categories }: EditPostProps) {
     const { locale } = usePage<SharedData>().props;
-    const isZh = locale === 'zh-TW';
+    const isZh = locale?.toLowerCase() === 'zh-tw';
+
+    const postsIndexUrl = '/manage/admin/posts';
+    const breadcrumbs = [
+        { title: isZh ? '管理首頁' : 'Management', href: '/manage/dashboard' },
+        { title: isZh ? '公告管理' : 'Announcements', href: postsIndexUrl },
+        { title: isZh ? '編輯公告' : 'Edit', href: `/manage/admin/posts/${post.id}/edit` },
+    ];
 
     const initialValues: PostFormValues = {
         title: {
@@ -65,8 +72,6 @@ export default function EditPost({ post, categories }: EditPostProps) {
         attachments_remove: [],
     };
 
-    const initialPreviewHtml = '';
-
     const statusOptions: StatusOption[] = [
         { value: 'draft', labelZh: '草稿', labelEn: 'Draft' },
         { value: 'published', labelZh: '發布', labelEn: 'Publish' },
@@ -74,7 +79,7 @@ export default function EditPost({ post, categories }: EditPostProps) {
     ];
 
     const handleSubmit = (form: any) => {
-        form.put(PostController.update(post.id).url, {
+        form.put(`${postsIndexUrl}/${post.id}`, {
             onError: (formErrors: any) => {
                 // 繫結表單錯誤以便開發時追蹤
                 console.error('Form errors:', formErrors);
@@ -83,41 +88,39 @@ export default function EditPost({ post, categories }: EditPostProps) {
     };
 
     return (
-        <AppLayout>
-            <Head title={isZh ? '編輯公告' : 'Edit Post'} />
+        <ManageLayout role="admin" breadcrumbs={breadcrumbs}>
+            <Head title={isZh ? '編輯公告' : 'Edit bulletin'} />
 
-            <div className="mx-auto max-w-4xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
-                <div className="flex items-center gap-4">
-                    <Link href={PostController.index().url}>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                        >
-                            <ArrowLeft className="h-4 w-4" />
+            <section className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-0">
+                <Card className="border-0 bg-white shadow-sm ring-1 ring-black/5">
+                    <CardContent className="flex flex-col gap-4 px-6 py-6 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="space-y-2">
+                            <h1 className="text-3xl font-semibold text-[#151f54]">
+                                {isZh ? '編輯公告' : 'Edit bulletin'}
+                            </h1>
+                            <p className="text-sm text-slate-600">
+                                {isZh ? '調整公告內容與附件設定。' : 'Update bulletin details and attachments.'}
+                            </p>
+                        </div>
+                        <Button asChild variant="outline" className="rounded-full border-[#151f54]/30">
+                            <Link href={postsIndexUrl}>
+                                <ArrowLeft className="mr-2 h-4 w-4" />
+                                {isZh ? '返回列表' : 'Back to list'}
+                            </Link>
                         </Button>
-                    </Link>
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-                            {isZh ? '編輯公告' : 'Edit Post'}
-                        </h1>
-                        <p className="mt-2 text-gray-600">
-                            {isZh ? '調整公告內容與顯示設定' : 'Update the announcement details.'}
-                        </p>
-                    </div>
-                </div>
+                    </CardContent>
+                </Card>
 
                 <PostForm
                     categories={categories}
-                    cancelUrl={PostController.index().url}
+                    cancelUrl={postsIndexUrl}
                     mode="edit"
                     initialValues={initialValues}
-                    initialPreviewHtml={initialPreviewHtml}
                     statusOptions={statusOptions}
                     existingAttachments={post.attachments ?? []}
                     onSubmit={handleSubmit}
                 />
-            </div>
-        </AppLayout>
+            </section>
+        </ManageLayout>
     );
 }
