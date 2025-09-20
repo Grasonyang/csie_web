@@ -38,7 +38,7 @@ Route::group(['as' => 'public.'], function () {
 
 
 // Locale switcher: sets session locale and redirects back
-Route::get('/locale/{locale}', function (string $locale) {
+$handleLocaleChange = function (string $locale) {
     $normalized = strtolower(str_replace('_', '-', $locale));
     $supported = ['en', 'zh-tw'];
     if (! in_array($normalized, $supported, true)) {
@@ -49,7 +49,10 @@ Route::get('/locale/{locale}', function (string $locale) {
     Session::put('locale', $canonical);
     App::setLocale($canonical);
     return Redirect::back();
-})->name('locale.set');
+};
+
+Route::get('/locale/{locale}', $handleLocaleChange)->name('locale.set');
+Route::get('/lang/{locale}', $handleLocaleChange)->name('lang.set');
 
 // Authenticated Routes
 Route::middleware(['auth', 'verified'])->group(function () {

@@ -1,42 +1,39 @@
-// Components
 import EmailVerificationNotificationController from '@/actions/App/Http/Controllers/Auth/EmailVerificationNotificationController';
-import { logout } from '@/routes';
-import { Form, Head, usePage } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
-
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import AuthLayout from '@/layouts/auth-layout';
+import { logout } from '@/routes';
+import { Form, Head } from '@inertiajs/react';
+import { LoaderCircle } from 'lucide-react';
+import { useTranslator } from '@/hooks/use-translator';
+import { formButtonClass, formLinkClass, formStatusClass } from './styles';
 
 export default function VerifyEmail({ status }: { status?: string }) {
-    const page = usePage<any>();
-    const { locale } = page.props;
-    const isZh = locale?.toLowerCase() === 'zh-tw';
+    const { t } = useTranslator('auth');
+
+    const copy = {
+        title: t('pages.verify_email.title', '驗證電子郵件'),
+        description: t('pages.verify_email.description', '請透過點擊我們剛寄給您的驗證連結來完成設定'),
+        submit: t('pages.verify_email.submit', '重新發送驗證郵件'),
+        logout: t('actions.logout', '登出'),
+    };
 
     return (
-        <AuthLayout
-              noDecor={true}
-              title={isZh ? "驗證電子郵件" : "Verify Email"}
-              description={isZh ? "請透過點擊我們剛才發送給您的電子郵件中的連結來驗證您的電子郵件地址。" : "Please verify your email address by clicking on the link we just emailed to you."}
-        >
-            <Head title={isZh ? "電子郵件驗證" : "Email Verification"} />
+        <AuthLayout title={copy.title} description={copy.description}>
+            <Head title={copy.title} />
 
-            {status && (
-                <div className="mb-4 rounded-md border border-green-200 bg-green-50 p-3 text-center text-sm font-medium text-green-700">
-                    {status}
-                </div>
-            )}
+            {status && <div className={formStatusClass}>{status}</div>}
 
             <Form {...EmailVerificationNotificationController.store.form()} className="space-y-6 text-center">
                 {({ processing }) => (
                     <>
-                        <Button disabled={processing} className="w-full bg-blue-600 text-white hover:bg-blue-700">
+                        <Button disabled={processing} size="lg" className={`${formButtonClass} w-full`}>
                             {processing && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
-                            {isZh ? "重新發送驗證郵件" : "Resend Verification Email"}
+                            {copy.submit}
                         </Button>
 
-                        <TextLink href={logout()} className="mx-auto block text-sm text-blue-700 hover:text-blue-800">
-                            {isZh ? "登出" : "Log out"}
+                        <TextLink href={logout()} className={`${formLinkClass} text-sm font-semibold`}>
+                            {copy.logout}
                         </TextLink>
                     </>
                 )}
