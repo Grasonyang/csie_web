@@ -26,12 +26,10 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->enum('status', ['draft','published','archived'])->default('draft')->index();
             $table->enum('source_type', ['manual', 'link'])
-            ->default('manual')
-            ->after('status')
-            ->index();
+                ->default('manual')
+                ->index();
             $table->string('source_url')
-            ->nullable()
-            ->after('source_type');
+                ->nullable();
             $table->timestamp('publish_at')->nullable()->index();
             $table->timestamp('expire_at')->nullable();
             $table->boolean('pinned')->default(false)->index();

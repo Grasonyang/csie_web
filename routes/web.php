@@ -36,7 +36,6 @@ Route::group(['as' => 'public.'], function () {
         ->name('attachments.download');
 });
 
-
 // Locale switcher: sets session locale and redirects back
 Route::get('/locale/{locale}', function (string $locale) {
     $normalized = strtolower(str_replace('_', '-', $locale));
@@ -50,14 +49,6 @@ Route::get('/locale/{locale}', function (string $locale) {
     App::setLocale($canonical);
     return Redirect::back();
 })->name('locale.set');
-
-// Authenticated Routes
-Route::middleware(['auth', 'verified'])->group(function () {
-    // Dashboard
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
-});
 
 // Include additional route files
 require __DIR__.'/manage.php';
