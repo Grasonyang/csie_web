@@ -2,14 +2,15 @@ import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, Sideba
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 
-export function NavMain({ items = [] }: { items: NavItem[] }) {
+export function NavMain({ items = [], label }: { items: NavItem[]; label?: string }) {
     const page = usePage<any>();
     const { locale } = page.props;
     const isZh = locale?.toLowerCase() === 'zh-tw';
+    const groupLabel = label ?? (isZh ? '系統功能' : 'Platform');
 
     return (
         <SidebarGroup className="px-2 py-0">
-            <SidebarGroupLabel>{isZh ? "系統功能" : "Platform"}</SidebarGroupLabel>
+            <SidebarGroupLabel>{groupLabel}</SidebarGroupLabel>
             <SidebarMenu>
                 {items.map((item) => (
                     <SidebarMenuItem key={item.title}>
