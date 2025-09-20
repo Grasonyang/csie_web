@@ -1,129 +1,141 @@
 import RegisteredUserController from '@/actions/App/Http/Controllers/Auth/RegisteredUserController';
-import { login } from '@/routes';
-import { Form, Head, usePage } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
-import { useTranslator } from '@/hooks/use-translator';
-
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
+import { login } from '@/routes';
+import { Form, Head } from '@inertiajs/react';
+import { LoaderCircle } from 'lucide-react';
+import { useTranslator } from '@/hooks/use-translator';
+import {
+    formButtonClass,
+    formFieldInputClass,
+    formFieldLabelClass,
+    formHelperTextClass,
+    formLinkClass,
+    formSectionClass,
+} from './styles';
 
 export default function Register() {
-    const page = usePage<any>();
-    const { locale } = page.props;
-    const isZh = locale?.toLowerCase() === 'zh-tw';
-    const { t } = useTranslator('common');
+    const { t } = useTranslator('auth');
+
+    const copy = {
+        title: t('pages.register.title', '註冊新帳號'),
+        description: t('pages.register.description', '請填寫以下資訊來建立您的帳號'),
+        nameLabel: t('fields.name.label', '姓名'),
+        namePlaceholder: t('fields.name.placeholder', '請輸入您的姓名'),
+        emailLabel: t('fields.email.label', '電子郵件'),
+        emailPlaceholder: t('fields.email.placeholder', '請輸入電子郵件'),
+        passwordLabel: t('fields.password.label', '密碼'),
+        passwordPlaceholder: t('fields.password.placeholder', '請輸入密碼'),
+        confirmLabel: t('fields.password_confirmation.label', '確認密碼'),
+        confirmPlaceholder: t('fields.password_confirmation.placeholder', '請再次輸入密碼'),
+        submit: t('pages.register.submit', '建立帳號'),
+        loginPrompt: t('pages.register.login_prompt', '已經有帳號了？'),
+        loginLink: t('pages.register.login_link', '立即登入'),
+    };
 
     return (
-        <AuthLayout
-            noDecor={true}
-            title={isZh ? "註冊新帳號" : "Register"}
-            description={isZh ? "請填寫以下資訊來建立您的帳號" : "Fill in the information below to create your account"}
-        >
-            <Head title={isZh ? "註冊" : "Register"} />
+        <AuthLayout title={copy.title} description={copy.description}>
+            <Head title={copy.title} />
             <Form
                 {...RegisteredUserController.store.form()}
                 resetOnSuccess={['password', 'password_confirmation']}
                 disableWhileProcessing
-                className="flex flex-col gap-6"
+                className="space-y-8"
             >
                 {({ processing, errors }) => (
-                    <>
-                        <div className="grid gap-4">
-                            <div className="grid gap-2">
-                                <Label htmlFor="name" className="text-sm font-medium text-slate-700">
-                                    {isZh ? "姓名" : "Name"}
+                    <div className="space-y-8">
+                        <div className={formSectionClass}>
+                            <div className="space-y-2">
+                                <Label htmlFor="name" className={formFieldLabelClass}>
+                                    {copy.nameLabel}
                                 </Label>
                                 <Input
                                     id="name"
                                     type="text"
                                     required
                                     autoFocus
-                                    tabIndex={1}
                                     autoComplete="name"
                                     name="name"
-                                    placeholder={isZh ? "請輸入您的姓名" : "Enter your name"}
-                                    className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:ring-blue-600 focus:ring-1"
+                                    placeholder={copy.namePlaceholder}
+                                    className={formFieldInputClass}
                                 />
-                                <InputError message={errors.name} className="mt-2" />
+                                <InputError message={errors.name} className="mt-1 text-sm font-medium text-red-600" />
                             </div>
 
-                            <div className="grid gap-2">
-                                <Label htmlFor="email" className="text-sm font-medium text-slate-700">
-                                    {isZh ? "電子郵件" : "Email"}
+                            <div className="space-y-2">
+                                <Label htmlFor="email" className={formFieldLabelClass}>
+                                    {copy.emailLabel}
                                 </Label>
                                 <Input
                                     id="email"
                                     type="email"
                                     required
-                                    tabIndex={2}
                                     autoComplete="email"
                                     name="email"
-                                    placeholder={isZh ? "請輸入電子郵件" : "Enter your email"}
-                                    className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:ring-blue-600 focus:ring-1"
+                                    placeholder={copy.emailPlaceholder}
+                                    className={formFieldInputClass}
                                 />
-                                <InputError message={errors.email} />
+                                <InputError message={errors.email} className="mt-1 text-sm font-medium text-red-600" />
                             </div>
 
-                            <div className="grid gap-2">
-                                <Label htmlFor="password" className="text-sm font-medium text-slate-700">
-                                    {isZh ? "密碼" : "Password"}
+                            <div className="space-y-2">
+                                <Label htmlFor="password" className={formFieldLabelClass}>
+                                    {copy.passwordLabel}
                                 </Label>
                                 <Input
                                     id="password"
                                     type="password"
                                     required
-                                    tabIndex={3}
                                     autoComplete="new-password"
                                     name="password"
-                                    placeholder={isZh ? "請輸入密碼" : "Enter your password"}
-                                    className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:ring-blue-600 focus:ring-1"
+                                    placeholder={copy.passwordPlaceholder}
+                                    className={formFieldInputClass}
                                 />
-                                <InputError message={errors.password} />
+                                <InputError message={errors.password} className="mt-1 text-sm font-medium text-red-600" />
                             </div>
 
-                            <div className="grid gap-2">
-                                <Label htmlFor="password_confirmation" className="text-sm font-medium text-slate-700">
-                                    {isZh ? "確認密碼" : "Confirm Password"}
+                            <div className="space-y-2">
+                                <Label htmlFor="password_confirmation" className={formFieldLabelClass}>
+                                    {copy.confirmLabel}
                                 </Label>
                                 <Input
                                     id="password_confirmation"
                                     type="password"
                                     required
-                                    tabIndex={4}
                                     autoComplete="new-password"
                                     name="password_confirmation"
-                                    placeholder={isZh ? "請再次輸入密碼" : "Confirm your password"}
-                                    className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:ring-blue-600 focus:ring-1"
+                                    placeholder={copy.confirmPlaceholder}
+                                    className={formFieldInputClass}
                                 />
-                                <InputError message={errors.password_confirmation} />
+                                <InputError
+                                    message={errors.password_confirmation}
+                                    className="mt-1 text-sm font-medium text-red-600"
+                                />
                             </div>
-
-                            <Button
-                                type="submit"
-                                className="mt-4 w-full bg-blue-600 text-white hover:bg-blue-700"
-                                tabIndex={5}
-                                data-test="register-user-button"
-                            >
-                                {processing && <LoaderCircle className="h-4 w-4 animate-spin mr-2" />}
-                                {isZh ? "建立帳號" : "Create Account"}
-                            </Button>
                         </div>
 
-                        <div className="text-center text-sm text-slate-600">
-                            {isZh ? "已經有帳號了？" : "Already have an account?"}{' '}
-                            <TextLink
-                                href={login()}
-                                tabIndex={6}
-                                className="font-medium text-blue-700 hover:text-blue-800"
-                            >
-                                {isZh ? "立即登入" : "Sign in"}
+                        <Button
+                            type="submit"
+                            size="lg"
+                            className={formButtonClass}
+                            disabled={processing}
+                            data-test="register-user-button"
+                        >
+                            {processing && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
+                            {copy.submit}
+                        </Button>
+
+                        <div className={formHelperTextClass + ' text-center'}>
+                            {copy.loginPrompt}{' '}
+                            <TextLink href={login()} className={formLinkClass}>
+                                {copy.loginLink}
                             </TextLink>
                         </div>
-                    </>
+                    </div>
                 )}
             </Form>
         </AuthLayout>

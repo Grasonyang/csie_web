@@ -42,7 +42,7 @@ class HandleInertiaRequests extends Middleware
         $availableLocales = ['zh-TW', 'en'];
 
         $translations = [];
-        foreach (['common', 'home', 'manage'] as $namespace) {
+        foreach (['common', 'home', 'manage', 'auth'] as $namespace) {
             foreach ($availableLocales as $locale) {
                 $translations[$namespace][$locale] = Lang::get($namespace, [], $locale);
             }

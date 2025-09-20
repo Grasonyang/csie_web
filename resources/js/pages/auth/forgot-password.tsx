@@ -1,44 +1,50 @@
-// Components
 import PasswordResetLinkController from '@/actions/App/Http/Controllers/Auth/PasswordResetLinkController';
-import { login } from '@/routes';
-import { Form, Head, usePage } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
-import { useTranslator } from '@/hooks/use-translator';
-
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
+import { login } from '@/routes';
+import { Form, Head } from '@inertiajs/react';
+import { LoaderCircle } from 'lucide-react';
+import { useTranslator } from '@/hooks/use-translator';
+import {
+    formButtonClass,
+    formFieldInputClass,
+    formFieldLabelClass,
+    formHelperTextClass,
+    formLinkClass,
+    formSectionClass,
+    formStatusClass,
+} from './styles';
 
 export default function ForgotPassword({ status }: { status?: string }) {
-    const page = usePage<any>();
-    const { locale } = page.props;
-    const isZh = locale?.toLowerCase() === 'zh-tw';
-    const { t } = useTranslator('common');
+    const { t } = useTranslator('auth');
+
+    const copy = {
+        title: t('pages.forgot_password.title', '忘記密碼'),
+        description: t('pages.forgot_password.description', '輸入電子郵件以接收重設密碼信'),
+        emailLabel: t('fields.email.label', '電子郵件'),
+        emailPlaceholder: t('fields.email.placeholder', '請輸入電子郵件'),
+        submit: t('pages.forgot_password.submit', '寄送密碼重設連結'),
+        backPrefix: t('actions.back_to_login_prefix', '或者，'),
+        backLink: t('actions.back_to_login_link', '返回登入頁面'),
+    };
 
     return (
-        <AuthLayout
-            noDecor={true}
-            title={isZh ? "忘記密碼" : "Forgot password"}
-            description={isZh ? "輸入電子郵件以接收重設密碼信" : "Enter your email to receive password reset instructions"}
-        >
-            <Head title={isZh ? "忘記密碼" : "Forgot Password"} />
+        <AuthLayout title={copy.title} description={copy.description}>
+            <Head title={copy.title} />
 
-            {status && (
-                <div className="mb-4 rounded-md bg-green-50 border border-green-200 p-3 text-center text-sm font-medium text-green-700">
-                    {status}
-                </div>
-            )}
+            {status && <div className={formStatusClass}>{status}</div>}
 
-            <div className="space-y-6">
-                <Form {...PasswordResetLinkController.store.form()}>
+            <div className="space-y-8">
+                <Form {...PasswordResetLinkController.store.form()} className={formSectionClass}>
                     {({ processing, errors }) => (
                         <>
-                            <div className="grid gap-2">
-                                <Label htmlFor="email" className="text-sm font-medium text-slate-700">
-                                    {isZh ? "電子郵件" : "Email"}
+                            <div className="space-y-2">
+                                <Label htmlFor="email" className={formFieldLabelClass}>
+                                    {copy.emailLabel}
                                 </Label>
                                 <Input
                                     id="email"
@@ -46,30 +52,30 @@ export default function ForgotPassword({ status }: { status?: string }) {
                                     name="email"
                                     autoComplete="off"
                                     autoFocus
-                                    placeholder="請輸入您的電子郵件"
-                                    className="border-slate-300 bg-white text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:ring-blue-600 focus:ring-1"
+                                    placeholder={copy.emailPlaceholder}
+                                    className={formFieldInputClass}
                                 />
-                                <InputError message={errors.email} />
+                                <InputError message={errors.email} className="mt-1 text-sm font-medium text-red-600" />
                             </div>
 
-                            <div className="my-6 flex items-center justify-start">
-                                <Button
-                                    className="w-full bg-blue-600 text-white hover:bg-blue-700"
-                                    disabled={processing}
-                                    data-test="email-password-reset-link-button"
-                                >
-                                    {processing && <LoaderCircle className="h-4 w-4 animate-spin mr-2" />}
-                                    {isZh ? "寄送密碼重設連結" : "Send Password Reset Link"}
-                                </Button>
-                            </div>
+                            <Button
+                                type="submit"
+                                size="lg"
+                                className={formButtonClass}
+                                disabled={processing}
+                                data-test="email-password-reset-link-button"
+                            >
+                                {processing && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
+                                {copy.submit}
+                            </Button>
                         </>
                     )}
                 </Form>
 
-                <div className="space-x-1 text-center text-sm text-slate-600">
-                    <span>{isZh ? "或者，" : "Or,"}</span>
-                    <TextLink href={login()} className="font-medium text-blue-700 hover:text-blue-800">
-                        {isZh ? "返回登入頁面" : "return to login"}
+                <div className={formHelperTextClass + ' text-center'}>
+                    <span>{copy.backPrefix}</span>{' '}
+                    <TextLink href={login()} className={formLinkClass}>
+                        {copy.backLink}
                     </TextLink>
                 </div>
             </div>
