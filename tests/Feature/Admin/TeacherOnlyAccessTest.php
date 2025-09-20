@@ -32,7 +32,7 @@ class TeacherOnlyAccessTest extends TestCase
     public function test_admin_can_create_posts()
     {
         $response = $this->actingAs($this->admin)
-            ->post(route('admin.posts.store'), [
+            ->post(route('manage.admin.posts.store'), [
                 'title' => ['zh-TW' => 'Test Post'],
                 'content' => ['zh-TW' => 'Test Content'],
                 'category_id' => $this->category->id,
@@ -50,7 +50,7 @@ class TeacherOnlyAccessTest extends TestCase
     public function test_teacher_can_create_posts()
     {
         $response = $this->actingAs($this->teacher)
-            ->post(route('admin.posts.store'), [
+            ->post(route('manage.admin.posts.store'), [
                 'title' => ['zh-TW' => 'Test Post'],
                 'content' => ['zh-TW' => 'Test Content'],
                 'category_id' => $this->category->id,
@@ -68,7 +68,7 @@ class TeacherOnlyAccessTest extends TestCase
     public function test_regular_user_cannot_create_posts()
     {
         $response = $this->actingAs($this->regularUser)
-            ->post(route('admin.posts.store'), [
+            ->post(route('manage.admin.posts.store'), [
                 'title' => ['zh-TW' => 'Test Post'],
                 'content' => ['zh-TW' => 'Test Content'],
                 'category_id' => $this->category->id,
@@ -85,7 +85,7 @@ class TeacherOnlyAccessTest extends TestCase
     public function test_regular_user_cannot_access_post_create_page()
     {
         $response = $this->actingAs($this->regularUser)
-            ->get(route('admin.posts.create'));
+            ->get(route('manage.admin.posts.create'));
 
         $response->assertForbidden();
     }
@@ -93,7 +93,7 @@ class TeacherOnlyAccessTest extends TestCase
     public function test_admin_can_create_publications()
     {
         $response = $this->actingAs($this->admin)
-            ->post(route('admin.publications.store'), [
+            ->post(route('manage.admin.publications.store'), [
                 'title' => ['zh-TW' => 'Test Publication', 'en' => 'Test Publication EN'],
                 'authors_text' => ['zh-TW' => 'Test Author', 'en' => 'Test Author EN'],
                 'year' => 2024,
@@ -110,7 +110,7 @@ class TeacherOnlyAccessTest extends TestCase
     public function test_teacher_can_create_publications()
     {
         $response = $this->actingAs($this->teacher)
-            ->post(route('admin.publications.store'), [
+            ->post(route('manage.admin.publications.store'), [
                 'title' => ['zh-TW' => 'Test Publication', 'en' => 'Test Publication EN'],
                 'authors_text' => ['zh-TW' => 'Test Author', 'en' => 'Test Author EN'],
                 'year' => 2024,
@@ -127,7 +127,7 @@ class TeacherOnlyAccessTest extends TestCase
     public function test_regular_user_cannot_create_publications()
     {
         $response = $this->actingAs($this->regularUser)
-            ->post(route('admin.publications.store'), [
+            ->post(route('manage.admin.publications.store'), [
                 'title' => ['zh-TW' => 'Test Publication', 'en' => 'Test Publication EN'],
                 'authors_text' => ['zh-TW' => 'Test Author', 'en' => 'Test Author EN'],
                 'year' => 2024,
@@ -144,7 +144,7 @@ class TeacherOnlyAccessTest extends TestCase
     public function test_regular_user_cannot_access_publication_create_page()
     {
         $response = $this->actingAs($this->regularUser)
-            ->get(route('admin.publications.create'));
+            ->get(route('manage.admin.publications.create'));
 
         $response->assertForbidden();
     }
@@ -157,7 +157,7 @@ class TeacherOnlyAccessTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->teacher)
-            ->put(route('admin.posts.update', $post), [
+            ->put(route('manage.admin.posts.update', $post), [
                 'title' => ['zh-TW' => 'Updated Post'],
                 'content' => ['zh-TW' => 'Updated Content'],
                 'category_id' => $this->category->id,
@@ -181,7 +181,7 @@ class TeacherOnlyAccessTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->teacher)
-            ->put(route('admin.posts.update', $post), [
+            ->put(route('manage.admin.posts.update', $post), [
                 'title' => ['zh-TW' => 'Updated Post'],
                 'content' => ['zh-TW' => 'Updated Content'],
                 'category_id' => $this->category->id,
@@ -200,7 +200,7 @@ class TeacherOnlyAccessTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->regularUser)
-            ->put(route('admin.posts.update', $post), [
+            ->put(route('manage.admin.posts.update', $post), [
                 'title' => ['zh-TW' => 'Updated Post'],
                 'content' => ['zh-TW' => 'Updated Content'],
                 'category_id' => $this->category->id,

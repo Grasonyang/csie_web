@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Manage\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\PostCategory;
@@ -19,7 +19,7 @@ class PostCategoryController extends Controller
             ->orderBy('name->zh-TW')
             ->get();
 
-        return Inertia::render('admin/post-categories/index', [
+        return Inertia::render('manage/admin/post-categories/index', [
             'categories' => $categories,
         ]);
     }
@@ -29,7 +29,7 @@ class PostCategoryController extends Controller
      */
     public function create()
     {
-        return Inertia::render('admin/post-categories/create', [
+        return Inertia::render('manage/admin/post-categories/create', [
             'parent_categories' => PostCategory::whereNull('parent_id')->get(),
         ]);
     }
@@ -52,7 +52,7 @@ class PostCategoryController extends Controller
 
         PostCategory::create($validated);
 
-        return redirect()->route('admin.post-categories.index')
+        return redirect()->route('manage.admin.post-categories.index')
             ->with('success', '分類建立成功');
     }
 
@@ -61,7 +61,7 @@ class PostCategoryController extends Controller
      */
     public function show(PostCategory $postCategory)
     {
-        return Inertia::render('admin/post-categories/show', [
+        return Inertia::render('manage/admin/post-categories/show', [
             'category' => $postCategory->load(['posts', 'children', 'parent']),
         ]);
     }
@@ -71,7 +71,7 @@ class PostCategoryController extends Controller
      */
     public function edit(PostCategory $postCategory)
     {
-        return Inertia::render('admin/post-categories/edit', [
+        return Inertia::render('manage/admin/post-categories/edit', [
             'category' => $postCategory,
             'parent_categories' => PostCategory::whereNull('parent_id')
                 ->where('id', '!=', $postCategory->id)
@@ -95,7 +95,7 @@ class PostCategoryController extends Controller
 
         $postCategory->update($validated);
 
-        return redirect()->route('admin.post-categories.index')
+        return redirect()->route('manage.admin.post-categories.index')
             ->with('success', '分類更新成功');
     }
 
@@ -110,7 +110,7 @@ class PostCategoryController extends Controller
 
         $postCategory->delete();
 
-        return redirect()->route('admin.post-categories.index')
+        return redirect()->route('manage.admin.post-categories.index')
             ->with('success', '分類刪除成功');
     }
 }

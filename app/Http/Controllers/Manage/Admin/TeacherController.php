@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Manage\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Teacher;
@@ -16,7 +16,7 @@ class TeacherController extends Controller
     public function index(Request $request)
     {
         // 導向新的統一列表頁，維持查詢參數（例如分頁或語系）
-        return redirect()->route('admin.staff.index', array_merge(
+        return redirect()->route('manage.admin.staff.index', array_merge(
             $request->query(),
             ['tab' => 'teachers']
         ));
@@ -27,7 +27,7 @@ class TeacherController extends Controller
      */
     public function create()
     {
-        return Inertia::render('admin/teachers/create', [
+        return Inertia::render('manage/admin/teachers/create', [
             'users' => User::where('role', 'teacher')->whereDoesntHave('teacher')->get(),
         ]);
     }
@@ -63,7 +63,7 @@ class TeacherController extends Controller
 
         Teacher::create($validated);
 
-        return redirect()->route('admin.teachers.index')
+        return redirect()->route('manage.admin.teachers.index')
             ->with('success', '教師建立成功');
     }
 
@@ -72,7 +72,7 @@ class TeacherController extends Controller
      */
     public function show(Teacher $teacher)
     {
-        return Inertia::render('admin/teachers/show', [
+        return Inertia::render('manage/admin/teachers/show', [
             'teacher' => $teacher->load(['user', 'labs', 'links', 'projects', 'publications']),
         ]);
     }
@@ -82,7 +82,7 @@ class TeacherController extends Controller
      */
     public function edit(Teacher $teacher)
     {
-        return Inertia::render('admin/teachers/edit', [
+        return Inertia::render('manage/admin/teachers/edit', [
             'teacher' => $teacher->load(['user', 'links']),
             'users' => User::where('role', 'teacher')
                 ->where(function($query) use ($teacher) {
@@ -123,7 +123,7 @@ class TeacherController extends Controller
 
         $teacher->update($validated);
 
-        return redirect()->route('admin.teachers.index')
+        return redirect()->route('manage.admin.teachers.index')
             ->with('success', '教師更新成功');
     }
 
@@ -134,7 +134,7 @@ class TeacherController extends Controller
     {
         $teacher->delete();
 
-        return redirect()->route('admin.teachers.index')
+        return redirect()->route('manage.admin.teachers.index')
             ->with('success', '教師刪除成功');
     }
 }

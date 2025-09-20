@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Manage\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Publication;
@@ -22,7 +22,7 @@ class PublicationController extends Controller
             ->orderBy('title->zh-TW')
             ->paginate(20);
 
-        return Inertia::render('admin/publications/index', [
+        return Inertia::render('manage/admin/publications/index', [
             'publications' => $publications,
         ]);
     }
@@ -32,7 +32,7 @@ class PublicationController extends Controller
      */
     public function create()
     {
-        return Inertia::render('admin/publications/create');
+        return Inertia::render('manage/admin/publications/create');
     }
 
     /**
@@ -76,7 +76,7 @@ class PublicationController extends Controller
 
         Publication::create($publicationData);
 
-        return redirect()->route('admin.publications.index')
+        return redirect()->route('manage.admin.publications.index')
             ->with('success', '論文建立成功');
     }
 
@@ -85,7 +85,7 @@ class PublicationController extends Controller
      */
     public function show(Publication $publication)
     {
-        return Inertia::render('admin/publications/show', [
+        return Inertia::render('manage/admin/publications/show', [
             'publication' => $publication,
         ]);
     }
@@ -95,7 +95,7 @@ class PublicationController extends Controller
      */
     public function edit(Publication $publication)
     {
-        return Inertia::render('admin/publications/edit', [
+        return Inertia::render('manage/admin/publications/edit', [
             'publication' => $publication,
         ]);
     }
@@ -141,7 +141,7 @@ class PublicationController extends Controller
 
         $publication->update($publicationData);
 
-        return redirect()->route('admin.publications.index')
+        return redirect()->route('manage.admin.publications.index')
             ->with('success', '論文更新成功');
     }
 
@@ -152,7 +152,7 @@ class PublicationController extends Controller
     {
         $publication->delete();
 
-        return redirect()->route('admin.publications.index')
+        return redirect()->route('manage.admin.publications.index')
             ->with('success', '論文刪除成功');
     }
 }

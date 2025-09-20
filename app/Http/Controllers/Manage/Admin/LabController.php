@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Manage\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lab;
@@ -58,7 +58,7 @@ class LabController extends Controller
             ->orderBy('name')
             ->get();
 
-        return Inertia::render('admin/labs/index', [
+        return Inertia::render('manage/admin/labs/index', [
             'labs' => $labs,
             'teachers' => $teachers,
             'filters' => [
@@ -74,7 +74,7 @@ class LabController extends Controller
     // 顯示新增實驗室表單
     public function create()
     {
-        return Inertia::render('admin/labs/create');
+        return Inertia::render('manage/admin/labs/create');
     }
 
     // 儲存新的實驗室
@@ -101,13 +101,13 @@ class LabController extends Controller
 
         Lab::create($data);
 
-        return redirect()->route('admin.labs.index');
+        return redirect()->route('manage.admin.labs.index');
     }
 
     // 顯示編輯表單
     public function edit(Lab $lab)
     {
-        return Inertia::render('admin/labs/edit', [
+        return Inertia::render('manage/admin/labs/edit', [
             'lab' => $lab,
         ]);
     }
@@ -135,13 +135,13 @@ class LabController extends Controller
 
         $lab->update($data);
 
-        return redirect()->route('admin.labs.index');
+        return redirect()->route('manage.admin.labs.index');
     }
 
     // 刪除實驗室
     public function destroy(Lab $lab)
     {
         $lab->delete();
-        return redirect()->route('admin.labs.index');
+        return redirect()->route('manage.admin.labs.index');
     }
 }

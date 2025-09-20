@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Manage\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attachment;
@@ -56,7 +56,7 @@ class AttachmentController extends Controller
             ->filter()
             ->values();
 
-        return Inertia::render('admin/attachments/index', [
+        return Inertia::render('manage/admin/attachments/index', [
             'attachments' => $attachments,
             'filters' => $request->only(['search', 'type', 'attachable_type', 'attachable_id', 'trashed', 'per_page']),
             'typeOptions' => ['image', 'document', 'link'],
@@ -70,7 +70,7 @@ class AttachmentController extends Controller
         $attachment->delete();
 
         return redirect()
-            ->route('admin.attachments.index')
+            ->route('manage.admin.attachments.index')
             ->with('success', '附件已移除');
     }
 
@@ -80,7 +80,7 @@ class AttachmentController extends Controller
         $record->restore();
 
         return redirect()
-            ->route('admin.attachments.index')
+            ->route('manage.admin.attachments.index')
             ->with('success', '附件已復原');
     }
 
@@ -90,7 +90,7 @@ class AttachmentController extends Controller
         $record->forceDelete();
 
         return redirect()
-            ->route('admin.attachments.index')
+            ->route('manage.admin.attachments.index')
             ->with('success', '附件已永久刪除');
     }
 }
