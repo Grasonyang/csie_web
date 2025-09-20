@@ -39,6 +39,15 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        $availableLocales = ['zh-TW', 'en'];
+
+        $translations = [];
+        foreach (['common', 'home', 'manage'] as $namespace) {
+            foreach ($availableLocales as $locale) {
+                $translations[$namespace][$locale] = Lang::get($namespace, [], $locale);
+            }
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -48,11 +57,9 @@ class HandleInertiaRequests extends Middleware
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'locale' => app()->getLocale(),
-            'locales' => ['en', 'zh-TW'],
-            // Share a small set of front-end strings. Extend as needed.
-            'i18n' => [
-                'common' => Lang::get('common'),
-            ],
+            'locales' => $availableLocales,
+            // 前端共用的翻譯字串
+            'i18n' => $translations,
         ];
     }
 }

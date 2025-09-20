@@ -1,0 +1,318 @@
+<?php
+
+return [
+    'layout' => [
+        'breadcrumbs' => [
+            'dashboard' => '管理首頁',
+            'admin_dashboard' => '系統總覽',
+            'posts' => '公告管理',
+            'posts_create' => '新增公告',
+            'posts_edit' => '編輯公告',
+            'posts_show' => '公告詳情',
+            'attachments' => '附件管理',
+        ],
+        'footer' => 'CSIE 後台',
+    ],
+    'sidebar' => [
+        'admin' => [
+            'dashboard' => '儀表板',
+            'posts' => '公告管理',
+            'staff' => '師資與職員',
+            'labs' => '實驗室管理',
+            'academics' => '課程與學程',
+            'users' => '使用者管理',
+            'messages' => '聯絡訊息',
+            'attachments' => '附件管理',
+        ],
+        'teacher' => [
+            'dashboard' => '教學首頁',
+            'posts' => '公告管理',
+            'labs' => '研究管理',
+            'courses' => '課程與活動',
+            'profile' => '個人設定',
+            'guide' => '教學資源指南',
+            'nav_label' => '教學管理',
+        ],
+        'user' => [
+            'dashboard' => '會員首頁',
+            'profile' => '個人資料',
+            'appearance' => '外觀偏好',
+            'security' => '安全設定',
+            'support' => '協助中心',
+            'nav_label' => '會員專區',
+        ],
+        'footer' => [
+            'settings' => '系統設定',
+            'docs' => '說明文件',
+            'repo' => '原始碼庫',
+        ],
+    ],
+    'dashboard' => [
+        'common' => [
+            'manage_center' => '管理中心',
+            'back_to_overview' => '回到管理首頁',
+            'quick_actions' => '常用操作',
+        ],
+        'teacher' => [
+            'title' => '教學管理首頁',
+            'description' => '快速掌握公告、研究與課程工具。',
+            'actions' => [
+                'posts' => [
+                    'label' => '公告管理',
+                    'description' => '發布與維護系上公告與資訊。',
+                ],
+                'labs' => [
+                    'label' => '研究管理',
+                    'description' => '更新實驗室介紹與研究成果。',
+                ],
+                'courses' => [
+                    'label' => '課程與活動',
+                    'description' => '管理課程資訊與活動時程。',
+                ],
+                'profile' => [
+                    'label' => '個人設定',
+                    'description' => '調整公開資料與聯絡資訊。',
+                ],
+            ],
+        ],
+        'user' => [
+            'title' => '會員專區',
+            'description' => '集中管理個人資料、外觀與安全設定。',
+            'actions' => [
+                'profile' => [
+                    'label' => '更新個人資料',
+                    'description' => '維護個人與聯絡資訊。',
+                ],
+                'appearance' => [
+                    'label' => '外觀偏好',
+                    'description' => '切換介面主題與版面。',
+                ],
+                'security' => [
+                    'label' => '安全設定',
+                    'description' => '更新密碼與檢視登入紀錄。',
+                ],
+            ],
+        ],
+    ],
+    'posts' => [
+        'status' => [
+            'draft' => '草稿',
+            'published' => '發布',
+            'archived' => '封存',
+        ],
+        'source_type' => [
+            'manual' => '手動輸入',
+            'link' => '外部連結',
+        ],
+        'index' => [
+            'badge' => '公告中心',
+            'title' => '公告管理',
+            'description' => '掌握公告發布狀態、置頂資訊與附件管理。',
+            'create' => '新增公告',
+            'filters_title' => '篩選條件',
+            'filters' => [
+                'keyword' => '關鍵字',
+                'keyword_placeholder' => '輸入標題關鍵字',
+                'category' => '分類',
+                'status' => '狀態',
+                'pinned' => '置頂',
+                'pinned_only' => '僅顯示置頂',
+                'pinned_exclude' => '排除置頂',
+                'per_page' => '每頁數量',
+                'all' => '全部',
+                'apply' => '套用',
+                'reset' => '重設',
+            ],
+            'table' => [
+                'title' => '公告列表',
+                'empty' => '目前尚無符合條件的公告。',
+                'columns' => [
+                    'title' => '標題',
+                    'category' => '分類',
+                    'status' => '狀態',
+                    'published_at' => '發布時間',
+                    'attachments' => '附件',
+                    'actions' => '操作',
+                ],
+                'records_total' => '共 :total 筆資料',
+                'attachments_count' => '共 :count 筆附件',
+                'manage_attachments' => '管理附件',
+                'page' => '第 :current / :last 頁',
+            ],
+            'actions' => [
+                'view_label' => '檢視公告內容',
+                'view_aria' => '檢視公告',
+                'edit_label' => '編輯公告內容',
+                'edit_aria' => '編輯公告',
+                'delete_label' => '刪除此公告',
+                'delete_aria' => '刪除公告',
+                'pinned_badge' => '置頂公告',
+            ],
+        ],
+        'form' => [
+            'sections' => [
+                'content' => [
+                    'title' => '公告內容',
+                    'description' => '撰寫雙語內容並設定發布狀態。',
+                ],
+                'attachments' => [
+                    'title' => '附件管理',
+                    'description' => '上傳檔案或新增外部連結，供公告使用。',
+                ],
+            ],
+            'fields' => [
+                'category' => [
+                    'label' => '公告分類',
+                    'placeholder' => '選擇分類',
+                ],
+                'title_zh' => [
+                    'label' => '中文標題',
+                    'helper' => '顯示於繁體中文介面。',
+                ],
+                'title_en' => [
+                    'label' => '英文標題',
+                    'helper' => '留空將自動沿用中文標題。',
+                ],
+                'sync_title' => '自動同步英文標題',
+                'content_zh' => [
+                    'label' => '中文內容',
+                    'helper' => '支援 HTML 或 Markdown 片段。',
+                ],
+                'content_en' => [
+                    'label' => '英文內容',
+                    'helper' => '留空將沿用中文內容。',
+                ],
+                'sync_content' => '自動同步英文內容',
+                'status' => [
+                    'label' => '發布狀態',
+                    'placeholder' => '選擇狀態',
+                ],
+                'pinned' => [
+                    'label' => '是否置頂',
+                ],
+                'publish_at' => [
+                    'label' => '預定發布時間',
+                    'helper' => '可選擇排程時間（系統時區）。',
+                ],
+                'source_type' => [
+                    'label' => '內容來源',
+                    'manual' => '手動輸入',
+                    'link' => '外部連結',
+                ],
+                'source_url' => [
+                    'label' => '來源網址',
+                    'placeholder' => 'https://example.com/post',
+                ],
+            ],
+            'attachments' => [
+                'upload_button' => '上傳附件',
+                'add_link' => '新增連結',
+                'link_title_placeholder' => '連結標題',
+                'link_url_placeholder' => 'https://example.com',
+                'existing_title' => '既有附件',
+                'remove' => '移除',
+                'empty' => '尚未新增附件。',
+                'pending_files' => '待上傳檔案（:count）',
+            ],
+            'preview' => [
+                'title' => '來源內容預覽',
+                'reload' => '重新載入',
+                'not_embeddable' => '此連結無法內嵌預覽，請於新分頁開啟。',
+                'invalid' => '無法載入來源內容，請確認網址是否有效。',
+            ],
+            'actions' => [
+                'cancel' => '取消',
+                'submit_create' => '建立公告',
+                'submit_create_processing' => '建立中…',
+                'submit_update' => '更新公告',
+                'submit_update_processing' => '更新中…',
+            ],
+        ],
+        'show' => [
+            'title' => '公告詳情',
+            'overview' => '基本資訊',
+            'category' => '公告分類',
+            'english_title' => '英文標題',
+            'source_type' => '來源類型',
+            'source_url' => '來源網址',
+            'content' => '中文內容',
+            'content_en' => '英文內容',
+            'attachments' => '附件清單',
+            'attachment_manager' => '開啟附件管理',
+            'status' => '狀態',
+            'pinned_badge' => '置頂',
+            'published_at' => '發布時間',
+            'not_set' => '未設定',
+            'no_content' => '此語系尚未提供內容。',
+            'link_notice' => '本公告採用外部連結來源。',
+        ],
+    ],
+    'attachments' => [
+        'type' => [
+            'image' => '圖片',
+            'document' => '文件',
+            'link' => '連結',
+        ],
+        'index' => [
+            'title' => '附件管理',
+            'description' => '檢視與維護公告、頁面所使用的檔案與連結資源。',
+            'back_to_posts' => '回公告列表',
+            'filters_title' => '篩選條件',
+            'filters' => [
+                'search' => '搜尋附件',
+                'search_placeholder' => '輸入標題、檔名或 MIME',
+                'type' => '附件類型',
+                'all_types' => '全部類型',
+                'attachable' => '來源資料',
+                'all_sources' => '全部來源',
+                'source_id' => '來源 ID',
+                'source_id_placeholder' => '輸入來源資料 ID',
+                'trashed' => '刪除範圍',
+                'active_only' => '僅顯示現存',
+                'include_deleted' => '含已刪除',
+                'deleted_only' => '僅已刪除',
+                'per_page' => '每頁數量',
+                'apply' => '套用',
+                'reset' => '重設',
+            ],
+            'table' => [
+                'title' => '附件列表',
+                'columns' => [
+                    'attachment' => '附件資訊',
+                    'source' => '來源',
+                    'size' => '大小',
+                    'updated_at' => '更新時間',
+                    'actions' => '操作',
+                ],
+                'records_total' => '共 :total 筆資料',
+                'empty' => '目前尚無符合條件的附件。',
+                'meta' => [
+                    'type' => '類型',
+                ],
+                'page' => '第 :current / :last 頁',
+            ],
+            'status' => [
+                'unassigned' => '未關聯',
+                'post' => '公告 · :title',
+                'generic_with_identifier' => ':type · :identifier',
+                'generic_without_identifier' => ':type #:id',
+            ],
+            'actions' => [
+                'visit_external' => '開啟外部連結',
+                'download' => '下載附件',
+                'restore' => '還原附件',
+                'force_delete' => '永久刪除',
+                'delete' => '刪除附件',
+            ],
+            'dialogs' => [
+                'delete_confirm' => '確定要移除附件「:name」嗎？',
+                'force_delete_confirm' => '確定要永久刪除此附件？此動作無法復原。',
+            ],
+            'pagination' => [
+                'summary' => '第 :current / :last 頁',
+                'previous' => '上一頁',
+                'next' => '下一頁',
+            ],
+        ],
+    ],
+];

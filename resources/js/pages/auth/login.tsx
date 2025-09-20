@@ -10,6 +10,7 @@ import { register } from '@/routes';
 import { request } from '@/routes/password';
 import { Form, Head, usePage } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
+import { useTranslator } from '@/hooks/use-translator';
 
 interface LoginProps {
     status?: string;
@@ -18,12 +19,9 @@ interface LoginProps {
 
 export default function Login({ status, canResetPassword }: LoginProps) {
     const page = usePage<any>();
-    const { locale, i18n } = page.props;
+    const { locale } = page.props;
     const isZh = locale?.toLowerCase() === 'zh-tw';
-
-    const t = (key: string, fallback?: string) => {
-        return key.split('.').reduce((acc: any, k: string) => (acc && acc[k] !== undefined ? acc[k] : undefined), i18n?.common) ?? fallback ?? key;
-    };
+    const { t } = useTranslator('common');
 
     return (
         <AuthLayout
