@@ -23,6 +23,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'role',
+        'teacher_id',
         'locale',
         'status',
     ];
@@ -52,7 +53,65 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
+    // Role-related methods
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isTeacher(): bool
+    {
+        return $this->role === 'teacher';
+    }
+
+    public function isUser(): bool
+    {
+        return $this->role === 'user';
+    }
+
+    public function hasRoleOrHigher(string $role): bool
+    {
+        $hierarchy = ['user' => 1, 'teacher' => 2, 'admin' => 3];
+        $userLevel = $hierarchy[$this->role] ?? 0;
+        $requiredLevel = $hierarchy[$role] ?? 0;
+
+        return $userLevel >= $requiredLevel;
+    }
+
+    /**
+     * Scope: Get users that can be managed by the given user
+     */
+    public function scopeCanBeManagedBy($query, $user)
+    {
+        if ($user->role === 'admin') {
+            // Admin can manage all users except other admins
+            return $query->where('role', '!=', 'admin')
+                        ->where('id', '!=', $user->id);
+        } elseif ($user->role === 'teacher') {
+            // Teacher can manage regular users only
+            return $query->where('role', 'user');
+        } else {
+            // Regular users cannot manage anyone
+            return $query->whereRaw('1 = 0'); // Always false
+        }
+    }
+
     // Relationships
+    public function teacher()
+    {
+        return $this->hasOne(Teacher::class, 'user_id');
+    }
+
+    public function settings()
+    {
+        return $this->hasMany(Settings::class);
+    }
+
+    public function auditLogs()
+    {
+        return $this->hasMany(AuditLog::class, 'actor_id');
+    }
+
     public function createdPosts()
     {
         return $this->hasMany(Post::class, 'created_by');
