@@ -1,6 +1,6 @@
 import { AppSidebar } from '@/components/app-sidebar';
 
 export default function AdminSidebar() {
-	// reuse existing AppSidebar which already contains admin navigation
-	return <AppSidebar />;
+    // 直接沿用現有的 AppSidebar，維持完整的管理導覽
+    return <AppSidebar />;
 }
